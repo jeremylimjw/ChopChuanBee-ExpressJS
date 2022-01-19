@@ -1,19 +1,9 @@
+require('dotenv').config();
 const http = require('http');
 const app = require('../app');
 const db = require('../db')
-require('dotenv').config();
 
 const server = http.createServer(app);
-
-// Test connection with database.
-db.query("SELECT NOW()")
-  .then(result => {
-    console.log("Connected to database");
-  })
-  .catch(err => {
-    console.log("Connection to database failed.");
-    console.log(err);
-  })
 
 // Start the server.
 const port = process.env.PORT || 3000;

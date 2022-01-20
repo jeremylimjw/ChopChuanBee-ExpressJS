@@ -1,23 +1,23 @@
 CREATE TABLE IF NOT EXISTS roles(
-    id SERIAL PRIMARY KEY,
+    role_id SERIAL PRIMARY KEY,
     name VARCHAR(255)
 );
 
-CREATE TABLE IF NOT EXISTS subsystems(
-    id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS views(
+    view_id SERIAL PRIMARY KEY,
     name VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS users(
-    id VARCHAR(255) PRIMARY KEY,
+    user_id VARCHAR(255) PRIMARY KEY,
     username VARCHAR(255),
     password VARCHAR(255),
-    role_id INTEGER REFERENCES roles(id)
+    role_id INTEGER REFERENCES roles(role_id)
 );
 
 CREATE TABLE IF NOT EXISTS access_rights(
-    id SERIAL PRIMARY KEY,
-    user_id VARCHAR(255) REFERENCES users(id),
-    subsystem_id INTEGER REFERENCES subsystems(id),
+    access_right_id SERIAL PRIMARY KEY,
+    user_id VARCHAR(255) REFERENCES users(user_id),
+    view_id INTEGER REFERENCES views(view_id),
     write_access BOOLEAN
 );

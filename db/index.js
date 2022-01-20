@@ -2,6 +2,7 @@ const { Pool } = require('pg')
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
+const { hash } = require('../auth/bcrypt');
 
 const pool = new Pool({
   user: process.env.PGUSER,
@@ -33,8 +34,8 @@ async function init() {
       await pool.query(init_sql);
 
       // Create superadmin
-      // TODO: encrypt password using bcrypt
-      await pool.query(`INSERT INTO users VALUES($1, $2, $3, $4)`, [uuidv4(), 'admin', 'admin', 1]);
+      const password = await hash('admin');
+      await pool.query(`INSERT INTO users VALUES($1, $2, $3, $4)`, [uuidv4(), 'admin', password, 1]);
     }
   
   } catch (err) {
@@ -43,8 +44,9 @@ async function init() {
   }
 }
 
+
 module.exports = {
-    query: (text, params, callback) => {
-      return pool.query(text, params, callback)
+    query: (text, params) => {
+      return pool.query(text, params)
     },
 }

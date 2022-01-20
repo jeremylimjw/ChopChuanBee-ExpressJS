@@ -1,6 +1,6 @@
 INSERT INTO roles (name) VALUES('Admin');
 INSERT INTO roles (name) VALUES('Staff');
 
-INSERT INTO subsystems (name) VALUES('hr');
-INSERT INTO subsystems (name) VALUES('crm');
-INSERT INTO subsystems (name) VALUES('scm');
+INSERT INTO views (name) VALUES('HR');
+INSERT INTO views (name) VALUES('CRM');
+INSERT INTO views (name) VALUES('SCM');

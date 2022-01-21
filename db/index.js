@@ -34,8 +34,16 @@ async function init() {
       await pool.query(init_sql);
 
       // Create superadmin
-      const password = await hash('admin');
-      await pool.query(`INSERT INTO users VALUES($1, $2, $3, $4)`, [uuidv4(), 'admin', password, 1]);
+      const adminPassword = await hash('password');
+      await pool.query(`INSERT INTO users VALUES($1, $2, $3, $4)`, [uuidv4(), 'admin', adminPassword, 1]);
+
+      // Create 1 staff
+      const alicePassword = await hash('password');
+      await pool.query(`INSERT INTO users VALUES($1, $2, $3, $4)`, [uuidv4(), 'alice', alicePassword, 2]);
+      const usersQuery = await pool.query(`SELECT user_id FROM users`);
+      await pool.query(`INSERT INTO access_rights(user_id, view_id, write_access) VALUES($1, $2, $3)`, [usersQuery.rows[1].user_id, 1, true]);
+      await pool.query(`INSERT INTO access_rights(user_id, view_id, write_access) VALUES($1, $2, $3)`, [usersQuery.rows[1].user_id, 2, false]);
+      
     }
   
   } catch (err) {

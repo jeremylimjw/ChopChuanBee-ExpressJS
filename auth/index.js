@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 
 const TOKEN_NAME = "chocolatechip";
-const SESSION_DURATION_MS = 30*1000;
+const SESSION_DURATION_MS = 30*60*1000;
 
 /**
  * Keeps a memory mapping of logged in users and their session expiry
@@ -24,6 +24,9 @@ module.exports = {
         };
         return token;
     },
+    removeToken: (token) => {
+        delete tokens[token];
+    },
     /**
      * Middleware for authorization between views
      * @param {string} view - the view name matching in the database. E.g. 'HR', 'CRM', 'SCM'
@@ -44,7 +47,6 @@ module.exports = {
             const now = new Date();
             if (tokens[token].expireOn < now) {
                 res.status(333).send("Session timed out due to inactivity, please login again.");
-                delete tokens[token];
                 return;
             }
 

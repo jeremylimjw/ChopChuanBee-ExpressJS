@@ -25,7 +25,7 @@ async function init() {
     await pool.query(tables_sql);
   
     // Data initiation
-    const { rows } = await pool.query("SELECT COUNT(1) FROM users LIMIT 1");
+    const { rows } = await pool.query("SELECT COUNT(1) FROM employees LIMIT 1");
     if (rows[0].count == 0) {
       console.log("First run detected, running data init");
 
@@ -35,14 +35,21 @@ async function init() {
 
       // Create superadmin
       const adminPassword = await hash('password');
-      await pool.query(`INSERT INTO users VALUES($1, $2, $3, $4)`, [uuidv4(), 'admin', adminPassword, 1]);
+      await pool.query(`
+        INSERT INTO employees 
+          (emp_id, emp_name, username, password, email, role_id) VALUES($1, $2, $3, $4, $5, $6)`, 
+          [uuidv4(), 'Admin', 'admin', adminPassword, 'admin@gmail.com', 1]
+      );
 
       // Create 1 staff
       const alicePassword = await hash('password');
-      await pool.query(`INSERT INTO users VALUES($1, $2, $3, $4)`, [uuidv4(), 'alice', alicePassword, 2]);
-      const usersQuery = await pool.query(`SELECT user_id FROM users`);
-      await pool.query(`INSERT INTO access_rights(user_id, view_id, write_access) VALUES($1, $2, $3)`, [usersQuery.rows[1].user_id, 1, true]);
-      await pool.query(`INSERT INTO access_rights(user_id, view_id, write_access) VALUES($1, $2, $3)`, [usersQuery.rows[1].user_id, 2, false]);
+      const aliceUser = await pool.query(`
+        INSERT INTO employees 
+          (emp_id, emp_name, username, password, email, role_id) VALUES($1, $2, $3, $4, $5, $6) RETURNING emp_id`, 
+          [uuidv4(), 'Alice', 'alice', alicePassword, 'alice@gmail.com', 2]
+      );
+      await pool.query(`INSERT INTO access_rights(emp_id, view_id, write_access) VALUES($1, $2, $3)`, [aliceUser.rows[0].emp_id, 1, true]);
+      await pool.query(`INSERT INTO access_rights(emp_id, view_id, write_access) VALUES($1, $2, $3)`, [aliceUser.rows[0].emp_id, 2, false]);
       
     }
   

@@ -9,7 +9,10 @@ router.post('/', async function(req, res, next) {
         const { username, password } = req.body;
 
         // Query user data by username
-        const userQuery = await db.query("SELECT user_id, username, password, name AS role_name FROM users u LEFT JOIN roles r USING(role_id) WHERE username = $1", [username]);
+        const userQuery = await db.query(`
+            SELECT emp_id, emp_name, username, password, role_name, email, contact_number, nok_name, nok_number, address, postal_code, discharge_date, created_at 
+                FROM employees LEFT JOIN roles_enum USING(role_id) 
+                WHERE username = $1`, [username]);
         if (userQuery.rows.length == 0) {
             res.status(400).send("Invalid username or password.");
             return;
@@ -26,7 +29,7 @@ router.post('/', async function(req, res, next) {
         delete user.password;
 
         // Retrieve access rights
-        const accessRightsQuery = await db.query("SELECT v.name AS view_name, write_access FROM access_rights LEFT JOIN views v USING(view_id) WHERE user_id = $1", [user.user_id]);
+        const accessRightsQuery = await db.query("SELECT view_name, write_access FROM access_rights LEFT JOIN views_enum USING(view_id) WHERE emp_id = $1", [user.emp_id]);
         user['access_rights'] = accessRightsQuery.rows.reduce((prev, curr) => {
             prev[curr.view_name] = { has_write_access: curr.write_access }
             return prev;

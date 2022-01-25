@@ -3,6 +3,7 @@ const { requireAccess } = require('../auth');
 var router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
+const { createLog } = require('../db');
 
 /**
  * Customer route
@@ -71,6 +72,10 @@ router.post('/', requireAccess("CRM", true), async function(req, res, next) {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, 
         [id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, cu_id, gst, gst_show, description]
     );
+    
+    // Record to admin logs
+    const user = res.locals.user;
+    await createLog(`${user.emp_name} created a customer record`, user.emp_id, 2); // 2 is 'CRM' view id.
 
     res.send({ id: id });
 
@@ -111,14 +116,19 @@ router.put('/', requireAccess("CRM", true), async function(req, res, next) {
           cu_id = $10, gst = $11, 
           gst_show = $12, description = $13
         WHERE cus_id = $1
-        RETURNING cus_id`, // this returns cus_id if customer record is found, else it returns empty array
+        RETURNING cus_id, company_name`, // this returns cus_id if customer record is found, else it returns empty array
         [cus_id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, cu_id, gst, gst_show, description]
     );
 
     // If 'cus_id' is not found return 400 Bad Request, if found then return the 'cus_id'
     if (rows.length === 0) {
       res.status(400).send(`'cus_id': ${cus_id} is not found.`)
+
     } else {
+      // Record to admin logs
+      const user = res.locals.user;
+      await createLog(`${user.emp_name} updated ${rows[0].company_name} customer's record`, user.emp_id, 2); // 2 is 'CRM' view id.
+
       res.send(rows[0]);
     }
 
@@ -152,7 +162,7 @@ router.delete('/', requireAccess("CRM", true), async function(req, res, next) {
         SET 
           deleted = TRUE
         WHERE cus_id = $1
-        RETURNING cus_id`, // this returns cus_id if customer record is found, else it returns empty array
+        RETURNING cus_id, company_name`, // this returns cus_id if customer record is found, else it returns empty array
         [cus_id]
     );
 
@@ -160,6 +170,10 @@ router.delete('/', requireAccess("CRM", true), async function(req, res, next) {
     if (rows.length === 0) {
       res.status(400).send(`'cus_id': ${cus_id} is not found.`)
     } else {
+      // Record to admin logs
+      const user = res.locals.user;
+      await createLog(`${user.emp_name} deleted ${rows[0].company_name} customer's record`, user.emp_id, 2); // 2 is 'CRM' view id.
+
       res.send(rows[0]);
     }
 

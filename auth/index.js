@@ -49,6 +49,9 @@ module.exports = {
                 res.status(333).send("Session timed out due to inactivity, please login again.");
                 return;
             }
+            
+            // Assign user to variable to be used further down the pipeline
+            res.locals.user = tokens[token].user;
 
             // Skip checking for access rights if its superadmin user
             if (tokens[token].user.role_name === 'Admin') {

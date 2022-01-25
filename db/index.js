@@ -64,4 +64,7 @@ module.exports = {
     query: (text, params) => {
       return pool.query(text, params)
     },
+    createLog: async (text, emp_id, view_id) => {
+      await pool.query(`INSERT INTO logs (text, emp_id, view_id) VALUES ($1, $2, $3)`, [text, emp_id, view_id]);
+    }
 }

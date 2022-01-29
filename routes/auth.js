@@ -1,7 +1,8 @@
 var express = require('express');
 const { generateToken, TOKEN_NAME, removeToken } = require('../auth');
 const { compare } = require('../auth/bcrypt');
-const db = require('../db');
+const { Employee, AccessRight, Role } = require('../models/Employee');
+const View = require('../models/View');
 var router = express.Router();
 
 router.post('/', async function(req, res, next) {
@@ -9,29 +10,25 @@ router.post('/', async function(req, res, next) {
         const { username, password } = req.body;
 
         // Query user data by username
-        const userQuery = await db.query(`
-            SELECT emp_id, emp_name, username, password, role_name, email, contact_number, nok_name, nok_number, address, postal_code, discharge_date, created_at 
-                FROM employees LEFT JOIN roles_enum USING(role_id) 
-                WHERE username = $1`, [username]);
-        if (userQuery.rows.length == 0) {
+        const employee = await Employee.findOne({ where: { username: username }, include: [{ model: AccessRight, include: View }, Role] });
+        if (employee == null) {
             res.status(400).send("Invalid username or password.");
             return;
         }
 
+        const user = employee.toJSON();
+
         // Verify user credentials
-        const match = await compare(password, userQuery.rows[0].password)
+        const match = await compare(password, user.password)
         if (!match) {
-            res.status(400).send("Invalid username or password2.");
+            res.status(400).send("Invalid username or password.");
             return;
         }
 
-        const user = userQuery.rows[0];
         delete user.password;
-
-        // Retrieve access rights
-        const accessRightsQuery = await db.query("SELECT view_name, write_access FROM access_rights LEFT JOIN views_enum USING(view_id) WHERE emp_id = $1", [user.emp_id]);
-        user['access_rights'] = accessRightsQuery.rows.reduce((prev, curr) => {
-            prev[curr.view_name] = { has_write_access: curr.write_access }
+        
+        user.access_rights = user.access_rights.reduce((prev, curr) => {
+            prev[curr.view.name] = { has_write_access: curr.has_write_access }
             return prev;
         }, {});
 

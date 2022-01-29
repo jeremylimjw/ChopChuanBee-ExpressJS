@@ -1,70 +1,56 @@
-const { Pool } = require('pg')
-const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
-const path = require('path');
 const { hash } = require('../auth/bcrypt');
+const { Sequelize, DataTypes } = require('sequelize');
+const ViewType = require('../common/ViewType');
+const RoleType = require('../common/RoleType');
+const ChargedUnderType = require('../common/ChargedUnderType');
 
-const pool = new Pool({
-  user: process.env.PGUSER,
+const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
-  database: process.env.PGDATABASE,
-  password: process.env.PGPASSWORD,
-  port: process.env.PGPORT,
-})
+  dialect: 'postgres',
+  port: 5432,
+  logging: false
+});
 
-init();
-
-async function init() {
+(async () => {
   try {
     // Test the database connection
-    await pool.query("SELECT NOW()"); 
+    await sequelize.query(`SELECT NOW()`);
     console.log("Connection to database established");
-  
-    // Create db tables if not exists.
-    var tables_sql = fs.readFileSync(path.join(__dirname, 'sql', 'tables.sql')).toString();
-    await pool.query(tables_sql);
-  
+
+    // Load and initialize all tables/associations
+    await require('../models')();
+
     // Data initiation
-    const { rows } = await pool.query("SELECT COUNT(1) FROM employees LIMIT 1");
-    if (rows[0].count == 0) {
+    const { Employee, Role, AccessRight } = require('../models/Employee');
+    const employees = await Employee.findOne();
+
+    if (employees == null) {
       console.log("First run detected, running data init");
 
-      // Insert default data for some tables
-      var init_sql = fs.readFileSync(path.join(__dirname, 'sql', 'data_init.sql')).toString();
-      await pool.query(init_sql);
+      const View = require('../models/View');
+      const { ChargedUnder } = require('../models/Customer');
 
-      // Create superadmin
-      const adminPassword = await hash('password');
-      await pool.query(`
-        INSERT INTO employees 
-          (emp_id, emp_name, username, password, email, role_id) VALUES($1, $2, $3, $4, $5, $6)`, 
-          [uuidv4(), 'Admin', 'admin', adminPassword, 'admin@gmail.com', 1]
-      );
+      await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
+      await Role.bulkCreate(Object.keys(RoleType).map(key => RoleType[key]));
+      await ChargedUnder.bulkCreate(Object.keys(ChargedUnderType).map(key => ChargedUnderType[key]));
 
-      // Create 1 staff
-      const alicePassword = await hash('password');
-      const aliceUser = await pool.query(`
-        INSERT INTO employees 
-          (emp_id, emp_name, username, password, email, role_id) VALUES($1, $2, $3, $4, $5, $6) RETURNING emp_id`, 
-          [uuidv4(), 'Alice', 'alice', alicePassword, 'alice@gmail.com', 2]
-      );
-      await pool.query(`INSERT INTO access_rights(emp_id, view_id, write_access) VALUES($1, $2, $3)`, [aliceUser.rows[0].emp_id, 1, true]);
-      await pool.query(`INSERT INTO access_rights(emp_id, view_id, write_access) VALUES($1, $2, $3)`, [aliceUser.rows[0].emp_id, 2, false]);
-      
+      await Employee.bulkCreate([
+        { name: "Admin", username: "admin", password: await hash('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id },
+        { name: "Alice", username: "alice", password: await hash('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id },
+      ])
+
+      const alice = await Employee.findOne({ where: { name: "Alice" } });
+      await AccessRight.create({ has_write_access: true, employee_id: alice.id, view_id: ViewType.HR.id })
+      await AccessRight.create({ has_write_access: false, employee_id: alice.id, view_id: ViewType.CRM.id })
+
     }
   
   } catch (err) {
     console.log("Connection to database failed.");
     console.log(err);
   }
-}
-
+})()
 
 module.exports = {
-    query: (text, params) => {
-      return pool.query(text, params)
-    },
-    createLog: async (text, emp_id, view_id) => {
-      await pool.query(`INSERT INTO logs (text, emp_id, view_id) VALUES ($1, $2, $3)`, [text, emp_id, view_id]);
-    }
+  sequelize
 }

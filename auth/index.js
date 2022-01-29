@@ -33,7 +33,7 @@ module.exports = {
      * @param {boolean} requireWriteAccess - whether the user has write access
      * @returns 
      */
-    requireAccess: (view, requireWriteAccess) => {
+    requireAccess: (viewType, requireWriteAccess) => {
         return (req, res, next) => {
             const token = req.cookies[TOKEN_NAME];
 
@@ -54,19 +54,19 @@ module.exports = {
             res.locals.user = tokens[token].user;
 
             // Skip checking for access rights if its superadmin user
-            if (tokens[token].user.role_name === 'Admin') {
+            if (tokens[token].user.role.name === 'Admin') {
                 next();
                 return;
             }
 
             // Require user access to this view
-            if (tokens[token].user.access_rights[view] == null) {
+            if (tokens[token].user.access_rights[viewType.name] == null) {
                 res.status(401).send("You do not have access to this method.");
                 return;
             }
 
             // Require user write access to this view
-            if (requireWriteAccess && tokens[token].user.access_rights[view]?.has_write_access == false) {
+            if (requireWriteAccess && tokens[token].user.access_rights[viewType.name]?.has_write_access == false) {
                 res.status(401).send("You do not have access to this method (write).");
                 return;
             }

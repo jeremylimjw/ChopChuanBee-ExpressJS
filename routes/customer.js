@@ -1,9 +1,9 @@
 var express = require('express');
 const { requireAccess } = require('../auth');
 var router = express.Router();
-const { v4: uuidv4 } = require('uuid');
-const db = require('../db');
-const { createLog } = require('../db');
+const { Customer, ChargedUnder } = require('../models/Customer');
+const ViewType = require('../common/ViewType');
+const Log = require('../models/Log');
 
 /**
  * Customer route
@@ -14,34 +14,33 @@ const { createLog } = require('../db');
 /**
  *  GET method: View all customers or a single customer if id is given
  *  - e.g. /api/customer OR /api/customer?id=123
- *  - requireAccess("CRM", false) because this is only reading data
+ *  - requireAccess(ViewType.CRM, false) because this is only reading data
  * */ 
-router.get('/', requireAccess("CRM", false), async function(req, res, next) {
-  const { id } = req.params; // This is same as `const id = req.params.id`;
+router.get('/', requireAccess(ViewType.CRM, false), async function(req, res, next) {
+  const { id } = req.query; // This is same as `const id = req.params.id`;
   
-  if (id != null) { // Retrieve single customer
-    const { rows } = await db.query(`
-      SELECT 
-        cus_id, company_name, company_email, p1_name, p1_phone_number, 
-        p2_name, p2_phone_number, address, postal_code, cu_name, 
-        gst, gst_show, description, created_at 
-        
-        FROM customers LEFT JOIN charged_under_enum USING (cu_id)
-        WHERE cus_id = $1`, [id]
-    );
-    res.send(rows);
-
-  } else { // Retrieve ALL customers
-    const { rows } = await db.query(`
-      SELECT 
-        cus_id, company_name, company_email, p1_name, p1_phone_number, 
-        p2_name, p2_phone_number, address, postal_code, cu_name, 
-        gst, gst_show, description, created_at 
-        
-        FROM customers LEFT JOIN charged_under_enum USING (cu_id)
-    `);
-    res.send(rows);
+  try {
+    if (id != null) { // Retrieve single customer
+      const customer = await Customer.findOne({ where: { id: id }, include: ChargedUnder });
+  
+      if (customer == null) {
+        res.status(400).send(`Customer id ${id} not found.`);
+        return;
+      }
+      
+      res.send(customer.toJSON());
+  
+    } else { // Retrieve ALL customers
+      const customers = await Customer.findAll({ include: ChargedUnder});
+      
+      res.send(customers);
+    }
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
   }
+
 
 });
 
@@ -49,35 +48,32 @@ router.get('/', requireAccess("CRM", false), async function(req, res, next) {
 /**
  *  POST method: Insert a customer given the data in the HTTP body
  *  - /api/customer
- *  - requireAccess("CRM", true) because this is writing data
+ *  - requireAccess(ViewType.CRM, true) because this is writing data
  * */ 
-router.post('/', requireAccess("CRM", true), async function(req, res, next) {
-  const { company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, cu_id, gst, gst_show, description } = req.body;
+router.post('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description } = req.body;
 
   // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
   if (company_name == null || p1_name == null 
       || p1_phone_number == null || address == null 
-      || postal_code == null || cu_id == null 
+      || postal_code == null || charged_under_id == null 
       || gst == null || gst_show == null) {
-    res.status(400).send("'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'cu_id', 'gst', 'gst_show' are required.", )
+    res.status(400).send("'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'charged_under_id', 'gst', 'gst_show' are required.", )
     return;
   }
 
   try {
-    const id = uuidv4(); // Use this to generate random id
-
-    await db.query(`
-      INSERT INTO customers 
-        (cus_id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, cu_id, gst, gst_show, description) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, 
-        [id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, cu_id, gst, gst_show, description]
-    );
+    const newCustomer = await Customer.create({ company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description });
     
     // Record to admin logs
     const user = res.locals.user;
-    await createLog(`${user.emp_name} created a customer record`, user.emp_id, 2); // 2 is 'CRM' view id.
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.CRM.id,
+      text: `${user.name} created a customer record for ${company_name}`, 
+    });
 
-    res.send({ id: id });
+    res.send({ id: newCustomer.id });
 
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
@@ -91,45 +87,40 @@ router.post('/', requireAccess("CRM", true), async function(req, res, next) {
 /**
  *  PUT method: Update a customer given the data in the HTTP body
  *  - /api/customer
- *  - requireAccess("CRM", true) because this is writing data
+ *  - requireAccess(ViewType.CRM, true) because this is writing data
  * */ 
-router.put('/', requireAccess("CRM", true), async function(req, res, next) {
-  const { cus_id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, cu_id, gst, gst_show, description } = req.body;
+router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description } = req.body;
 
   // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (cus_id == null || company_name == null 
+  if (id == null || company_name == null 
       || p1_name == null || p1_phone_number == null 
       || address == null || postal_code == null 
-      || cu_id == null || gst == null || gst_show == null) {
-    res.status(400).send("'cus_id', 'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'cu_id', 'gst', 'gst_show' are required.", )
+      || charged_under_id == null || gst == null || gst_show == null) {
+    res.status(400).send("'id', 'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'charged_under_id', 'gst', 'gst_show' are required.", )
     return;
   }
 
   try {
-    const { rows } = await db.query(`
-      UPDATE customers 
-        SET 
-          company_name = $2, company_email = $3, 
-          p1_name = $4, p1_phone_number = $5, 
-          p2_name = $6, p2_phone_number = $7, 
-          address = $8, postal_code = $9, 
-          cu_id = $10, gst = $11, 
-          gst_show = $12, description = $13
-        WHERE cus_id = $1
-        RETURNING cus_id, company_name`, // this returns cus_id if customer record is found, else it returns empty array
-        [cus_id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, cu_id, gst, gst_show, description]
+    const result = await Customer.update(
+      { company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description },
+      { where: { id: id } }
     );
 
-    // If 'cus_id' is not found return 400 Bad Request, if found then return the 'cus_id'
-    if (rows.length === 0) {
-      res.status(400).send(`'cus_id': ${cus_id} is not found.`)
+    // If 'id' is not found return 400 Bad Request, if found then return the 'id'
+    if (result[0] === 0) {
+      res.status(400).send(`Customer id ${id} not found.`)
 
     } else {
       // Record to admin logs
       const user = res.locals.user;
-      await createLog(`${user.emp_name} updated ${rows[0].company_name} customer's record`, user.emp_id, 2); // 2 is 'CRM' view id.
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.CRM.id,
+        text: `${user.name} updated ${company_name}'s customer record`, 
+      });
 
-      res.send(rows[0]);
+      res.send(id);
     }
 
 
@@ -145,36 +136,37 @@ router.put('/', requireAccess("CRM", true), async function(req, res, next) {
 /**
  *  DELETE method: Update a customer 'deleted' attribute
  *  - /api/customer
- *  - requireAccess("CRM", true) because this is writing data
+ *  - requireAccess(ViewType.CRM, true) because this is writing data
  * */ 
-router.delete('/', requireAccess("CRM", true), async function(req, res, next) {
-  const { cus_id } = req.body;
+router.delete('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { id } = req.body;
 
   // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (cus_id == null) {
-    res.status(400).send("'cus_id' is required.", )
+  if (id == null) {
+    res.status(400).send("'id' is required.", )
     return;
   }
 
   try {
-    const { rows } = await db.query(`
-      UPDATE customers 
-        SET 
-          deleted = TRUE
-        WHERE cus_id = $1
-        RETURNING cus_id, company_name`, // this returns cus_id if customer record is found, else it returns empty array
-        [cus_id]
-    );
+    const customer = await Customer.findByPk(id, { include: ChargedUnder });
 
-    // If 'cus_id' is not found return 400 Bad Request, if found then return the 'cus_id'
-    if (rows.length === 0) {
-      res.status(400).send(`'cus_id': ${cus_id} is not found.`)
+    // If 'id' is not found return 400 Bad Request, if found then return the 'id'
+    if (customer == null) {
+      res.status(400).send(`Customer id ${id} not found.`)
+
     } else {
+      customer.deleted = true;
+      customer.save();
+
       // Record to admin logs
       const user = res.locals.user;
-      await createLog(`${user.emp_name} deleted ${rows[0].company_name} customer's record`, user.emp_id, 2); // 2 is 'CRM' view id.
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.CRM.id,
+        text: `${user.name} deleted ${customer.company_name}'s customer record`, 
+      });
 
-      res.send(rows[0]);
+      res.send(id);
     }
 
 

@@ -52,11 +52,6 @@ const Role = sequelize.define('role', {
 
 
 const AccessRight = sequelize.define('access_right', {
-  id: {
-    type: DataTypes.UUID,
-    primaryKey: true,
-    defaultValue: DataTypes.UUIDV4
-  },
   has_write_access: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,

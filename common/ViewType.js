@@ -5,6 +5,8 @@ const ViewType = {
     INVENTORY: { id: 4, name: "Inventory" },
     SALES: { id: 5, name: "Sales" },
     ACCOUNTING: { id: 6, name: "Accounting" },
+    ADMIN: { id: 7, name: "Admin" },
+    GENERAL: { id: 8, name: "General" },
 }
 
 module.exports = ViewType;

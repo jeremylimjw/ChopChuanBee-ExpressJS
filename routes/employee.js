@@ -1,7 +1,7 @@
 const express = require('express');
 const { requireAccess } = require('../auth');
 const crypto = require('crypto');
-const { hashPassword } = require('../auth/bcrypt');
+const { hashPassword, compareHash } = require('../auth/bcrypt');
 const router = express.Router();
 const ViewType = require('../common/ViewType');
 const { Employee, AccessRight, Role } = require('../models/Employee');
@@ -124,14 +124,14 @@ router.post('/changePassword', requireAccess(ViewType.GENERAL), async function(r
             return;
         }
 
-        const match = await compare(old_password, employee.password)
+        const match = await compareHash(old_password, employee.password)
         if (!match) {
             res.status(403).send("Old password does not match.");
             return;
         }
 
         // Update the employee object
-        employee.password = await hash(new_password);
+        employee.password = await hashPassword(new_password);
         await employee.save();
 
         // Record to admin logs

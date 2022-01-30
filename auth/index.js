@@ -35,6 +35,7 @@ module.exports = {
      */
     requireAccess: (viewType, requireWriteAccess) => {
         return (req, res, next) => {
+            // Get attached token from cookies
             const token = req.cookies[TOKEN_NAME];
 
             // Require user to have a token
@@ -53,8 +54,8 @@ module.exports = {
             // Assign user to variable to be used further down the pipeline
             res.locals.user = tokens[token].user;
 
-            // Skip checking for access rights if its superadmin user
-            if (tokens[token].user.role.name === 'Admin') {
+            // Skip checking for access rights if its superadmin user or if view type is GENERAL
+            if (tokens[token].user.role.name === 'Admin' || viewType == ViewType.GENERAL) {
                 next();
                 return;
             }

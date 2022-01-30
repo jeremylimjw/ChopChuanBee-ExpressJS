@@ -1,6 +1,6 @@
 var express = require('express');
 const { generateToken, TOKEN_NAME, removeToken } = require('../auth');
-const { compare } = require('../auth/bcrypt');
+const { compareHash } = require('../auth/bcrypt');
 const { Employee, AccessRight, Role } = require('../models/Employee');
 const View = require('../models/View');
 var router = express.Router();
@@ -19,7 +19,7 @@ router.post('/', async function(req, res, next) {
         const user = employee.toJSON();
 
         // Verify user credentials
-        const match = await compare(password, user.password)
+        const match = await compareHash(password, user.password)
         if (!match) {
             res.status(400).send("Invalid username or password.");
             return;

@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const ViewType = require('../common/ViewType');
 
 const TOKEN_NAME = "chocolatechip";
@@ -18,7 +18,7 @@ const tokens = {};
 
 module.exports = {
     generateToken: (user) => {
-        const token = uuidv4();
+        const token = crypto.createHash('sha1').update(Math.random().toString()).digest('hex');
         tokens[token] = {
             user: user,
             expireOn: new Date(new Date().getTime() + SESSION_DURATION_MS)

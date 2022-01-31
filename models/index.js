@@ -8,11 +8,12 @@ module.exports = async function() {
      * Specify your associations here also
      */
     const { Employee, Role , AccessRight } = require('./Employee');
+   
 
     // 1-M association
     Role.hasMany(Employee, { foreignKey: { allowNull: false, name: 'role_id' }});
     Employee.belongsTo(Role, { foreignKey: { allowNull: false, name: 'role_id' }});
-
+   
     const View = require('./View');
     
     // M-M association
@@ -35,8 +36,30 @@ module.exports = async function() {
     ChargedUnder.hasMany(Customer, { foreignKey: { allowNull: false, name: 'charged_under_id' }}); // Foreign key defaults to chargedUnderId, change to standardize
     Customer.belongsTo(ChargedUnder, { foreignKey: { allowNull: false, name: 'charged_under_id' }});
 
-    await sequelize.sync(); // This will create tables if not exists
-    // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+    const Supplier = require('./Supplier');
+    const Product = require('./Product');
 
+    
+    const { LeaveAccount, LeaveType } = require('./LeaveAccount');
+    const { LeaveApplication, LeaveStatus } = require('./LeaveApplication');
+    //1 - Many
+    Employee.hasMany(LeaveAccount, { foreignKey: { allowNull: false, name: 'employee_id' }});
+    //LeaveAccount.belongsTo(Employee,  { foreignKey: { allowNull: false, name: 'employee_id' }});
+
+    LeaveType.hasMany(LeaveAccount, { foreignKey: { allowNull: false, name: 'leave_type_id' }});
+    LeaveAccount.belongsTo(LeaveType,  { foreignKey: { allowNull: false, name: 'leave_type_id' }});
+
+    LeaveAccount.hasMany(LeaveApplication, { foreignKey: { allowNull: false, name: 'leave_account_id' }});
+    LeaveApplication.belongsTo(LeaveAccount, { foreignKey: { allowNull: false, name: 'leave_account_id' }});
+
+    LeaveStatus.hasMany(LeaveApplication, { foreignKey: { allowNull: false, name: 'leave_status_id' }});
+    LeaveApplication.belongsTo(LeaveStatus,  { foreignKey: { allowNull: false, name: 'leave_status_id' }});
+    
+ 
+    
+    await sequelize.sync(); // This will create tables if not exists
+   // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+
+    
 }
 

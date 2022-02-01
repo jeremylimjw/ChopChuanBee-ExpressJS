@@ -37,11 +37,15 @@ module.exports = async function() {
     Customer.belongsTo(ChargedUnder, { foreignKey: { allowNull: false, name: 'charged_under_id' }});
 
     const Supplier = require('./Supplier');
-    const Product = require('./Product');
+    const { Product, ProductCategory } = require('./Product');
 
+    // 1-M association
+    ProductCategory.hasMany(Product, { foreignKey: { allowNull: false, name: 'product_category_id' }});
+    Product.belongsTo(ProductCategory, { foreignKey: { allowNull: false, name: 'product_category_id' }});
     
     const { LeaveAccount, LeaveType } = require('./LeaveAccount');
     const { LeaveApplication, LeaveStatus } = require('./LeaveApplication');
+
     //1 - Many
     Employee.hasMany(LeaveAccount, { foreignKey: { allowNull: false, name: 'employee_id' }});
     //LeaveAccount.belongsTo(Employee,  { foreignKey: { allowNull: false, name: 'employee_id' }});
@@ -57,8 +61,8 @@ module.exports = async function() {
     
  
     
-    await sequelize.sync(); // This will create tables if not exists
-   // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+    // await sequelize.sync(); // This will create tables if not exists
+    await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
 
     
 }

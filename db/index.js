@@ -5,6 +5,7 @@ const RoleType = require('../common/RoleType');
 const ChargedUnderType = require('../common/ChargedUnderType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
 const LeaveStatusEnum = require('../common/LeaveStatusEnum');
+const ProductCategoryEnum = require('../common/ProductCategory');
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
@@ -33,6 +34,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const { ChargedUnder } = require('../models/Customer');
       const {LeaveType, LeaveAccount} = require('../models/LeaveAccount');
       const {LeaveStatus} = require('../models/LeaveApplication');
+      const { ProductCategory } = require('../models/Product');
 
       await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
       await Role.bulkCreate(Object.keys(RoleType).map(key => RoleType[key]));
@@ -44,14 +46,12 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { entitled_days: 14, entitled_rollover: 3, leave_type_id: LeaveTypeEnum.ANNUAL.id }
 
       ]); */
-
+      await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
      
       await Employee.bulkCreate([
         { name: "Admin", username: "admin", password: await hash('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id },
         { name: "Alice", username: "alice", password: await hash('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id },
       ])
-
-      
 
       const alice = await Employee.findOne({ where: { name: "Alice" } });
       await AccessRight.create({ has_write_access: true, employee_id: alice.id, view_id: ViewType.HR.id })

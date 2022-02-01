@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const { requireAccess } = require('../auth');
-const Product = require('../models/Product');
+const { Product, ProductCategory } = require('../models/Product');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 
@@ -11,7 +11,7 @@ router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, re
   
     try {
       if (id != null) { // Retrieve single product
-        const product = await Product.findOne({ where: { id: id }});
+        const product = await Product.findOne({ where: { id: id }, include: ProductCategory });
     
         if (product == null) {
           res.status(400).send(`product id ${id} not found.`);
@@ -21,7 +21,7 @@ router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, re
         res.send(product.toJSON());
     
       } else { // Retrieve ALL products
-        const products = await Product.findAll();
+        const products = await Product.findAll({ include: ProductCategory });
         
         res.send(products);
       }
@@ -34,17 +34,17 @@ router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, re
 
 router.post('/', requireAccess(ViewType.INVENTORY, true), async function(req, res, next) { 
 
-    const {name, description, unit, min_inventory_level} = req.body;
+    const {name, description, unit, min_inventory_level, product_category_id } = req.body;
 
     // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
     if (name == null || unit == null 
-        || min_inventory_level == null ) {
-      res.status(400).send("'name', 'unit', 'min_inventory_level' are required.", )
+        || min_inventory_level == null || product_category_id == null) {
+      res.status(400).send("'name', 'unit', 'min_inventory_level', 'product_category_id' are required.", )
       return;
     }
   
     try {
-      const newProduct = await Product.create({name, description, unit, min_inventory_level});
+      const newProduct = await Product.create({name, description, unit, min_inventory_level, product_category_id});
       
       // Record to admin logs
       const user = res.locals.user;
@@ -65,18 +65,18 @@ router.post('/', requireAccess(ViewType.INVENTORY, true), async function(req, re
 
 
 router.put('/', requireAccess(ViewType.INVENTORY, true), async function(req, res, next) {
-    const { id, name, description, unit, min_inventory_level } = req.body;
+    const { id, name, description, unit, min_inventory_level, product_category_id } = req.body;
   
     // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
     if (id == null || name == null 
-        || unit == null || min_inventory_level == null ) {
-      res.status(400).send("'id', 'name' , 'unit', min_inventory_level' are required.", )
+        || unit == null || min_inventory_level == null || product_category_id == null) {
+      res.status(400).send("'id', 'name' , 'unit', min_inventory_level', 'product_category_id' are required.", )
       return;
     }
   
     try {
       const result = await Product.update(
-        { name, description, unit, min_inventory_level },
+        { name, description, unit, min_inventory_level, product_category_id },
         { where: { id: id } }
       );
   

@@ -17,6 +17,8 @@ module.exports = async function() {
     const View = require('./View');
     
     // M-M association
+    Employee.belongsToMany(View, { through: AccessRight, foreignKey: { allowNull: false, name: 'employee_id' } });
+    View.belongsToMany(Employee, { through: AccessRight, foreignKey: { allowNull: false, name: 'view_id' } });
     Employee.hasMany(AccessRight, { foreignKey: { allowNull: false, name: 'employee_id' }});
     AccessRight.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'employee_id' }});
     View.hasMany(AccessRight, { foreignKey: { allowNull: false, name: 'view_id' }});

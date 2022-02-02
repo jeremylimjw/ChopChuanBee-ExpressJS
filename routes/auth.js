@@ -1,6 +1,6 @@
 var express = require('express');
 const { generateToken, TOKEN_NAME, removeToken } = require('../auth');
-const { compare } = require('../auth/bcrypt');
+const { compareHash } = require('../auth/bcrypt');
 const { Employee, AccessRight, Role } = require('../models/Employee');
 const View = require('../models/View');
 var router = express.Router();
@@ -9,6 +9,12 @@ router.post('/', async function(req, res, next) {
     try {
         const { username, password } = req.body;
 
+        // Validation here
+        if (username == null || password == null) {
+          res.status(400).send("'username', 'password' are required.", )
+          return;
+        }
+
         // Query user data by username
         const employee = await Employee.findOne({ where: { username: username }, include: [{ model: AccessRight, include: View }, Role] });
         if (employee == null) {
@@ -16,10 +22,15 @@ router.post('/', async function(req, res, next) {
             return;
         }
 
+        if (employee.deleted == true) {
+            res.status(400).send("This account does not exist anymore.");
+            return;
+        }
+
         const user = employee.toJSON();
 
         // Verify user credentials
-        const match = await compare(password, user.password)
+        const match = await compareHash(password, user.password)
         if (!match) {
             res.status(400).send("Invalid username or password.");
             return;

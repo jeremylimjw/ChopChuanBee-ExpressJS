@@ -23,6 +23,10 @@ const Employee = sequelize.define('employee', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
   contact_number: DataTypes.STRING,
   nok_name: DataTypes.STRING,
   nok_number: DataTypes.STRING,
@@ -52,11 +56,6 @@ const Role = sequelize.define('role', {
 
 
 const AccessRight = sequelize.define('access_right', {
-  id: {
-    type: DataTypes.UUID,
-    primaryKey: true,
-    defaultValue: DataTypes.UUIDV4
-  },
   has_write_access: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,

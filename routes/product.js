@@ -93,7 +93,7 @@ router.put('/', requireAccess(ViewType.INVENTORY, true), async function(req, res
           text: `${user.name} updated ${name}'s product record`, 
         });
   
-        res.send(id);
+        res.send({ id: id });
       }
   
   
@@ -105,7 +105,7 @@ router.put('/', requireAccess(ViewType.INVENTORY, true), async function(req, res
   
   });
   router.delete('/', requireAccess(ViewType.INVENTORY, true), async function(req, res, next) {
-    const { id } = req.body;
+    const { id } = req.query;
   
     // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
     if (id == null) {
@@ -132,7 +132,7 @@ router.put('/', requireAccess(ViewType.INVENTORY, true), async function(req, res
           text: `${user.name} deleted ${product.name}'s product record`, 
         });
   
-        res.send(id);
+        res.send({ id: id });
       }
   
   

@@ -122,7 +122,7 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
  *  - requireAccess(ViewType.CRM, true) because this is writing data
  * */ 
 router.delete('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
-    const { id } = req.body;
+    const { id } = req.query;
   
     // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
     if (id == null) {

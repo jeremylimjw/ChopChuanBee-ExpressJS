@@ -50,6 +50,7 @@ module.exports = async function() {
 
     //1 - Many
     Employee.hasMany(LeaveAccount, { foreignKey: { allowNull: false, name: 'employee_id' }});
+    LeaveAccount.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'employee_id' }});
 
     LeaveType.hasMany(LeaveAccount, { foreignKey: { allowNull: false, name: 'leave_type_id' }});
     LeaveAccount.belongsTo(LeaveType,  { foreignKey: { allowNull: false, name: 'leave_type_id' }});
@@ -62,8 +63,8 @@ module.exports = async function() {
     
  
     
-    await sequelize.sync(); // This will create tables if not exists
-    //await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+    // await sequelize.sync(); // This will create tables if not exists
+    await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
 
     
 }

@@ -6,8 +6,8 @@ router.use("/auth", require("./auth"));
 router.use("/customer", require("./customer"));
 router.use("/supplier", require("./supplier"));
 router.use("/product", require("./product"));
-router.use("/leave", require("./leave"));
 router.use("/employee", require("./employee"));
 router.use("/employee", require("./accessRight"));
+router.use("/employee/leave", require("./leave"));
 
 module.exports = router;

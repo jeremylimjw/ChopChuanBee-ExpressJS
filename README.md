@@ -25,6 +25,11 @@ REACT_URL=http://localhost:3001
 4. Start the server with `npm start` or `npm run dev`
 5. Ensure that `Connected to database` appears in the server logs
 
+## Unit Testing
+Powered by Mocha. Unit test files can be found in the `/test` directory.
+1. Run server with `npm start` or `npm run dev`
+2. Open another terminal and run `npm test`
+
 # Resetting the database
 When there is a change in database schema, you must drop all tables so it can recreate again. Heres how:
 1. In cmd run `psql -U postgres` and login.

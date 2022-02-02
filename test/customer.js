@@ -29,7 +29,12 @@ describe('/customer', () => {
             newCustomer = getData;
 
         } catch(err) {
-            assert.fail(err.response.data);
+            if (err.response) {
+                console.log(err.response.status, err.response.data);
+            } else {
+                console.log(err);
+            }
+            assert.fail();
         }
     })
 
@@ -48,7 +53,12 @@ describe('/customer', () => {
             assert.equal(getData.p2_phone_number, "99998888");
 
         } catch(err) {
-            assert.fail(err.response.data);
+            if (err.response) {
+                console.log(err.response.status, err.response.data);
+            } else {
+                console.log(err);
+            }
+            assert.fail();
         }
     });
 
@@ -64,7 +74,12 @@ describe('/customer', () => {
             assert.equal(getData.deleted, true);
 
         } catch(err) {
-            assert.fail(err.response.data);
+            if (err.response) {
+                console.log(err.response.status, err.response.data);
+            } else {
+                console.log(err);
+            }
+            assert.fail();
         }
     });
 
@@ -77,7 +92,12 @@ describe('/customer', () => {
             assert.notEqual(getData.length, 0);
 
         } catch(err) {
-            assert.fail(err.response.data);
+            if (err.response) {
+                console.log(err.response.status, err.response.data);
+            } else {
+                console.log(err);
+            }
+            assert.fail();
         }
     });
 

@@ -9,6 +9,12 @@ router.post('/', async function(req, res, next) {
     try {
         const { username, password } = req.body;
 
+        // Validation here
+        if (username == null || password == null) {
+          res.status(400).send("'username', 'password' are required.", )
+          return;
+        }
+
         // Query user data by username
         const employee = await Employee.findOne({ where: { username: username }, include: [{ model: AccessRight, include: View }, Role] });
         if (employee == null) {

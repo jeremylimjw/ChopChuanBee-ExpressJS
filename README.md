@@ -30,5 +30,5 @@ EMAIL_PASSWORD=Nuschopchuanbee1
 # Resetting the database
 When there is a change in database schema, you must drop all tables so it can recreate again. Heres how:
 1. In cmd run `psql -U postgres` and login.
-2. Run `DROP DATABASE chopchuanbee`.
-3. Run `CREATE DATABASE chopchuanbee`.
+2. Run `DROP DATABASE chopchuanbee;`.
+3. Run `CREATE DATABASE chopchuanbee;`.

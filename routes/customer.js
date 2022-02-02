@@ -73,7 +73,7 @@ router.post('/', requireAccess(ViewType.CRM, true), async function(req, res, nex
       text: `${user.name} created a customer record for ${company_name}`, 
     });
 
-    res.send({ id: newCustomer.id });
+    res.send(newCustomer.toJSON());
 
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
@@ -120,7 +120,7 @@ router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next
         text: `${user.name} updated ${company_name}'s customer record`, 
       });
 
-      res.send(id);
+      res.send({ id: id });
     }
 
 
@@ -139,7 +139,7 @@ router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next
  *  - requireAccess(ViewType.CRM, true) because this is writing data
  * */ 
 router.delete('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
-  const { id } = req.body;
+  const { id } = req.query;
 
   // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
   if (id == null) {
@@ -166,7 +166,7 @@ router.delete('/', requireAccess(ViewType.CRM, true), async function(req, res, n
         text: `${user.name} deleted ${customer.company_name}'s customer record`, 
       });
 
-      res.send(id);
+      res.send({ id: customer.id });
     }
 
 

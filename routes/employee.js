@@ -114,6 +114,70 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
 
 
 /**
+ *  PUT method: Update a employee given the data in the HTTP body
+ *  - /api/employee
+ *  - requireAccess(ViewType.GENERAL)
+ * */ 
+router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+    const { id, name, username, email, role_id, contact_number, nok_name, nok_number, address, postal_code } = req.body;
+
+    // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
+    if (id == null || name == null || 
+        username == null || email == null ||
+        role_id == null || contact_number == null ||
+        nok_name == null || nok_number == null ||
+        address == null || postal_code == null) {
+        res.status(400).send("'id', 'name', 'username', 'email', 'role_id', 'contact_number', 'nok_name', 'nok_number', 'address', 'postal_code' are required.", )
+        return;
+    }
+    
+    const user = res.locals.user;
+
+    // If user is not the employee OR user doesnt have HR access role OR user is not Admin
+    if (user.id != id && user.access_rights[ViewType.HR] == null && user.role.name !== 'Admin') {
+        res.status(401).send("You do not have access to this method.");
+        return;
+    }
+
+    try {
+        const result = await Employee.update(
+            { name, username, email, role_id, contact_number, nok_name, nok_number, address, postal_code },
+            { where: { id: id } }
+        );
+
+        // If 'id' is not found return 400 Bad Request, if found then return the 'id'
+        if (result[0] === 0) {
+            res.status(400).send(`Employee id ${id} not found.`)
+
+        } else {
+        // Record to admin logs
+        if (user.id == id) {
+            await Log.create({ 
+                employee_id: user.id, 
+                view_id: ViewType.GENERAL.id,
+                text: `${user.name} updated his/her employee record`, 
+            });
+        } else {
+            await Log.create({ 
+                employee_id: user.id, 
+                view_id: ViewType.HR.id,
+                text: `${user.name} updated ${name}'s employee record`, 
+            });
+        }
+
+        res.send({ id: id });
+    }
+
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+/**
  *  DELETE method: Update a employee 'deleted' attribute
  *  - /api/employee
  *  - requireAccess(ViewType.HR, true) because this is writing data

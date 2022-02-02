@@ -44,29 +44,28 @@ describe('/employee', () => {
         }
     })
 
-    // TODO: By Peter (General Employee Module Profile Page)
-    // it('UPDATE /', async () => {
-    //     try {
-    //         // Update employee
-    //         const modifyEmployee = {...newEmployee, address: "Kent Ridge Hall", postal_code: "123456" };
-    //         await http.put(`/employee`, modifyEmployee);
+    it('UPDATE /', async () => {
+        try {
+            // Update employee
+            const modifyEmployee = {...newEmployee, address: "Kent Ridge Hall", postal_code: "123456" };
+            await http.put(`/employee`, modifyEmployee);
 
-    //         // Retrieve employee
-    //         const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
-    //         assert.notEqual(getData, null);
+            // Retrieve employee
+            const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
+            assert.notEqual(getData, null);
 
-    //         // Assert changes
-    //         assert.equal(getData.address, "Jane Doe");
-    //         assert.equal(getData.postal_code, "99998888");
+            // Assert changes
+            assert.equal(getData.address, "Kent Ridge Hall");
+            assert.equal(getData.postal_code, "123456");
 
-    //     } catch(err) {
-            // if (err.response) {
-            //     console.log(err.response.status, err.response.data);
-            // } else {
-            //     console.log(err);
-            // }
-    //     }
-    // });
+        } catch(err) {
+            if (err.response) {
+                console.log(err.response.status, err.response.data);
+            } else {
+                console.log(err);
+            }
+        }
+    });
 
     it('GET /', async () => {
         try {

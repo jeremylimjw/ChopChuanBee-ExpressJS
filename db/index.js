@@ -1,4 +1,4 @@
-const { hash } = require('../auth/bcrypt');
+const { hashPassword } = require('../auth/bcrypt');
 const { Sequelize, DataTypes } = require('sequelize');
 const ViewType = require('../common/ViewType');
 const RoleType = require('../common/RoleType');
@@ -49,8 +49,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
      
       await Employee.bulkCreate([
-        { name: "Admin", username: "admin", password: await hash('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id },
-        { name: "Alice", username: "alice", password: await hash('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id },
+        { name: "Admin", username: "admin", password: await hashPassword('password'), email: "nuschopchuanbee@gmail.com", role_id: RoleType.ADMIN.id },
+        { name: "Alice", username: "alice", password: await hashPassword('password'), email: "nuschopchuanbee@gmail.com", role_id: RoleType.STAFF.id },
       ])
 
       const alice = await Employee.findOne({ where: { name: "Alice" } });

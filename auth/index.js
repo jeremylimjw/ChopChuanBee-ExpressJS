@@ -1,4 +1,5 @@
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+const ViewType = require('../common/ViewType');
 
 const TOKEN_NAME = "chocolatechip";
 const SESSION_DURATION_MS = 30*60*1000;
@@ -17,7 +18,7 @@ const tokens = {};
 
 module.exports = {
     generateToken: (user) => {
-        const token = uuidv4();
+        const token = crypto.createHash('sha1').update(Math.random().toString()).digest('hex');
         tokens[token] = {
             user: user,
             expireOn: new Date(new Date().getTime() + SESSION_DURATION_MS)
@@ -35,6 +36,7 @@ module.exports = {
      */
     requireAccess: (viewType, requireWriteAccess) => {
         return (req, res, next) => {
+            // Get attached token from cookies
             const token = req.cookies[TOKEN_NAME];
 
             // Require user to have a token
@@ -53,8 +55,8 @@ module.exports = {
             // Assign user to variable to be used further down the pipeline
             res.locals.user = tokens[token].user;
 
-            // Skip checking for access rights if its superadmin user
-            if (tokens[token].user.role.name === 'Admin') {
+            // Skip checking for access rights if its superadmin user or if view type is GENERAL
+            if (tokens[token].user.role.name === 'Admin' || viewType == ViewType.GENERAL) {
                 next();
                 return;
             }

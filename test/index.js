@@ -15,5 +15,15 @@ module.exports = {
         withCredentials: true,
         baseURL: BASE_URL
     })
+  },
+  login: async(username, password) => {
+    const loginResponse = await axios.post(`${BASE_URL}/auth`, { username: username, password: password });
+    cookie = loginResponse.headers["set-cookie"][0];
+
+    return axios.create({
+        headers: { Cookie: cookie },
+        withCredentials: true,
+        baseURL: BASE_URL
+    })
   }
 }

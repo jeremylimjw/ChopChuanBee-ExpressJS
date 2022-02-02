@@ -9,9 +9,10 @@ const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { sequelize } = require('../db');
 
+
 // view leave balance
-router.get('/viewLeaveAccounts', requireAccess(ViewType.HR, false), async function(req, res, next) {
-  const { employee_id } = req.query; // This is same as `const id = req.params.id`;
+router.get('/viewAllLeaveAccounts', requireAccess(ViewType.HR, false), async function(req, res, next) {
+  const { employee_id } = req.body; // This is same as `const id = req.params.id`;
   
   try {
     const employee = await Employee.findOne({ where: { id: employee_id }, include: Role, include : AccessRight });
@@ -52,6 +53,89 @@ router.get('/viewLeaveAccounts', requireAccess(ViewType.HR, false), async functi
 
 
 });
+
+// view a leave account 
+router.get('/viewLeaveAccount', requireAccess(ViewType.HR, false), async function(req, res, next) {
+  const { employee_id, leave_type_id } = req.body; // This is same as `const id = req.params.id`;
+  
+  try {
+    const employee = await Employee.findOne({ where: { id: employee_id }, include: Role, include : AccessRight });
+    
+    if (employee == null) {
+        res.status(400).send(`Employee id ${employee_id} not found.`);
+        return;
+    }
+
+    const leaveAccount = await LeaveAccount.findOne({ where: { employee_id: employee.id, leave_type_id  }, include: LeaveType});
+    var map = new HashMap();
+
+    var currBalance = await sequelize.query(
+      'SELECT leaveAcc.entitled_days - SUM(leaveApp.num_days) AS amt ' +
+      'FROM leave_accounts leaveAcc, leave_applications leaveApp ' +
+      'WHERE leaveApp.leave_account_id = leaveAcc.id ' +
+      `AND leaveAcc.id::text = '${leaveAccount.id}' ` +
+      'AND leaveApp.leave_status_id = 2 ' + 
+      'AND extract(year from leaveApp.start_date) = extract(year from current_date) ' +
+      'GROUP BY leaveAcc.id',
+      { raw: true, 
+          type: sequelize.QueryTypes.SELECT}
+      );
+
+      if (currBalance[0]) {
+         map.set(leaveAccount.id, currBalance[0].amt);
+      } else {
+        map.set(leaveAccount.id, leaveAccount.entitled_days);
+      }
+   
+      res.send({leave_account: leaveAccount, map});
+
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+
+});
+
+//view a leave applications 
+router.get('/viewLeaveApplication', requireAccess(ViewType.CRM, false), async function(req, res, next) {
+  const { leave_application_id } = req.body; // This is same as `const id = req.params.id`;
+  
+  try {
+    if (leave_application_id != null) { // Retrieve single customer
+      const leave_application = await LeaveApplication.findOne({ where: { id: leave_application_id }, include: LeaveStatus });
+  
+      if (leave_application == null) {
+        res.status(400).send(`Leave Application ${leave_application_id} not found.`);
+        return;
+      }
+      
+      res.send(leave_application);
+    } 
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
+
+//view all leave applications 
+router.get('/viewAllLeaveApplications', requireAccess(ViewType.CRM, false), async function(req, res, next) {
+  const { } = req.body; // This is same as `const id = req.params.id`;
+  
+  try {
+       const leave_applications = await LeaveApplication.findAll({include: LeaveStatus });
+       res.send(leave_applications);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
+
+
 
 //create leave account
 router.post('/createLeaveAccount', requireAccess(ViewType.HR, true), async function(req, res, next) { 
@@ -114,6 +198,32 @@ router.post('/createLeaveApplication', requireAccess(ViewType.HR, false), async 
       
     const employee = await Employee.findOne({ where: { id: employee_id }, include: Role, include : AccessRight});
     const leave_account = await LeaveAccount.findOne({ where: { employee_id: employee.id, leave_type_id }, include: LeaveType});
+    
+    
+   // const leaveAccounts = await LeaveAccount.findAll({ where: { employee_id: employee.id }, include: LeaveType});
+    var balance = leave_account.entitled_days ;
+   
+    var currBalance = await sequelize.query(
+      'SELECT leaveAcc.entitled_days - SUM(leaveApp.num_days) AS amt ' +
+      'FROM leave_accounts leaveAcc, leave_applications leaveApp ' +
+      'WHERE leaveApp.leave_account_id = leaveAcc.id ' +
+      `AND leaveAcc.id::text = '${leave_account.id}' ` +
+      'AND leaveApp.leave_status_id = 2 ' + 
+      'AND extract(year from leaveApp.start_date) = extract(year from current_date) ' +
+     'GROUP BY leaveAcc.id',
+       { raw: true, 
+       type: sequelize.QueryTypes.SELECT}
+    );
+
+    if (currBalance[0] !== undefined) {
+      balance = currBalance[0].amt
+    }
+    
+    if (balance < num_days){
+      res.status(400).send("Employee does not have sufficient leave to apply",)
+      return;
+    }
+
     const leave_application = await LeaveApplication.create({ paid, start_date, end_date, num_days, remarks, leave_account_id : leave_account.id, leave_status_id : 1 });
 
     // Record to admin logs

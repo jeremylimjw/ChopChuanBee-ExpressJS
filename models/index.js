@@ -48,7 +48,6 @@ module.exports = async function() {
 
     //1 - Many
     Employee.hasMany(LeaveAccount, { foreignKey: { allowNull: false, name: 'employee_id' }});
-    //LeaveAccount.belongsTo(Employee,  { foreignKey: { allowNull: false, name: 'employee_id' }});
 
     LeaveType.hasMany(LeaveAccount, { foreignKey: { allowNull: false, name: 'leave_type_id' }});
     LeaveAccount.belongsTo(LeaveType,  { foreignKey: { allowNull: false, name: 'leave_type_id' }});

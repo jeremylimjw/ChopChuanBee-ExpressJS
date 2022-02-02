@@ -23,6 +23,10 @@ const Employee = sequelize.define('employee', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
   contact_number: DataTypes.STRING,
   nok_name: DataTypes.STRING,
   nok_number: DataTypes.STRING,

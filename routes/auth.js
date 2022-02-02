@@ -22,6 +22,11 @@ router.post('/', async function(req, res, next) {
             return;
         }
 
+        if (employee.deleted == true) {
+            res.status(400).send("This account does not exist anymore.");
+            return;
+        }
+
         const user = employee.toJSON();
 
         // Verify user credentials

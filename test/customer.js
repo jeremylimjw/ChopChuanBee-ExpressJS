@@ -4,6 +4,7 @@ const { loginAsAdmin } = require('.');
 describe('/customer', () => {
 
     let http;
+    let newCustomer;
 
     it('POST /', async () => {
         try {

@@ -114,6 +114,52 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
 
 
 /**
+ *  DELETE method: Update a employee 'deleted' attribute
+ *  - /api/employee
+ *  - requireAccess(ViewType.HR, true) because this is writing data
+ * */ 
+router.delete('/', requireAccess(ViewType.HR, true), async function(req, res, next) {
+  const { id } = req.query;
+
+  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
+  if (id == null) {
+    res.status(400).send("'id' is required.", )
+    return;
+  }
+
+  try {
+    const employee = await Employee.findByPk(id);
+
+    // If 'id' is not found return 400 Bad Request, if found then return the 'id'
+    if (employee == null) {
+      res.status(400).send(`Employee id ${id} not found.`)
+
+    } else {
+      employee.deleted = true;
+      employee.save();
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.HR.id,
+        text: `${user.name} deleted ${employee.name}'s record`, 
+      });
+
+      res.send({ id: employee.id });
+    }
+
+
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+/**
  *  POST method: Change password of a given user (employee)
  *  - /api/employee/changePassword
  *  - requireAccess(ViewType.GENERAL) will only check if user is logged in, and logged in user can be accessed via `res.locals.user`

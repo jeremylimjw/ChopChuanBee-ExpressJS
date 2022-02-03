@@ -43,7 +43,7 @@ describe('/customer', () => {
         try {
             // Update customer
             const modifyCustomer = {...newCustomer, p2_name: "Jane Doe", p2_phone_number: "99998888" };
-            await http.put(`/customer`, modifyCustomer);
+            const { data: putData } = await http.put(`/customer`, modifyCustomer);
 
             // Retrieve customer
             const { data: getData } = await http.get(`/customer?id=${newCustomer.id}`);

@@ -2,7 +2,8 @@ var express = require('express');
 const { requireAccess } = require('../auth');
 var router = express.Router();
 const ViewType = require('../common/ViewType');
-const { Employee, AccessRight } = require('../models/Employee');
+const { insertAccessRights, validateAccessRights, removeAccessRights, validateRemoveAccessRights } = require('../models/AccessRight');
+const { Employee } = require('../models/Employee');
 const Log = require('../models/Log');
 
 
@@ -19,18 +20,16 @@ const Log = require('../models/Log');
         res.status(400).send("'employee_id' is required and 'access_rights' must be an array", )
         return;
     }
-
-    // More validation
-    for (let access_right of access_rights) {
-        if (access_right.view_id == null || access_right.has_write_access == null) {
-            res.status(400).send(`'access_rights' array must be in { view_id: number, has_write_access: boolean } format.`);
-            return;
-        }
+    
+    // Validation
+    try {
+        validateAccessRights(access_rights);
+    } catch(err) {
+        res.status(400).send(err);
+        return;
     }
     
     try {
-        const user = res.locals.user;
-
         // Find the employee using `employee_id`
         const employee = await Employee.findOne({ where: { id: employee_id } });
         if (employee == null) {
@@ -38,26 +37,10 @@ const Log = require('../models/Log');
             return;
         }
         
-        for (let access_right of access_rights) {
-            // Create the access right
-            await AccessRight.upsert({ 
-                has_write_access: access_right.has_write_access, 
-                employee_id: employee.id, view_id: 
-                access_right.view_id 
-            })
-            
-            // Get view name with `view_id`
-            const viewName = Object.keys(ViewType).filter(key => ViewType[key].id == access_right.view_id);
+        const user = res.locals.user;
+        await insertAccessRights(access_rights, employee, user);
 
-            // Record in admin logs
-            await Log.create({ 
-              employee_id: user.id, 
-              view_id: ViewType.ADMIN.id,
-              text: `${user.name} granted ${viewName} access to ${employee.name}${access_right.has_write_access ? ' with write access' : ''}`, 
-            });
-        }
-
-        res.send(employee.id);
+        res.send({ id: employee.id });
 
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database
@@ -77,22 +60,20 @@ router.post('/revoke', requireAccess(ViewType.ADMIN, true), async function(req, 
     const { employee_id, access_rights } = req.body;
 
     // Validation
-    if (employee_id == null || access_rights == null || !Array.isArray(access_rights)) {
-        res.status(400).send("'employee_id' is required and 'access_rights' must be an array", )
+    if (employee_id == null || access_rights == null) {
+        res.status(400).send("'employee_id' is required must be an array", )
         return;
     }
-
-    // More validation
-    for (let access_right of access_rights) {
-        if (access_right.view_id == null) {
-            res.status(400).send(`'access_rights' array must be in { view_id: number } format.`);
-            return;
-        }
+    
+    // Validation
+    try {
+        validateRemoveAccessRights(access_rights);
+    } catch(err) {
+        res.status(400).send(err);
+        return;
     }
     
     try {
-        const user = res.locals.user;
-
         // Find the employee using `employee_id`
         const employee = await Employee.findOne({ where: { id: employee_id } });
         if (employee == null) {
@@ -100,26 +81,10 @@ router.post('/revoke', requireAccess(ViewType.ADMIN, true), async function(req, 
             return;
         }
         
-        for (let access_right of access_rights) {
-            const accessRight  = await AccessRight.findOne({ where: { view_id: access_right.view_id } })
+        const user = res.locals.user;
+        await removeAccessRights(access_rights, employee, user);
 
-            if (accessRight != null) {
-                // Delete the access right
-                await AccessRight.destroy({ where: { view_id: access_right.view_id } });
-
-                // Find the view name using `view_id`
-                const viewName = Object.keys(ViewType).filter(key => ViewType[key].id == access_right.view_id);
-
-                // Record in admin logs
-                await Log.create({ 
-                    employee_id: user.id, 
-                    view_id: ViewType.ADMIN.id,
-                    text: `${user.name} revoked ${viewName} access from ${employee.name}`, 
-                });
-            }
-        }
-
-        res.send(employee.id);
+        res.send({ id: employee.id });
 
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database
@@ -128,6 +93,5 @@ router.post('/revoke', requireAccess(ViewType.ADMIN, true), async function(req, 
     }
 
 });
-
 
 module.exports = router;

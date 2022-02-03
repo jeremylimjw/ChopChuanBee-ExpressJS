@@ -24,7 +24,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
     await require('../models')();
 
     // Data initiation
-    const { Employee, Role, AccessRight } = require('../models/Employee');
+    const { Employee, Role } = require('../models/Employee');
+    const { AccessRight } = require('../models/AccessRight');
     const employees = await Employee.findOne();
 
     if (employees == null) {
@@ -49,8 +50,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
      
       await Employee.bulkCreate([
-        { name: "Admin", username: "admin", password: await hashPassword('password'), email: "nuschopchuanbee@gmail.com", role_id: RoleType.ADMIN.id },
-        { name: "Alice", username: "alice", password: await hashPassword('password'), email: "nuschopchuanbee@gmail.com", role_id: RoleType.STAFF.id },
+        { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id },
+        { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id },
       ])
 
       const alice = await Employee.findOne({ where: { name: "Alice" } });

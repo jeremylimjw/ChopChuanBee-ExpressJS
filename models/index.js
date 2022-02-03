@@ -7,9 +7,9 @@ module.exports = async function() {
      * Import your model here. This will let the server create a table based on ur model on startup.
      * Specify your associations here also
      */
-    const { Employee, Role , AccessRight } = require('./Employee');
+    const { Employee, Role } = require('./Employee');
+    const { AccessRight } = require('./AccessRight');
    
-
     // 1-M association
     Role.hasMany(Employee, { foreignKey: { allowNull: false, name: 'role_id' }});
     Employee.belongsTo(Role, { foreignKey: { allowNull: false, name: 'role_id' }});
@@ -39,11 +39,7 @@ module.exports = async function() {
     Customer.belongsTo(ChargedUnder, { foreignKey: { allowNull: false, name: 'charged_under_id' }});
 
     const Supplier = require('./Supplier');
-    const { Product, ProductCategory } = require('./Product');
-
-    // 1-M association
-    ProductCategory.hasMany(Product, { foreignKey: { allowNull: false, name: 'product_category_id' }});
-    Product.belongsTo(ProductCategory, { foreignKey: { allowNull: false, name: 'product_category_id' }});
+    const { Product } = require('./Product');
     
     const { LeaveAccount, LeaveType } = require('./LeaveAccount');
     const { LeaveApplication, LeaveStatus } = require('./LeaveApplication');

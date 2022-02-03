@@ -16,15 +16,16 @@ describe('/employee/leave', () => {
             // Create Employee
             let employee = { 
                 name: "Bob Builder", 
-                username: "bobby", 
-                email: "nuschopchuanbee@gmail.com", 
+                username: Math.random().toString(), // because of unique constraint
+                email: Math.random().toString(), 
                 role_id: 2, 
                 contact_number: "84726782", 
                 nok_name: "Matthew McCaughnohaugh", 
                 nok_number: "82747282", 
                 address: "21 Old Airport Rd", 
                 postal_code: "624902", 
-                send_email: false
+                send_email: false,
+                access_rights: [],
             }
             const { data: postDataEmployee } = await http.post(`/employee`, employee);
             newEmployee = postDataEmployee;
@@ -83,7 +84,7 @@ describe('/employee/leave', () => {
             assert.notEqual(getData1.length, 0)
 
             const { data: getData2 } = await http.get(`/employee/leave?leave_account_id=${newLeaveAccounts[0].id}`);
-            assert.notEqual(getData2.length, 0)
+            assert.notEqual(getData2, null)
 
             const { data: getData3 } = await http.get(`/employee/leave`);
             assert.notEqual(getData3.length, 0)

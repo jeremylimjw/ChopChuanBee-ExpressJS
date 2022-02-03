@@ -15,15 +15,21 @@ describe('/employee', () => {
             // Create Employee
             let employee = { 
                 name: "Kenny McCormick", 
-                username: "kenny", 
-                email: "nuschopchuanbee@gmail.com", 
+                username: Math.random().toString(), // because of unique constraint
+                email: Math.random().toString(), 
                 role_id: 2, 
                 contact_number: "84726782", 
                 nok_name: "Matthew McCaughnohaugh", 
                 nok_number: "82747282", 
                 address: "21 Old Airport Rd", 
                 postal_code: "624902", 
-                send_email: false
+                send_email: false,
+                access_rights: [
+                    {
+                        view_id: 1,
+                        has_write_access: true,
+                    },
+                ]
             }
             const { data: postData } = await http.post(`/employee`, employee);
             newEmployee = postData;
@@ -48,6 +54,8 @@ describe('/employee', () => {
         try {
             // Update employee
             const modifyEmployee = {...newEmployee, address: "Kent Ridge Hall", postal_code: "123456" };
+            modifyEmployee.access_rights[0].has_write_access = false;
+
             await http.put(`/employee`, modifyEmployee);
 
             // Retrieve employee
@@ -57,6 +65,7 @@ describe('/employee', () => {
             // Assert changes
             assert.equal(getData.address, "Kent Ridge Hall");
             assert.equal(getData.postal_code, "123456");
+            assert.equal(getData.access_rights[0].has_write_access, false);
 
         } catch(err) {
             if (err.response) {
@@ -64,6 +73,7 @@ describe('/employee', () => {
             } else {
                 console.log(err);
             }
+            assert.fail();
         }
     });
 
@@ -107,11 +117,11 @@ describe('/employee', () => {
             const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
 
             // Assert changes
-            assert.equal(getData.access_rights.length, 2);
-            assert.equal(getData.access_rights[0].view_id, 2);
-            assert.equal(getData.access_rights[0].has_write_access, false);
-            assert.equal(getData.access_rights[1].view_id, 3);
-            assert.equal(getData.access_rights[1].has_write_access, true);
+            assert.equal(getData.access_rights.length, 3);
+            assert.equal(getData.access_rights[1].view_id, 2);
+            assert.equal(getData.access_rights[1].has_write_access, false);
+            assert.equal(getData.access_rights[2].view_id, 3);
+            assert.equal(getData.access_rights[2].has_write_access, true);
 
         } catch(err) {
             if (err.response) {
@@ -145,11 +155,11 @@ describe('/employee', () => {
             const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
 
             // Assert changes
-            assert.equal(getData.access_rights.length, 2);
-            assert.equal(getData.access_rights[0].view_id, 2);
-            assert.equal(getData.access_rights[0].has_write_access, true);
-            assert.equal(getData.access_rights[1].view_id, 3);
+            assert.equal(getData.access_rights.length, 3);
+            assert.equal(getData.access_rights[1].view_id, 2);
             assert.equal(getData.access_rights[1].has_write_access, true);
+            assert.equal(getData.access_rights[2].view_id, 3);
+            assert.equal(getData.access_rights[2].has_write_access, true);
 
         } catch(err) {
             if (err.response) {
@@ -178,9 +188,9 @@ describe('/employee', () => {
             const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
 
             // Assert changes
-            assert.equal(getData.access_rights.length, 1);
-            assert.equal(getData.access_rights[0].view_id, 3);
-            assert.equal(getData.access_rights[0].has_write_access, true);
+            assert.equal(getData.access_rights.length, 2);
+            assert.equal(getData.access_rights[1].view_id, 3);
+            assert.equal(getData.access_rights[1].has_write_access, true);
 
         } catch(err) {
             if (err.response) {

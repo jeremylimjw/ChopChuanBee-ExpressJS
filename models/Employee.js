@@ -13,7 +13,8 @@ const Employee = sequelize.define('employee', {
   },
   username: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true,
   },
   password: {
     type: DataTypes.STRING,
@@ -21,7 +22,8 @@ const Employee = sequelize.define('employee', {
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true,
   },
   deleted: {
     type: DataTypes.BOOLEAN,
@@ -38,8 +40,6 @@ const Employee = sequelize.define('employee', {
   createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
 });
 
-
-
 const Role = sequelize.define('role', {
   id: {
     type: DataTypes.INTEGER,
@@ -53,16 +53,4 @@ const Role = sequelize.define('role', {
   timestamps: false 
 });
 
-
-
-const AccessRight = sequelize.define('access_right', {
-  has_write_access: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-}, {
-  updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
-  createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
-});
-
-module.exports = { Employee, Role, AccessRight };
+module.exports = { Employee, Role };

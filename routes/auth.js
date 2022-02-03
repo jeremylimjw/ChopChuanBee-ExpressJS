@@ -1,7 +1,8 @@
 var express = require('express');
 const { generateToken, TOKEN_NAME, removeToken } = require('../auth');
 const { compareHash } = require('../auth/bcrypt');
-const { Employee, AccessRight, Role } = require('../models/Employee');
+const { AccessRight } = require('../models/AccessRight');
+const { Employee, Role } = require('../models/Employee');
 const View = require('../models/View');
 var router = express.Router();
 

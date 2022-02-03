@@ -7,8 +7,7 @@ const Log = require('../models/Log');
 
 //Read supplier (find 1 or find all depending if ID was given)
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
-
-    const { id } = req.query; // This is same as `const id = req.params.id`;
+    const { id } = req.query;;
   
     try {
       if (id != null) { // Retrieve single supplier
@@ -37,7 +36,7 @@ router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, nex
 
 router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, next) { 
 
-    const { company_name,s1_name, s1_phone_number, address, postal_code, description, company_email,s2_name, s2_phone_number} = req.body;
+    const { company_name, s1_name, s1_phone_number, address, postal_code, description, company_email, s2_name, s2_phone_number} = req.body;
 
     // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
     if (company_name == null || s1_name == null 
@@ -58,7 +57,7 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
         text: `${user.name} created a supplier record for ${company_name}`, 
       });
   
-      res.send({ id: newSupplier.id });
+      res.send(newSupplier.toJSON());
   
     } catch(err) {
       // Catch and return any uncaught exceptions while inserting into database
@@ -76,7 +75,6 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
  router.put('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
     const { id, company_name,s1_name, s1_phone_number, address, postal_code, description, company_email,s2_name, s2_phone_number} = req.body;
   
-    
     // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
     if ( id == null || company_name == null || s1_name == null 
         || s1_phone_number == null || address == null 
@@ -104,7 +102,7 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
           text: `${user.name} updated ${company_name}'s supplier record`, 
         });
   
-        res.send(id);
+        res.send({ id: id });
       }
   
   
@@ -149,7 +147,7 @@ router.delete('/', requireAccess(ViewType.SCM, true), async function(req, res, n
           text: `${user.name} deleted ${supplier.company_name}'s supplier record`, 
         });
   
-        res.send(id);
+        res.send({ id: id });
       }
   
   

@@ -4,10 +4,12 @@ const crypto = require('crypto');
 const { hashPassword, compareHash } = require('../auth/bcrypt');
 const router = express.Router();
 const ViewType = require('../common/ViewType');
-const { Employee, AccessRight, Role } = require('../models/Employee');
+const { Employee, Role } = require('../models/Employee');
 const View = require('../models/View');
 const Log = require('../models/Log');
 const { sendEmailTo } = require('../emailer/index');
+const { Sequelize, DataTypes } = require('sequelize');
+const { AccessRight, validateAccessRights, removeAccessRights, insertAccessRights } = require('../models/AccessRight');
 
 /**
  * Employee route
@@ -56,11 +58,19 @@ router.get('/', requireAccess(ViewType.HR, false), async function(req, res, next
  *  - requireAccess(ViewType.ADMIN, true)
  * */ 
 router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, next) {
-    const { name, username, email, role_id, contact_number, nok_name, nok_number, address, postal_code, send_email } = req.body;
+    const { name, username, email, role_id, contact_number, nok_name, nok_number, address, postal_code, send_email, access_rights } = req.body;
 
-    // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
+    // Vvalidation
     if (name == null || username == null || email == null, role_id == null, send_email == null) {
         res.status(400).send("'name', 'username', 'email', 'role_id', 'send_email are required.")
+        return;
+    }
+    
+    // Access Rights Validation
+    try {
+        validateAccessRights(access_rights);
+    } catch(err) {
+        res.status(400).send(err);
         return;
     }
 
@@ -78,7 +88,7 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
         const password = await hashPassword(passwordPlaintext);
 
         // Create new employee
-        const newEmployee = await Employee.create({ name, username, password, email, role_id, contact_number, nok_name, nok_number, address, postal_code });
+        const newEmployee = await Employee.create({ name, username, password, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights }, { include: AccessRight });
 
         if (send_email == true) {
             // Send account information to user's email
@@ -98,8 +108,11 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
             text: `${user.name} created an employee record for ${newEmployee.name}`, 
         });
 
+        // Retrieve employee again to get the access right and view associations
+        const getEmployee = await Employee.findByPk(newEmployee.id, { include: { model: AccessRight, include: View }})
+
         // Replace hashed password with random generated password before sending response
-        const employee = newEmployee.toJSON();
+        const employee = getEmployee.toJSON();
         employee.password = passwordPlaintext;
 
         res.send(employee);
@@ -119,11 +132,10 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
  *  - requireAccess(ViewType.GENERAL)
  * */ 
 router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
-    const { id, name, username, email, role_id, contact_number, nok_name, nok_number, address, postal_code } = req.body;
+    const { id, name, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights } = req.body;
 
     // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-    if (id == null || name == null || 
-        username == null || email == null ||
+    if (id == null || name == null || email == null ||
         role_id == null || contact_number == null ||
         nok_name == null || nok_number == null ||
         address == null || postal_code == null) {
@@ -140,18 +152,45 @@ router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
     }
 
     try {
-        const result = await Employee.update(
-            { name, username, email, role_id, contact_number, nok_name, nok_number, address, postal_code },
+        // Validate unique constraint
+        const hasEmail = await Employee.findOne({ where: { email, id: { [Sequelize.Op.not]: id } } });
+
+        if (hasEmail != null) {
+            res.status(401).send(`Email ${email} is already taken.`);
+            return;
+        }
+
+        // Update employee
+        const updateResult = await Employee.update(
+            { name, email, role_id, contact_number, nok_name, nok_number, address, postal_code },
             { where: { id: id } }
         );
 
         // If 'id' is not found return 400 Bad Request, if found then return the 'id'
-        if (result[0] === 0) {
-            res.status(400).send(`Employee id ${id} not found.`)
+        if (updateResult[0] === 0) {
+            res.status(400).send(`Employee id ${id} not found.`);
+            return;
+        }
 
-        } else {
+        // Update with access rights if HR or admin only
+        if (user.access_rights[ViewType.HR] != null || user.role.name == 'Admin') {
+            
+            // Access Rights Validation
+            try {
+                validateAccessRights(access_rights);
+            } catch(err) {
+                res.status(400).send(err);
+                return;
+            }
+
+            const employee = await Employee.findByPk(id, { include: AccessRight });
+            await removeAccessRights(employee.toJSON().access_rights, employee, user, true);
+            await insertAccessRights(access_rights, employee, user, true);
+
+        }
+
         // Record to admin logs
-        if (user.id == id) {
+        if (user.id == id) { // If user is updating his own record
             await Log.create({ 
                 employee_id: user.id, 
                 view_id: ViewType.GENERAL.id,
@@ -166,7 +205,6 @@ router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
         }
 
         res.send({ id: id });
-    }
 
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database
@@ -265,7 +303,7 @@ router.post('/changePassword', requireAccess(ViewType.GENERAL), async function(r
           text: `${user.name} changed his/her password`, 
         });
 
-        res.send(user.id);
+        res.send({ id: user.id });
 
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database
@@ -279,33 +317,24 @@ router.post('/changePassword', requireAccess(ViewType.GENERAL), async function(r
 /**
  *  POST method: Reset password of a given user (employee)
  *  - /api/employee/resetPassword
- *  - requireAccess(ViewType.GENERAL) will only check if user is logged in, and logged in user can be accessed via `res.locals.user`
  * */ 
-router.post('/resetPassword', requireAccess(ViewType.GENERAL), async function(req, res, next) {
-    const { email } = req.body;
+router.post('/resetPassword', async function(req, res, next) {
+    const { username, email } = req.body;
 
     // Validation
-    if (email == null) {
-        res.status(400).send("'email' is required.", )
+    if (username == null || email == null) {
+        res.status(400).send("'username' and 'email' are required.", )
         return;
     }
 
     try {
-        const user = res.locals.user;
-
         // Retrieve the employee
-        const employee = await Employee.findOne({ where: { id: user.id } });
+        const employee = await Employee.findOne({ where: { username, email } });
         if (employee == null) {
-            res.status(400).send(`Logged in user ${user?.name} does not exist anymore.`);
+            res.status(400).send(`Invalid username and/or email.`);
             return;
         }
 
-        // Verify correct email
-        if (employee.email != email) {
-            res.status(400).send(`Email ${email} does not match the employee.`);
-            return;
-        }
-        
         // Randomly generate 8 character password
         const newPassword = crypto.createHash('sha1').update(Math.random().toString()).digest('hex').substring(0,6);
 
@@ -322,12 +351,12 @@ router.post('/resetPassword', requireAccess(ViewType.GENERAL), async function(re
 
         // Record to admin logs
         await Log.create({ 
-          employee_id: user.id, 
+          employee_id: employee.id, 
           view_id: ViewType.GENERAL.id,
-          text: `${user.name} resetted his/her password`, 
+          text: `${employee.name} resetted his/her password`, 
         });
 
-        res.send(user.id);
+        res.send({ id: employee.id });
 
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database

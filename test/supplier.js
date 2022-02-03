@@ -69,7 +69,7 @@ describe('/supplier', () => {
     it('DELETE /', async () => {
         try {
             // Delete supplier
-            await http.delete(`/supplier?id=${newSupplier.id}`);
+            const { data: deleteData } = await http.delete(`/supplier?id=${newSupplier.id}`);
 
             // Retrieve supplier
             const { data: getData } = await http.get(`/supplier?id=${newSupplier.id}`);

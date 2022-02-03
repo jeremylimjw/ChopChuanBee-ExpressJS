@@ -16,8 +16,7 @@ describe('/product', () => {
                 name: "Maggi ketchup", 
                 description: "Best ketchup ever", 
                 unit: "bottles", 
-                min_inventory_level: 100, 
-                product_category_id: 1
+                min_inventory_level: 100
             }
             const { data: postData } = await http.post(`/product`, product);
 
@@ -41,8 +40,8 @@ describe('/product', () => {
     it('UPDATE /', async () => {
         try {
             // Update product
-            const modifyProduct = {...newProduct, min_inventory_level: 150, product_category_id: 2 };
-            await http.put(`/product`, modifyProduct);
+            const modifyProduct = {...newProduct, min_inventory_level: 150 };
+            const { data: putData } = await http.put(`/product`, modifyProduct);
 
             // Retrieve product
             const { data: getData } = await http.get(`/product?id=${newProduct.id}`);
@@ -50,7 +49,6 @@ describe('/product', () => {
 
             // Assert changes
             assert.equal(getData.min_inventory_level, 150);
-            assert.equal(getData.product_category_id, 2);
 
         } catch(err) {
             if (err.response) {

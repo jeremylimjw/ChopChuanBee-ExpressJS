@@ -30,17 +30,8 @@ describe('/employee/leave', () => {
             const { data: postDataEmployee } = await http.post(`/employee`, employee);
             newEmployee = postDataEmployee;
 
-            // Create leave accounts for employee
-            for (let i = 0; i < 5; i++ ) {
-                let leaveAccount = {
-                    employee_id: newEmployee.id, 
-                    entitled_days: 10, 
-                    entitled_rollover: 4, 
-                    leave_type_id: i+1
-                }
-                const { data: postDataLeaveAccount } = await http.post(`/employee/leave`, leaveAccount);
-                newLeaveAccounts.push(postDataLeaveAccount);
-            }
+            const { data: getData } = await http.get(`/employee/leave?employee_id=${newEmployee.id}`);
+            newLeaveAccounts = getData;
 
         } catch(err) {
             if (err.response) {
@@ -56,15 +47,20 @@ describe('/employee/leave', () => {
     it('UPDATE /', async () => {
         try {
             // Update leave account
-            const modifyLeaveAccount = {...newLeaveAccounts[0], entitled_days: 20 };
-            const { data: putData } = await http.put(`/employee/leave`, modifyLeaveAccount);
+            newLeaveAccounts = newLeaveAccounts.map(x => {
+                return {
+                    id: x.id,
+                    entitled_days: 20
+                };
+            })
+
+            const { data: putData } = await http.put(`/employee/leave`, { leave_accounts: newLeaveAccounts });
 
             // Retrieve leave account
-            const { data: getData } = await http.get(`/employee/leave?leave_account_id=${newLeaveAccounts[0].id}`);
-            assert.notEqual(getData, null);
-
-            // Assert changes
-            assert.equal(getData.entitled_days, 20);
+            const { data: getData } = await http.get(`/employee/leave?employee_id=${newEmployee.id}`);
+            getData.forEach(element => {
+                assert.equal(element.entitled_days, 20);
+            });
 
         } catch(err) {
             if (err.response) {
@@ -102,31 +98,16 @@ describe('/employee/leave', () => {
 
     it('POST /application', async () => {
         try {
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 5; i++) {
                 // Create Leave Application
                 let leaveApplication = { 
                     employee_id: newEmployee.id, 
                     paid: true, 
-                    start_date: new Date(), 
-                    end_date: new Date(), 
-                    num_days: i + 1, 
+                    start_date: new Date(new Date().getTime() + 7*24*60*60*1000), 
+                    end_date: new Date(new Date().getTime() + 14*24*60*60*1000), 
+                    num_days: 4, 
                     remarks: "", 
                     leave_account_id: newLeaveAccounts[0].id
-                }
-                const { data: postData } = await http.post(`/employee/leave/application`, leaveApplication);
-                newLeaveApplications.push(postData);
-            }
-            
-            for (let i = 0; i < 3; i++) {
-                // Create Leave Application
-                let leaveApplication = { 
-                    employee_id: newEmployee.id, 
-                    paid: true, 
-                    start_date: new Date(), 
-                    end_date: new Date(), 
-                    num_days: i + 2, 
-                    remarks: "", 
-                    leave_account_id: newLeaveAccounts[1].id
                 }
                 const { data: postData } = await http.post(`/employee/leave/application`, leaveApplication);
                 newLeaveApplications.push(postData);
@@ -146,16 +127,18 @@ describe('/employee/leave', () => {
     it('UPDATE /application', async () => {
         try {
             // Update applications to APPROVED
-            for (let application of newLeaveApplications) {
-                const { data: putData } = await http.put(`/employee/leave/application`, { id: application.id, leave_status_id: 2 });
-            }
+            newLeaveApplications.forEach(element => {
+                element.leave_status_id = 2;
+                return element;
+            })
+
+            const { data: putData } = await http.put(`/employee/leave/application`, { leave_applications: newLeaveApplications });
             
             // Retrieve leave account balances
             const { data: getData1 } = await http.get(`/employee/leave?leave_account_id=${newLeaveAccounts[0].id}`);
-            assert.equal(getData1.balance, 14)
-
-            const { data: getData2 } = await http.get(`/employee/leave?leave_account_id=${newLeaveAccounts[1].id}`);
-            assert.equal(getData2.balance, 1)
+            
+            // Assert changes
+            assert.equal(getData1.balance, 0)
 
         } catch(err) {
             if (err.response) {
@@ -170,25 +153,16 @@ describe('/employee/leave', () => {
 
     it('DELETE /application', async () => {
         try {
-            // Create new leave application
-            const leaveApplication = { 
-                employee_id: newEmployee.id, 
-                paid: true, 
-                start_date: new Date(), 
-                end_date: new Date(), 
-                num_days: 1, 
-                remarks: "", 
-                leave_account_id: newLeaveAccounts[3].id
-            }
-            const { data: postData } = await http.post(`/employee/leave/application`, leaveApplication);
-            newLeaveApplications.push(postData);
-
             // Update applications to CANCELLED
-            const { data: deleteData } = await http.delete(`/employee/leave/application?id=${postData.id}`);
+            for (let leaveApplication of newLeaveApplications) {
+                const { data: deleteData } = await http.delete(`/employee/leave/application?id=${leaveApplication.id}`);
+            }
             
             // Retrieve leave account balances
-            const { data: getData } = await http.get(`/employee/leave/application?leave_application_id=${postData.id}`);
-            assert.equal(getData.leave_status_id, 4)
+            const { data: getData } = await http.get(`/employee/leave?leave_account_id=${newLeaveAccounts[0].id}`);
+
+            // Assert changes
+            assert.equal(getData.balance, 20)
 
         } catch(err) {
             if (err.response) {

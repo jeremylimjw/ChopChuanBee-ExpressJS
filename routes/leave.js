@@ -1,12 +1,14 @@
 var express = require('express');
 var router = express.Router();
 const { requireAccess } = require('../auth');
-const {LeaveAccount, LeaveType} = require('../models/LeaveAccount');
-const {LeaveApplication, LeaveStatus} = require('../models/LeaveApplication');
+const {LeaveAccount, LeaveType, updateLeaveAccounts, validateLeaveAccounts} = require('../models/LeaveAccount');
+const {LeaveApplication, LeaveStatus, validateLeaveApplications} = require('../models/LeaveApplication');
 const {Employee , Role, AccessRight  } = require('../models/Employee');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { sequelize } = require('../db');
+const LeaveStatusEnum = require('../common/LeaveStatusEnum');
+const { Sequelize } = require('sequelize');
 
 
 // GET leave balance
@@ -124,36 +126,31 @@ router.post('/', requireAccess(ViewType.HR, true), async function(req, res, next
 
 // PUT Edit Leave Account
 router.put('/', requireAccess(ViewType.HR, true), async function(req, res, next) {
-  const { id, entitled_days } = req.body;
-
-  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (id == null || entitled_days == null) {
-    res.status(400).send("'id', 'entitled_days' are required.", )
+  const { leave_accounts } = req.body;
+    
+  // Validation
+  try {
+    validateLeaveAccounts(leave_accounts);
+  } catch(err) {
+    res.status(400).send(err);
     return;
   }
 
   try {
-    const result = await LeaveAccount.update(
-      { entitled_days },
-      { where: { id: id } }
-    );
-
-    // If 'id' is not found return 400 Bad Request, if found then return the 'id'
-    if (result[0] === 0) {
-      res.status(400).send(`Leave Account id ${id} is not found.`)
-
-    } else {
-      const leaveAccount = await LeaveAccount.findByPk(id, { include: Employee });
-      // Record to admin logs
-      const user = res.locals.user;
-      await Log.create({ 
-        employee_id: user.id, 
-        view_id: ViewType.HR.id,
-        text: `${user.name} updated ${leaveAccount.employee.name}'s Leave Account record`, 
-      });
-
-      res.send({ id: id });
+    // Do nothing if array is empty
+    if (leave_accounts.length == 0) {
+      res.send({});
+      return;
     }
+
+    const user = res.locals.user;
+
+    // Get employee
+    const leaveAccount = await LeaveAccount.findByPk(leave_accounts[0].id, { include: Employee });
+
+    await updateLeaveAccounts(leave_accounts, leaveAccount?.employee, user);
+    
+    res.send({});
 
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
@@ -337,39 +334,73 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
 
 // PUT Edit leave application (approve/reject)
 router.put('/application', requireAccess(ViewType.HR, true), async function(req, res, next) {
-  const { id, leave_status_id } = req.body;
+  const { leave_applications } = req.body;
 
-  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (id == null || leave_status_id == null) {
-    res.status(400).send("'id' and 'leave_status_id' are required.", )
+  // Validation
+  if (leave_applications == null) {
+    res.status(400).send("'leave_accounts' is required.");
+  }
+
+  // More validation
+  if (!Array.isArray(leave_applications)) {
+    res.status(400).send("'leave_accounts' must be an array.");
     return;
   }
 
+  // Even more validation
+  for (let leave_application of leave_applications) {
+    if (leave_application.id == null || leave_application.leave_status_id == null) {
+      res.status(400).send(`'leave_accounts' array must be in { id: number, leave_status_id: number } format.`);
+      return;
+    }
+  }
+
   try {
-    const leaveApplication = await LeaveApplication.findByPk(id, { include: { model: LeaveAccount, include: Employee }});
-  
-    if (leaveApplication == null) {
-      res.status(400).send(`Leave application id ${id} not found.`);
+    // Do nothing if array is empty
+    if (leave_applications.length == 0) {
+      res.send({});
       return;
     }
 
-    if (leaveApplication.leave_status_id !== 1 ) {
-      res.status(400).send("Leave application status has already been approved/rejected/cancelled.");
-      return;
+    const leaveApplications = await LeaveApplication.findAll(
+      { 
+        where: { id: { [Sequelize.Op.or]: leave_applications.map(element => element.id) } },
+        include: { model: LeaveAccount, include: Employee } 
+      }
+    );
+
+    for (let leaveApplication of leaveApplications) {
+      // Must be PENDING then can update
+      if (leaveApplication.leave_status_id !== 1 ) {
+        res.status(400).send("Leave application status has already been approved or rejected.");
+        return;
+      }
+
+      const newLeaveStatusId = leave_applications.find(element => element.id == leaveApplication.id).leave_status_id;
+
+      // Only allow approve or reject updates
+      if (newLeaveStatusId != 2 && newLeaveStatusId != 3) {
+        res.status(400).send("You can only approve or reject leave applications.");
+        return;
+      }
+      leaveApplication.leave_status_id = newLeaveStatusId;
+
+      // Update the application
+      await leaveApplication.save();
+
+      // Get leave status name for admin loggings
+      const leaveStatus = Object.keys(LeaveStatusEnum).filter(key => LeaveStatusEnum[key].id == leaveApplication.leave_status_id)[0];
+
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.HR.id,
+        text: `${user.name} ${leaveStatus} ${leaveApplication.leave_account.employee.name}'s leave application`, 
+      });
+
     }
 
-    leaveApplication.leave_status_id = leave_status_id;
-    await leaveApplication.save();
-
-    // Record to admin logs
-    const user = res.locals.user;
-    await Log.create({ 
-      employee_id: user.id, 
-      view_id: ViewType.HR.id,
-      text: `${user.name} approved/rejected ${leaveApplication.leave_account.employee.name}'s Leave Application`, 
-    });
-
-    res.send({ id: id });
+    res.send({});
 
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
@@ -408,16 +439,14 @@ router.delete('/application', requireAccess(ViewType.GENERAL, true), async funct
     if (leaveApplication.leave_status_id === 3 ) {
       res.status(400).send("Leave application status has been rejected, cannot cancel");
       return;
-    }; 
+    }
     
     const currentDate = new Date();
 
-    if (leaveApplication.leave_status_id === 2) {
-      if (leaveApplication.start_date < currentDate) {
+    if (leaveApplication.leave_status_id === 2 && leaveApplication.start_date < currentDate) {
         res.status(400).send("Past approved leave applications cannot be cancelled");
         return;
-      }
-    };
+    }
 
     leaveApplication.leave_status_id = 4;
     await leaveApplication.save();
@@ -426,7 +455,7 @@ router.delete('/application', requireAccess(ViewType.GENERAL, true), async funct
     await Log.create({ 
       employee_id: user.id, 
       view_id: ViewType.HR.id,
-      text: `${user.name} approved/rejected ${leaveApplication.leave_account.employee.name}'s Leave Application`, 
+      text: `${user.name} cancelled ${leaveApplication.leave_account.employee.name}'s leave application`, 
     });
 
     res.send({ id: id });

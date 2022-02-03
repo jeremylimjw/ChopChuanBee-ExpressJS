@@ -61,7 +61,7 @@ router.get('/', requireAccess(ViewType.HR, false), async function(req, res, next
 router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, next) {
     const { name, username, email, role_id, contact_number, nok_name, nok_number, address, postal_code, send_email, access_rights } = req.body;
 
-    // Vvalidation
+    // Validation
     if (name == null || username == null || email == null, role_id == null, send_email == null) {
         res.status(400).send("'name', 'username', 'email', 'role_id', 'send_email are required.")
         return;
@@ -88,14 +88,20 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
         const passwordPlaintext = crypto.createHash('sha1').update(Math.random().toString()).digest('hex').substring(0, 8);
         const password = await hashPassword(passwordPlaintext);
 
-        // Create new employee
-        const newEmployee = await Employee.create({ name, username, password, email, role_id, contact_number, nok_name, nok_number, address, postal_code });
+        // Standard leave accounts
+        const leave_accounts = [
+            { entitled_days : 14, leave_type_id : 1 },
+            { entitled_days : 0, leave_type_id : 2 },
+            { entitled_days : 0, leave_type_id : 3 },
+            { entitled_days : 0, leave_type_id : 4 },
+            { entitled_days : 0, leave_type_id : 5 },
+        ];
 
-        const annual_leaves = await LeaveAccount.create({ entitled_days : 14, leave_type_id : 1 , employee_id : newEmployee.id });
-        const Compassionate = await LeaveAccount.create({ entitled_days : 0, leave_type_id : 2 , employee_id : newEmployee.id });
-        const Maternity_Paternity = await LeaveAccount.create({ entitled_days : 0, leave_type_id : 3 , employee_id : newEmployee.id });
-        const Sick = await LeaveAccount.create({ entitled_days : 0, leave_type_id : 4 , employee_id : newEmployee.id });
-        const Childcare = await LeaveAccount.create({ entitled_days : 0, leave_type_id : 5 , employee_id : newEmployee.id });
+        // Create new employee
+        const newEmployee = await Employee.create(
+            { name, username, password, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights, leave_accounts }, 
+            { include: [AccessRight, LeaveAccount] }
+        );
 
         if (send_email == true) {
             // Send account information to user's email

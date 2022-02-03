@@ -49,8 +49,8 @@ const LeaveStatus = sequelize.define('leave_status', {
       type: DataTypes.STRING,
       allowNull: false
     },
-  }, { 
+}, { 
     timestamps: false // Dont record 'updatedAt' and 'createdAt'
-  });
+});
   
-  module.exports = { LeaveApplication, LeaveStatus };
+module.exports = { LeaveApplication, LeaveStatus };

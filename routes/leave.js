@@ -192,18 +192,18 @@ router.post('/application', requireAccess(ViewType.GENERAL), async function(req,
     }
    
     const currentBalance = await sequelize.query(
-      `SELECT entitled_days - COALESCE(SUM(num_days), 0) AS balance
-          FROM leave_accounts 
-            LEFT OUTER JOIN leave_applications ON leave_account_id = leave_applications.id 
-          AND leave_accounts.id = '${leave_account_id}'
-          AND leave_status_id = 2 
-          AND EXTRACT(year FROM start_date) = EXTRACT(year FROM CURRENT_DATE) 
-          GROUP BY leave_accounts.id`,
+      `SELECT leave_accounts.id, leave_accounts.entitled_days, entitled_days - COALESCE(SUM(num_days), 0) AS balance, leave_types.name leave_type_name, leave_types.id leave_type_id
+        FROM leave_accounts LEFT OUTER JOIN 
+          (SELECT * FROM leave_applications WHERE leave_status_id = 2 AND EXTRACT(year FROM start_date) = EXTRACT(year FROM CURRENT_DATE) ) active_leave_applications
+          ON active_leave_applications.leave_account_id = leave_accounts.id 
+          LEFT JOIN leave_types ON leave_accounts.leave_type_id = leave_types.id
+        WHERE leave_accounts.id = '${leave_account_id}'
+        GROUP BY leave_accounts.id, leave_types.id`,
        { raw: true, 
        type: sequelize.QueryTypes.SELECT}
     );
-    
-    if (currentBalance[0].balance < num_days){
+
+    if (currentBalance[0].balance - num_days < 0){
       res.status(400).send(`Employee does not have sufficient balance (left ${currentBalance[0].balance}) to apply`,)
       return;
     }
@@ -335,7 +335,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
 });
 
 
-// PUT Edit leave application (approve/reject/cancel)
+// PUT Edit leave application (approve/reject)
 router.put('/application', requireAccess(ViewType.HR, true), async function(req, res, next) {
   const { id, leave_status_id } = req.body;
 
@@ -380,7 +380,7 @@ router.put('/application', requireAccess(ViewType.HR, true), async function(req,
 });
 
 
-// PUT Edit leave application (approve/reject/cancel)
+// DELETE Edit leave application (cancel)
 router.delete('/application', requireAccess(ViewType.GENERAL, true), async function(req, res, next) {
   const { id } = req.query;
 
@@ -405,10 +405,19 @@ router.delete('/application', requireAccess(ViewType.GENERAL, true), async funct
       return;
     }
 
-    if (leaveApplication.leave_status_id !== 1 ) {
-      res.status(400).send("Leave application status has already been approved/rejected/cancelled.");
+    if (leaveApplication.leave_status_id === 3 ) {
+      res.status(400).send("Leave application status has been rejected, cannot cancel");
       return;
-    }
+    }; 
+    
+    const currentDate = new Date();
+
+    if (leaveApplication.leave_status_id === 2) {
+      if (leaveApplication.start_date < currentDate) {
+        res.status(400).send("Past approved leave applications cannot be cancelled");
+        return;
+      }
+    };
 
     leaveApplication.leave_status_id = 4;
     await leaveApplication.save();

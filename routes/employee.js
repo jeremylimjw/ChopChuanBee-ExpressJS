@@ -5,6 +5,7 @@ const { hashPassword, compareHash } = require('../auth/bcrypt');
 const router = express.Router();
 const ViewType = require('../common/ViewType');
 const { Employee, AccessRight, Role } = require('../models/Employee');
+const {LeaveAccount, LeaveType} = require('../models/LeaveAccount');
 const View = require('../models/View');
 const Log = require('../models/Log');
 const { sendEmailTo } = require('../emailer/index');
@@ -79,7 +80,11 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
 
         // Create new employee
         const newEmployee = await Employee.create({ name, username, password, email, role_id, contact_number, nok_name, nok_number, address, postal_code });
-
+        const annual_leaves = await LeaveAccount.create({ entitled_days : 14, leave_type_id : 1 , employee_id : newEmployee.id });
+        const Compassionate = await LeaveAccount.create({ entitled_days : 0, leave_type_id : 2 , employee_id : newEmployee.id });
+        const Maternity_Paternity = await LeaveAccount.create({ entitled_days : 0, leave_type_id : 3 , employee_id : newEmployee.id });
+        const Sick = await LeaveAccount.create({ entitled_days : 0, leave_type_id : 4 , employee_id : newEmployee.id });
+        const Childcare = await LeaveAccount.create({ entitled_days : 0, leave_type_id : 5 , employee_id : newEmployee.id });
         if (send_email == true) {
             // Send account information to user's email
             await sendEmailTo(newEmployee.email, 'newEmployee', { 

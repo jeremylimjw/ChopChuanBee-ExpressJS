@@ -10,56 +10,59 @@ const { sequelize } = require('../db');
 
 
 // GET leave balance
-router.get('/account', requireAccess(ViewType.HR, false), async function(req, res, next) {
+// Return all leave accounts for the employee, or return one leave account if `leave_account_id` is given
+// Roles access: Only employee can request their own, or HR role, or Admin
+router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
   const { employee_id, leave_account_id } = req.query;
-
-  // Attribute validation here.
-  if (employee_id == null) {
-    res.status(400).send("'employee_id' is required.", )
+  
+  // If user is not the employee OR user doesnt have HR access role OR user is not Admin
+  const user = res.locals.user;
+  if (user.id != employee_id && user.access_rights[ViewType.HR] == null && user.role.name !== 'Admin') {
+    res.status(401).send("You do not have access to this method.");
     return;
   }
   
   try {
-    const employee = await Employee.findOne({ where: { id: employee_id } });
-    
-    if (employee == null) {
-        res.status(400).send(`Employee id ${employee_id} not found.`);
-        return;
-    }
-
     const currentBalances = await sequelize.query(
-      `SELECT leave_accounts.id, entitled_days - COALESCE(SUM(num_days), 0) AS balance, leave_types.id leave_type_id, leave_types.name leave_type_name
-          FROM leave_accounts 
-            LEFT JOIN leave_types ON leave_type_id = leave_types.id
-            LEFT OUTER JOIN leave_applications ON leave_account_id = leave_applications.id 
-          AND employee_id = '${employee_id}' 
+      `SELECT leave_accounts.id, leave_accounts.entitled_days, entitled_days - COALESCE(SUM(num_days), 0) AS balance, leave_types.name leave_type_name, leave_types.id leave_type_id
+        FROM leave_accounts LEFT OUTER JOIN 
+          (SELECT * FROM leave_applications WHERE leave_status_id = 2 AND EXTRACT(year FROM start_date) = EXTRACT(year FROM CURRENT_DATE) ) active_leave_applications
+          ON active_leave_applications.leave_account_id = leave_accounts.id 
+          LEFT JOIN leave_types ON leave_accounts.leave_type_id = leave_types.id
+        WHERE TRUE
+          ${employee_id == null ? '' : `AND employee_id = '${employee_id}'`}
           ${leave_account_id == null ? '' : `AND leave_accounts.id = '${leave_account_id}'`}
-          AND leave_status_id = 2 
-          AND EXTRACT(year FROM start_date) = EXTRACT(year FROM CURRENT_DATE) 
-          GROUP BY leave_accounts.id, leave_types.id`,
+        GROUP BY leave_accounts.id, leave_types.id`,
       { 
         raw: true, 
         type: sequelize.QueryTypes.SELECT 
       }
     );
 
-    const transformedBalances = [];
-
-
     // Transform leave_type to preferred format
-    for (let row of currentBalances) {
-      transformedBalances.push({
+    const transformedBalances = currentBalances.map(row => {
+      const newRow = {
         ...row,
         leave_type: {
           id: row.leave_type_id,
           name: row.leave_type_name
         }
-      })
-      delete row['leave_type_id'];
-      delete row['leave_type_name'];
-    }
+      }
+      delete newRow['leave_type_id'];
+      delete newRow['leave_type_name'];
+      return newRow;
+    });
 
-    res.send(transformedBalances);
+    if (leave_account_id != null) {
+      if (transformedBalances.length == 0) {
+        res.status(400).send(`Leave account id ${leave_account_id} not found.`);
+      } else {
+        res.send(transformedBalances[0]);
+      }
+
+    } else {
+      res.send(transformedBalances);
+    }
 
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
@@ -70,15 +73,14 @@ router.get('/account', requireAccess(ViewType.HR, false), async function(req, re
 });
 
 
-// POST Ceate leave account
-router.post('/account', requireAccess(ViewType.HR, true), async function(req, res, next) { 
+// POST Create leave account
+router.post('/', requireAccess(ViewType.HR, true), async function(req, res, next) { 
 
-  const { employee_id, entitled_days, entitled_rollover, leave_type_id } = req.body;
+  const { employee_id, entitled_days, leave_type_id } = req.body;
 
   // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (employee_id == null || entitled_days == null 
-      || entitled_rollover == null || leave_type_id == null ) {
-    res.status(400).send("'employee_id', 'entitled_days', 'entitled_rollover', 'leave_type_id' are required.", )
+  if (employee_id == null || entitled_days == null || leave_type_id == null ) {
+    res.status(400).send("'employee_id', 'entitled_days', 'leave_type_id' are required.", )
     return;
   }
 
@@ -98,7 +100,7 @@ router.post('/account', requireAccess(ViewType.HR, true), async function(req, re
       return;
     } 
 
-    const newLeaveAccount = await LeaveAccount.create({ entitled_days, entitled_rollover, leave_type_id , employee_id : employee.id });
+    const newLeaveAccount = await LeaveAccount.create({ entitled_days, leave_type_id , employee_id : employee.id });
     
     // Record to admin logs
     const user = res.locals.user;
@@ -121,37 +123,36 @@ router.post('/account', requireAccess(ViewType.HR, true), async function(req, re
 
 
 // PUT Edit Leave Account
-router.put('/account', requireAccess(ViewType.HR, true), async function(req, res, next) {
-  const { employee_id, entitled_days, leave_account_id } = req.body;
+router.put('/', requireAccess(ViewType.HR, true), async function(req, res, next) {
+  const { id, entitled_days } = req.body;
 
   // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (employee_id == null || entitled_days == null || leave_account_id == null ) {
-    res.status(400).send("'employee_id', 'entitled_days', 'leave_account_id' are required.", )
+  if (id == null || entitled_days == null) {
+    res.status(400).send("'id', 'entitled_days' are required.", )
     return;
   }
 
   try {
-    const employee = await Employee.findOne({ where: { id: employee_id }});
-    
     const result = await LeaveAccount.update(
       { entitled_days },
-      { where: { employee_id, leave_account_id} }
+      { where: { id: id } }
     );
 
     // If 'id' is not found return 400 Bad Request, if found then return the 'id'
     if (result[0] === 0) {
-      res.status(400).send(`Leave Account id ${leave_account_id} is not found.`)
+      res.status(400).send(`Leave Account id ${id} is not found.`)
 
     } else {
+      const leaveAccount = await LeaveAccount.findByPk(id, { include: Employee });
       // Record to admin logs
       const user = res.locals.user;
       await Log.create({ 
         employee_id: user.id, 
         view_id: ViewType.HR.id,
-        text: `${user.name} updated ${employee.name}'s Leave Account record`, 
+        text: `${user.name} updated ${leaveAccount.employee.name}'s Leave Account record`, 
       });
 
-      res.send({ leave_account_id });
+      res.send({ id: id });
     }
 
   } catch(err) {
@@ -164,23 +165,30 @@ router.put('/account', requireAccess(ViewType.HR, true), async function(req, res
 
 
 // POST create leave Application
-router.post('/application', requireAccess(ViewType.HR, false), async function(req, res, next) { 
-  const { employee_id, paid, start_date, end_date, num_days, remarks, leave_account_id } = req.body;
+// Roles access: Only employee can request their own leave account, or HR role, or Admin
+router.post('/application', requireAccess(ViewType.GENERAL), async function(req, res, next) { 
+  const { leave_account_id, paid, start_date, end_date, num_days, remarks } = req.body;
 
-  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (employee_id == null || paid == null 
-      || start_date == null || end_date == null 
+  // Validation
+  if (paid == null || start_date == null || end_date == null 
       || num_days == null || leave_account_id == null ) {
-    res.status(400).send("'employee_id', 'paid', 'start_date', 'end_date', 'num_days', 'leave_account_id' are required.", )
+    res.status(400).send("'leave_account_id', 'paid', 'start_date', 'end_date', 'num_days' are required.", )
     return;
   }
 
   try {
-    const leaveAccount = await LeaveAccount.findByPk(leave_account_id);
+    const leaveAccount = await LeaveAccount.findByPk(leave_account_id, { include: Employee });
   
     if (leaveAccount == null) {
         res.status(400).send(`Leave account id ${leave_account_id} not found.`);
         return;
+    }
+
+    // If user is not the employee OR user doesnt have HR access role OR user is not Admin
+    const user = res.locals.user;
+    if (user.id != leaveAccount.employee_id && user.access_rights[ViewType.HR] == null && user.role.name !== 'Admin') {
+      res.status(401).send("You do not have access to this method.");
+      return;
     }
    
     const currentBalance = await sequelize.query(
@@ -196,19 +204,17 @@ router.post('/application', requireAccess(ViewType.HR, false), async function(re
     );
     
     if (currentBalance[0].balance < num_days){
-      res.status(400).send("Employee does not have sufficient leave to apply",)
+      res.status(400).send(`Employee does not have sufficient balance (left ${currentBalance[0].balance}) to apply`,)
       return;
     }
 
     const leaveApplication = await LeaveApplication.create({ paid, start_date, end_date, num_days, remarks, leave_account_id : leaveAccount.id, leave_status_id : 1 });
 
     // Record to admin logs
-    const employee = await Employee.findOne({ where: { id: employee_id }, include: Role, include : AccessRight});
-    const user = res.locals.user;
     await Log.create({ 
       employee_id: user.id, 
       view_id: ViewType.HR.id,
-      text: `${user.name} created a Leave Application record for ${employee.name}`, 
+      text: `${user.name} created a Leave Application record for ${leaveAccount.employee.name}`, 
     });
  
     res.send(leaveApplication);
@@ -221,19 +227,104 @@ router.post('/application', requireAccess(ViewType.HR, false), async function(re
 });
 
 
-// GET all leave applications 
-router.get('/application', requireAccess(ViewType.CRM, false), async function(req, res, next) {
-  const { employee_id } = req.query;
+/**
+ * GET all leave applications 
+ * 4 ways to retrieve:
+ * - One leave application with `leave_application_id`
+ * - All leave applications from a leave account with `leave_account_id`
+ * - All leave application from an employee with `employee_id`
+ * - All leave applications (HR and admin only)
+ * Roles access: Only employee can request their own leave account, or HR role, or Admin
+ */
+router.get('/application', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { employee_id, leave_account_id, leave_application_id } = req.query;
+
+  const user = res.locals.user;
   
   try {
-    if (employee_id != null) {
-      const leaveApplications = await LeaveApplication.findAll({ include: LeaveStatus });
-      res.send(leaveApplications);
-      return;
+    // One leave application with `leave_application_id`
+    if (leave_application_id != null) {
+      const leaveApplication = await LeaveApplication.findByPk(leave_application_id, { 
+        include: [
+          { 
+            model: LeaveAccount, 
+            include: { model: Employee, attributes: [] }, 
+            attributes: ['employee_id']
+          }, 
+          LeaveStatus
+        ] 
+      });
 
-    } else {
-      const leaveApplications = await LeaveApplication.findAll({ where: { employee_id }, include: LeaveStatus });
+      if (leaveApplication == null) {
+        res.status(400).send(`Leave application id ${leave_application_id} not found.`);
+        return;
+      }
+
+      // If user is not the employee OR user doesnt have HR access role OR user is not Admin
+      if (user.id != leaveApplication.leave_account.employee_id && user.access_rights[ViewType.HR] == null && user.role.name !== 'Admin') {
+        res.status(401).send("You do not have access to this method.");
+        return;
+      }
+
+      res.send(leaveApplication.toJSON());
+      
+    } 
+
+    // All leave applications from a leave account with `leave_account_id`
+    else if (leave_account_id != null) {
+      const leaveApplications = await LeaveApplication.findAll({ where: { leave_account_id }, 
+        include: [
+          { 
+            model: LeaveAccount, 
+            include: { model: Employee, attributes: [] }, 
+            attributes: ['employee_id'] 
+          }, 
+          LeaveStatus
+        ] });
+
+      // If user is not the employee OR user doesnt have HR access role OR user is not Admin
+      if (leaveApplications.length !== 0 && user.id != leaveApplications[0].leave_account.employee_id && user.access_rights[ViewType.HR] == null && user.role.name !== 'Admin') {
+        res.status(401).send("You do not have access to this method.");
+        return;
+      }
+
       res.send(leaveApplications);
+
+    } 
+
+    // All leave application from an employee with `employee_id`
+    else if (employee_id != null) {
+      const leaveApplications = await LeaveApplication.findAll({ include: [
+        { 
+          model: LeaveAccount, 
+          include: { model: Employee, attributes: [] }, 
+          attributes: ['employee_id'],
+          where: { employee_id } 
+        }, 
+        LeaveStatus
+      ] });
+
+      // If user is not the employee OR user doesnt have HR access role OR user is not Admin
+      if (leaveApplications.length !== 0 && user.id != leaveApplications[0].leave_account.employee_id && user.access_rights[ViewType.HR] == null && user.role.name !== 'Admin') {
+        res.status(401).send("You do not have access to this method.");
+        return;
+      }
+      
+      res.send(leaveApplications);
+      
+    } 
+    
+    // All leave applications
+    else {
+      // If user doesnt have HR access role OR user is not Admin
+      if (user.access_rights[ViewType.HR] == null && user.role.name !== 'Admin') {
+        res.status(401).send("You do not have access to this method.");
+        return;
+      }
+
+      const leaveApplications = await LeaveApplication.findAll({ include: [{ model: LeaveAccount, include: Employee, attributes: [] }, LeaveStatus] });
+      res.send(leaveApplications);
+
     }
     
   } catch(err) {
@@ -246,19 +337,19 @@ router.get('/application', requireAccess(ViewType.CRM, false), async function(re
 
 // PUT Edit leave application (approve/reject/cancel)
 router.put('/application', requireAccess(ViewType.HR, true), async function(req, res, next) {
-  const { leave_application_id, leave_status_id } = req.body;
+  const { id, leave_status_id } = req.body;
 
   // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (leave_application_id == null || leave_status_id == null) {
-    res.status(400).send("'leave_application_id' and 'leave_status_id' are required.", )
+  if (id == null || leave_status_id == null) {
+    res.status(400).send("'id' and 'leave_status_id' are required.", )
     return;
   }
 
   try {
-    const leaveApplication = await LeaveApplication.findByPk(leave_application_id, { include: { model: LeaveAccount, include: Employee }});
+    const leaveApplication = await LeaveApplication.findByPk(id, { include: { model: LeaveAccount, include: Employee }});
   
     if (leaveApplication == null) {
-      res.status(400).send(`Leave application id ${leave_application_id} not found.`);
+      res.status(400).send(`Leave application id ${id} not found.`);
       return;
     }
 
@@ -278,7 +369,7 @@ router.put('/application', requireAccess(ViewType.HR, true), async function(req,
       text: `${user.name} approved/rejected ${leaveApplication.leave_account.employee.name}'s Leave Application`, 
     });
 
-    res.send(leave_application_id);
+    res.send({ id: id });
 
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
@@ -289,43 +380,47 @@ router.put('/application', requireAccess(ViewType.HR, true), async function(req,
 });
 
 
-// DELETE leave application -> set status to cancelled
-router.delete('/application', requireAccess(ViewType.HRM, true), async function(req, res, next) {
-  const { leave_application_id } = req.query;
+// PUT Edit leave application (approve/reject/cancel)
+router.delete('/application', requireAccess(ViewType.GENERAL, true), async function(req, res, next) {
+  const { id } = req.query;
 
-  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (leave_application_id == null) {
-    res.status(400).send("'leave_application_id' is required.", )
+  // Validation
+  if (id == null) {
+    res.status(400).send("'id' is required.", )
     return;
   }
 
   try {
-    const leaveApplication = await LeaveApplication.findByPk(leave_application_id, { include: { model: LeaveAccount, include: Employee }});
-
-    // If 'id' is not found return 400 Bad Request, if found then return the 'id'
+    const leaveApplication = await LeaveApplication.findByPk(id, { include: { model: LeaveAccount, include: Employee }});
+  
     if (leaveApplication == null) {
-      res.status(400).send(`Leave Application id ${leave_application_id} not found.`)
+      res.status(400).send(`Leave application id ${id} not found.`);
       return;
-    } 
-    
-    if (leaveApplication.leave_status_id !== 1) {
-      res.status(400).send(`Leave Application has already been approved/rejected/cancelled.`)
+    }
+
+    // Only allow owner or Admin to access
+    const user = res.locals.user;
+    if (leaveApplication.leave_account.employee_id !== user.id && user.role.name !== 'Admin') {
+      res.status(401).send("You do not have access to this method.");
       return;
-    
+    }
+
+    if (leaveApplication.leave_status_id !== 1 ) {
+      res.status(400).send("Leave application status has already been approved/rejected/cancelled.");
+      return;
     }
 
     leaveApplication.leave_status_id = 4;
-    leaveApplication.save();
+    await leaveApplication.save();
 
     // Record to admin logs
-    const user = res.locals.user;
     await Log.create({ 
       employee_id: user.id, 
       view_id: ViewType.HR.id,
-      text: `${user.name} cancelled ${leaveApplication.leave_account.employee.name}'s Leave Application`, 
+      text: `${user.name} approved/rejected ${leaveApplication.leave_account.employee.name}'s Leave Application`, 
     });
 
-    res.send(leave_application_id);
+    res.send({ id: id });
 
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
@@ -334,5 +429,6 @@ router.delete('/application', requireAccess(ViewType.HRM, true), async function(
   }
 
 });
+
 
 module.exports = router;

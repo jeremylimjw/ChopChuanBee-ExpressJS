@@ -4,10 +4,11 @@ const { requireAccess } = require('../auth');
 const { Product } = require('../models/Product');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
+const { Sequelize } = require('sequelize');
 
 
 router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, res, next) {
-    const { id } = req.query; // This is same as `const id = req.params.id`;
+    const { id, name } = req.query; // This is same as `const id = req.params.id`;
   
     try {
       if (id != null) { // Retrieve single product
@@ -19,6 +20,11 @@ router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, re
         }
         
         res.send(product.toJSON());
+
+      } else if (name != null) {
+        const products = await Product.findAll({  where: { name: { [Sequelize.Op.iLike]: `%${name}%` } } });
+        
+        res.send(products);
     
       } else { // Retrieve ALL products
         const products = await Product.findAll();

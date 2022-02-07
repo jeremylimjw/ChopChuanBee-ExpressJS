@@ -46,4 +46,4 @@ const Supplier = sequelize.define('supplier', {
       createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
     });
 
-    module.exports = Supplier;
+    module.exports = { Supplier };

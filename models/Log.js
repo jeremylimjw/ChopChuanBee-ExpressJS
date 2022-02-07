@@ -3,13 +3,13 @@ const { sequelize } = require('../db');
 
 const Log = sequelize.define('logs', {
     id: {
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER,
       primaryKey: true,
-      defaultValue: DataTypes.UUIDV4
+      autoIncrement: true,
     },
     text: {
-        type: DataTypes.STRING,
-        allowNull: false
+      type: DataTypes.STRING,
+      allowNull: false
     }
 }, {
   updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'

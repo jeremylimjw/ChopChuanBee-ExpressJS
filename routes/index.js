@@ -5,6 +5,7 @@ var router = express.Router();
 router.use("/auth", require("./auth"));
 router.use("/customer", require("./customer"));
 router.use("/supplier", require("./supplier"));
+router.use("/purchaseOrder", require("./purchaseOrder"));
 router.use("/product", require("./product"));
 router.use("/employee", require("./employee"));
 router.use("/employee", require("./accessRight"));

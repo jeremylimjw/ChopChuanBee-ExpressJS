@@ -1,17 +1,18 @@
 var express = require('express');
 var router = express.Router();
 const { requireAccess } = require('../auth');
-const Supplier = require('../models/Supplier');
+const { Supplier } = require('../models/Supplier');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
+const { Sequelize } = require('sequelize');
 
 //Read supplier (find 1 or find all depending if ID was given)
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
-    const { id } = req.query;;
+    const { id, company_name } = req.query;;
   
     try {
       if (id != null) { // Retrieve single supplier
-        const supplier = await Supplier.findOne({ where: { id: id }});
+        const supplier = await Supplier.findOne({ where: { id } });
     
         if (supplier == null) {
           res.status(400).send(`supplier id ${id} not found.`);
@@ -19,6 +20,11 @@ router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, nex
         }
         
         res.send(supplier.toJSON());
+
+      } else if (company_name != null) {
+        const suppliers = await Supplier.findAll({  where: { company_name: { [Sequelize.Op.iLike]: `%${company_name}%` } } });
+        
+        res.send(suppliers);
     
       } else { // Retrieve ALL suppliers
         const suppliers = await Supplier.findAll();

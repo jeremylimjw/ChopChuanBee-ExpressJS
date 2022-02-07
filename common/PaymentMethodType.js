@@ -1,4 +1,4 @@
-const PaymentTypeEnum = {
+const PaymentMethodType = {
     CASH: { id: 1, name: "Cash" },
     PAYNOW: { id: 2, name: "PayNow" },
     PAYLAH: { id: 3, name: "PayLah" },
@@ -6,4 +6,4 @@ const PaymentTypeEnum = {
     CHEQUE: { id: 5, name: "Cheque" },
 }
 
-module.exports = PaymentTypeEnum;
+module.exports = PaymentMethodType;

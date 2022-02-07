@@ -17,7 +17,7 @@ const Payment = sequelize.define('payment', {
     createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
 });
 
-const PaymentType = sequelize.define('payment_type', {
+const PaymentMethod = sequelize.define('payment_method', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -44,4 +44,4 @@ const AccountingType = sequelize.define('accounting_type', {
 });
 
 
-module.exports = { Payment, PaymentType, AccountingType };
+module.exports = { Payment, PaymentMethod, AccountingType };

@@ -72,17 +72,27 @@ module.exports = async function() {
     PurchaseOrder.belongsTo(Supplier, { foreignKey: { allowNull: false, name: 'supplier_id' }});
 
     const { InventoryMovement } = require('../models/InventoryMovement');
-    const { Payment, PaymentType, AccountingType } = require('../models/Payment');
+    const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
 
     PurchaseOrderItem.hasOne(InventoryMovement, { foreignKey: { name: 'purchase_order_item_id' }});
     InventoryMovement.belongsTo(PurchaseOrderItem, { foreignKey: { name: 'purchase_order_item_id' }});
 
-    PaymentType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'payment_type_id' }});
-    Payment.belongsTo(PaymentType, { foreignKey: { allowNull: false, name: 'payment_type_id' }});
+    PurchaseOrder.hasMany(Payment, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
+    Payment.belongsTo(PurchaseOrder, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
 
-    AccountingType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'accounting_type_id' }});
-    Payment.belongsTo(AccountingType, { foreignKey: { allowNull: false, name: 'accounting_type_id' }});
+    PaymentMethod.hasMany(Payment, { foreignKey: { allowNull: false, name: 'payment_method_id' }});
+    Payment.belongsTo(PaymentMethod, { foreignKey: { allowNull: false, name: 'payment_method_id' }});
+
+    AccountingType.hasMany(Payment, { foreignKey: { name: 'accounting_type_id' }});
+    Payment.belongsTo(AccountingType, { foreignKey: { name: 'accounting_type_id' }});
     
+    const { MovementType } = require('../models/MovementType');
+
+    MovementType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+    Payment.belongsTo(MovementType, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+
+    MovementType.hasMany(InventoryMovement, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+    InventoryMovement.belongsTo(MovementType, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
  
     
     // await sequelize.sync(); // This will create tables if not exists

@@ -7,80 +7,76 @@ const ViewType = require('../common/ViewType');
 const { Supplier } = require('../models/Supplier');
 const { Payment } = require('../models/Payment');
 const { InventoryMovement } = require('../models/InventoryMovement');
+const { parseRequest, assertNotNull } = require('../common/helpers');
 
 
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
-  const { id, purchase_order_status_id } = req.query;
-  
+  // This is a dynamic query where user can search using any column
+  const predicate = parseRequest(req.query);
+
   try {
-    if (id != null) { // Retrieve single PO
-      const purchaseOrder = await PurchaseOrder.findOne({ where: { id: id }, include: [PurchaseOrderItem, Supplier, PaymentTerm, POStatus] });
-  
-      if (purchaseOrder == null) {
-        res.status(400).send(`Purchase order ID ${id} not found.`);
-        return;
-      }
-      
-      res.send(purchaseOrder.toJSON());
+    predicate.include = [PurchaseOrderItem, Supplier, PaymentTerm, POStatus];
+    const purchaseOrders = await PurchaseOrder.findAll(predicate);
+    res.send(purchaseOrders);
 
-    } else if (purchase_order_status_id != null) { // Retrieve ALL PO invoices
-        const purchaseOrders = await PurchaseOrder.findAll({ where: { purchase_order_status_id }, include: [PurchaseOrderItem, Supplier, PaymentTerm, POStatus] });
-        
-        res.send(purchaseOrders);
-
-    } else { // Retrieve ALL POs
-      const purchaseOrders = await PurchaseOrder.findAll({ include: [PurchaseOrderItem, Supplier, PaymentTerm, POStatus] });
-      
-      res.send(purchaseOrders);
-    }
   } catch(err) {
-    // Catch and return any uncaught exceptions while inserting into database
     console.log(err);
     res.status(500).send(err);
   }
-
 
 });
 
 
 router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
   const { supplier_id, gst_rate, is_payment_received, payment_received, offset, 
-    supplier_invoice_id, remarks, payment_term_id, payment_type_id, 
+    supplier_invoice_id, remarks, payment_term_id, payment_method_id, 
     purchase_order_status_id, purchase_order_items } = req.body;
 
   // Validation here
+  try {
+    assertNotNull(req.body, ['supplier_id', 'gst_rate', 'offset', 'remarks', 'payment_term_id', 'purchase_order_status_id', 'purchase_order_items'])
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
 
   try {
-    const newPurchaseOrder = await PurchaseOrder.create({ supplier_id, gst_rate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items }, { include: PurchaseOrderItem });
-    
+    const purchaseOrder = { supplier_id, gst_rate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items };
     const total = (1 + (gst_rate/100)) * purchase_order_items.reduce((prev, current) => prev + current.subtotal, 0) - offset;
 
+    // Register payment
     if (is_payment_received == true) {
-      await Payment.create({ amount: total, accounting_type_id: 1, payment_type_id: payment_type_id })
+      purchaseOrder.payments = [
+        { amount: total, payment_method_id: payment_method_id, movement_type_id: 1 },
+      ]
     } else {
       if (payment_received > 0) {
-        await Payment.create({ amount: payment_received, accounting_type_id: 1 }) //TODO if 1 shot payment isit payable or receivable?
+        purchaseOrder.payments = [
+          { amount: total, accounting_type_id: 1, payment_method_id: payment_method_id, movement_type_id: 1 },
+          { amount: -payment_received, accounting_type_id: 1, payment_method_id: payment_method_id, movement_type_id: 1 },
+        ]
       }
     }
+
+    // Register inventory movement
     for (let item of purchase_order_items) {
       const net_unit_cost = (1 + (gst_rate/100)) * item.unit_cost;
-      // TODO link with purchase order items id
-      await InventoryMovement.create({ unit_cost: net_unit_cost, quantity: item.received_quantity })
+      item.inventory_movement = { unit_cost: net_unit_cost, quantity: item.received_quantity, movement_type_id: 1 };
     }
 
+    const newPurchaseOrder = await PurchaseOrder.create(purchaseOrder, { include: [{ model: PurchaseOrderItem, include: InventoryMovement }, Payment] });
 
     // Record to admin logs
     const user = res.locals.user;
-    await Log.create({ 
+    Log.create({ 
       employee_id: user.id, 
       view_id: ViewType.CRM.id,
       text: `${user.name} created a purchase order with ID ${newPurchaseOrder.id}`, 
     });
 
-    res.send(newPurchaseOrder.toJSON());
+    res.send(newPurchaseOrder.toJSON())
 
   } catch(err) {
-    // Catch and return any uncaught exceptions while inserting into database
     console.log(err);
     res.status(500).send(err);
   }

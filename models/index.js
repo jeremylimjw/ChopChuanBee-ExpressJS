@@ -70,6 +70,18 @@ module.exports = async function() {
 
     Supplier.hasMany(PurchaseOrder, { foreignKey: { allowNull: false, name: 'supplier_id' }});
     PurchaseOrder.belongsTo(Supplier, { foreignKey: { allowNull: false, name: 'supplier_id' }});
+
+    const { InventoryMovement } = require('../models/InventoryMovement');
+    const { Payment, PaymentType, AccountingType } = require('../models/Payment');
+
+    PurchaseOrderItem.hasOne(InventoryMovement, { foreignKey: { name: 'purchase_order_item_id' }});
+    InventoryMovement.belongsTo(PurchaseOrderItem, { foreignKey: { name: 'purchase_order_item_id' }});
+
+    PaymentType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'payment_type_id' }});
+    Payment.belongsTo(PaymentType, { foreignKey: { allowNull: false, name: 'payment_type_id' }});
+
+    AccountingType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'accounting_type_id' }});
+    Payment.belongsTo(AccountingType, { foreignKey: { allowNull: false, name: 'accounting_type_id' }});
     
  
     

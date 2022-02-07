@@ -5,6 +5,8 @@ const { PurchaseOrder, PurchaseOrderItem, PaymentTerm, POStatus } = require('../
 const Log = require('../models/Log');
 const ViewType = require('../common/ViewType');
 const { Supplier } = require('../models/Supplier');
+const { Payment } = require('../models/Payment');
+const { InventoryMovement } = require('../models/InventoryMovement');
 
 
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
@@ -42,13 +44,31 @@ router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, nex
 
 
 router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
-  const { supplier_id, gstRate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items } = req.body;
+  const { supplier_id, gst_rate, is_payment_received, payment_received, offset, 
+    supplier_invoice_id, remarks, payment_term_id, payment_type_id, 
+    purchase_order_status_id, purchase_order_items } = req.body;
 
   // Validation here
 
   try {
-    const newPurchaseOrder = await PurchaseOrder.create({ supplier_id, gstRate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items }, { include: PurchaseOrderItem });
+    const newPurchaseOrder = await PurchaseOrder.create({ supplier_id, gst_rate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items }, { include: PurchaseOrderItem });
     
+    const total = (1 + (gst_rate/100)) * purchase_order_items.reduce((prev, current) => prev + current.subtotal, 0) - offset;
+
+    if (is_payment_received == true) {
+      await Payment.create({ amount: total, accounting_type_id: 1, payment_type_id: payment_type_id })
+    } else {
+      if (payment_received > 0) {
+        await Payment.create({ amount: payment_received, accounting_type_id: 1 }) //TODO if 1 shot payment isit payable or receivable?
+      }
+    }
+    for (let item of purchase_order_items) {
+      const net_unit_cost = (1 + (gst_rate/100)) * item.unit_cost;
+      // TODO link with purchase order items id
+      await InventoryMovement.create({ unit_cost: net_unit_cost, quantity: item.received_quantity })
+    }
+
+
     // Record to admin logs
     const user = res.locals.user;
     await Log.create({ 

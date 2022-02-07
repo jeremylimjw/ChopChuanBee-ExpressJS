@@ -8,6 +8,8 @@ const POStatusType = require('../common/POStatusType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
 const LeaveStatusEnum = require('../common/LeaveStatusEnum');
 const ProductCategoryEnum = require('../common/ProductCategory');
+const PaymentTypeEnum = require('../common/PaymentTypeEnum');
+const AccountingTypeEnum = require('../common/AccountingTypeEnum');
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
@@ -74,6 +76,10 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const { PurchaseOrder, PaymentTerm, POStatus } = require('../models/PurchaseOrder');
       await PaymentTerm.bulkCreate(Object.keys(PaymentTermType).map(key => PaymentTermType[key]));
       await POStatus.bulkCreate(Object.keys(POStatusType).map(key => POStatusType[key]));
+
+      const { PaymentType, AccountingType } = require('../models/Payment');
+      await PaymentType.bulkCreate(Object.keys(PaymentTypeEnum).map(key => PaymentTypeEnum[key]));
+      await AccountingType.bulkCreate(Object.keys(AccountingTypeEnum).map(key => AccountingTypeEnum[key]));
 
     }
   

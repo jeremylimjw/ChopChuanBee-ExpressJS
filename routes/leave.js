@@ -245,7 +245,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
         include: [
           { 
             model: LeaveAccount, 
-            include: { model: Employee, attributes: [] }, 
+            include: [{ model: Employee, attributes: [] }, LeaveType], 
             attributes: ['employee_id']
           }, 
           LeaveStatus
@@ -273,7 +273,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
         include: [
           { 
             model: LeaveAccount, 
-            include: { model: Employee, attributes: [] }, 
+            include: [{ model: Employee, attributes: [] }, LeaveType], 
             attributes: ['employee_id'] 
           }, 
           LeaveStatus
@@ -294,7 +294,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
       const leaveApplications = await LeaveApplication.findAll({ include: [
         { 
           model: LeaveAccount, 
-          include: { model: Employee, attributes: [] }, 
+          include: [{ model: Employee, attributes: [] }, LeaveType], 
           attributes: ['employee_id'],
           where: { employee_id } 
         }, 

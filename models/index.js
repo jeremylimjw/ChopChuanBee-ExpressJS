@@ -57,10 +57,15 @@ module.exports = async function() {
     LeaveStatus.hasMany(LeaveApplication, { foreignKey: { allowNull: false, name: 'leave_status_id' }});
     LeaveApplication.belongsTo(LeaveStatus,  { foreignKey: { allowNull: false, name: 'leave_status_id' }});
     
- 
+    const { Payment, PaymentType , AccountingType} = require('./Payment');
+
+    PaymentType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'payment_type_id' }});
+    Payment.belongsTo(PaymentType,  { foreignKey: { allowNull: false, name: 'payment_type_id' }});
+    AccountingType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'accountint_type_id' }});
+    Payment.belongsTo(AccountingType,  { foreignKey: { allowNull: false, name: 'accountint_type_id' }});
     
     await sequelize.sync(); // This will create tables if not exists
-    // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+    //await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
 
     
 }

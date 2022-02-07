@@ -6,6 +6,8 @@ const ChargedUnderType = require('../common/ChargedUnderType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
 const LeaveStatusEnum = require('../common/LeaveStatusEnum');
 const ProductCategoryEnum = require('../common/ProductCategory');
+const PaymentTypeEnum = require("../common/PaymentTypeEnum");
+const AccountingTypeEnum = require("../common/AccountingTypeEnum");
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
@@ -36,12 +38,15 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const {LeaveType, LeaveAccount} = require('../models/LeaveAccount');
       const {LeaveStatus} = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
+      const { PaymentType , AccountingType } = require('../models/Payment');
 
       await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
       await Role.bulkCreate(Object.keys(RoleType).map(key => RoleType[key]));
       await ChargedUnder.bulkCreate(Object.keys(ChargedUnderType).map(key => ChargedUnderType[key]));
       await LeaveType.bulkCreate(Object.keys(LeaveTypeEnum).map(key => LeaveTypeEnum[key]));
       await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
+      await PaymentType.bulkCreate(Object.keys(PaymentTypeEnum).map(key => PaymentTypeEnum[key]));
+      await AccountingType.bulkCreate(Object.keys(AccountingTypeEnum).map(key => AccountingTypeEnum[key]));
      /*  await LeaveAccount.bulkCreate([ 
         { entitled_days: 14, entitled_rollover: 3, leave_type_id: LeaveTypeEnum.ANNUAL.id },
         { entitled_days: 14, entitled_rollover: 3, leave_type_id: LeaveTypeEnum.ANNUAL.id }

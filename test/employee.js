@@ -133,6 +133,31 @@ describe('/employee', () => {
         }
     })
 
+    it('UPDATE /profile', async () => {
+        try {
+            // Update employee
+            const modifyEmployee = {...newEmployee, address: "Yusof Ishak House", postal_code: "987654" };
+
+            await http.put(`/employee/profile`, modifyEmployee);
+
+            // Retrieve employee
+            const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
+            assert.notEqual(getData, null);
+
+            // Assert changes
+            assert.equal(getData.address, "Yusof Ishak House");
+            assert.equal(getData.postal_code, "987654");
+
+        } catch(err) {
+            if (err.response) {
+                console.log(err.response.status, err.response.data);
+            } else {
+                console.log(err);
+            }
+            assert.fail();
+        }
+    });
+
     it('POST /grant (upsert)', async () => {
         try {
             // Create AccessRights

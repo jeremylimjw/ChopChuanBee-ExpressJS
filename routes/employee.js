@@ -142,9 +142,9 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
 /**
  *  PUT method: Update a employee given the data in the HTTP body
  *  - /api/employee
- *  - requireAccess(ViewType.GENERAL)
+ *  - requireAccess(ViewType.HR)
  * */ 
-router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.put('/', requireAccess(ViewType.HR), async function(req, res, next) {
     const { id, name, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights } = req.body;
 
     // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
@@ -157,12 +157,6 @@ router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
     }
     
     const user = res.locals.user;
-
-    // If user is not the employee OR user doesnt have HR access role OR user is not Admin
-    if (user.id != id && user.access_rights[ViewType.HR] == null && user.role.name !== 'Admin') {
-        res.status(401).send("You do not have access to this method.");
-        return;
-    }
 
     try {
         // Validate unique constraint
@@ -185,37 +179,24 @@ router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
             return;
         }
 
-        // Update with access rights if HR or admin only
-        if (user.access_rights[ViewType.HR] != null || user.role.name == 'Admin') {
-            
-            // Access Rights Validation
-            try {
-                validateAccessRights(access_rights);
-            } catch(err) {
-                res.status(400).send(err);
-                return;
-            }
-
-            const employee = await Employee.findByPk(id, { include: AccessRight });
-            await removeAccessRights(employee.toJSON().access_rights, employee, user, true);
-            await insertAccessRights(access_rights, employee, user, true);
-
+        // Access Rights Validation
+        try {
+            validateAccessRights(access_rights);
+        } catch(err) {
+            res.status(400).send(err);
+            return;
         }
+
+        const employee = await Employee.findByPk(id, { include: AccessRight });
+        await removeAccessRights(employee.toJSON().access_rights, employee, user, true);
+        await insertAccessRights(access_rights, employee, user, true);
 
         // Record to admin logs
-        if (user.id == id) { // If user is updating his own record
-            await Log.create({ 
-                employee_id: user.id, 
-                view_id: ViewType.GENERAL.id,
-                text: `${user.name} updated his/her employee record`, 
-            });
-        } else {
-            await Log.create({ 
-                employee_id: user.id, 
-                view_id: ViewType.HR.id,
-                text: `${user.name} updated ${name}'s employee record`, 
-            });
-        }
+        await Log.create({ 
+            employee_id: user.id, 
+            view_id: ViewType.HR.id,
+            text: `${user.name} updated ${name}'s employee record`, 
+        });
 
         res.send({ id: id });
 
@@ -370,6 +351,63 @@ router.post('/resetPassword', async function(req, res, next) {
         });
 
         res.send({ id: employee.id });
+
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+/**
+ *  PUT method: Update a employee given the data in the HTTP body
+ *  - /api/employee/profile
+ *  - requireAccess(ViewType.GENERAL)
+ * */ 
+router.put('/profile', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+    const { id, name, email, contact_number, nok_name, nok_number, address, postal_code } = req.body;
+
+    // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
+    if (id == null || name == null || email == null || contact_number == null ||
+        nok_name == null || nok_number == null ||
+        address == null || postal_code == null) {
+        res.status(400).send("'id', 'name', 'username', 'email', 'contact_number', 'nok_name', 'nok_number', 'address', 'postal_code' are required.", )
+        return;
+    }
+    
+    const user = res.locals.user;
+
+    try {
+        // Validate unique constraint
+        const hasEmail = await Employee.findOne({ where: { email, id: { [Sequelize.Op.not]: id } } });
+
+        if (hasEmail != null) {
+            res.status(401).send(`Email ${email} is already taken.`);
+            return;
+        }
+
+        // Update employee
+        const updateResult = await Employee.update(
+            { name, email, contact_number, nok_name, nok_number, address, postal_code },
+            { where: { id: id } }
+        );
+
+        // If 'id' is not found return 400 Bad Request, if found then return the 'id'
+        if (updateResult[0] === 0) {
+            res.status(400).send(`Employee id ${id} not found.`);
+            return;
+        }
+
+        // Record to admin logs
+        await Log.create({ 
+            employee_id: user.id, 
+            view_id: ViewType.GENERAL.id,
+            text: `${user.name} updated his/her employee record`, 
+        });
+
+        res.send({ id: id });
 
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database

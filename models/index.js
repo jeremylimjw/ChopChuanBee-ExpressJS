@@ -95,8 +95,8 @@ module.exports = async function() {
     InventoryMovement.belongsTo(MovementType, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
  
     
-    // await sequelize.sync(); // This will create tables if not exists
-    await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+    await sequelize.sync(); // This will create tables if not exists
+    // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
 
     
 }

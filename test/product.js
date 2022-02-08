@@ -1,33 +1,31 @@
 const assert = require('assert');
 const { loginAsAdmin } = require('.');
 
-describe('/customer', () => {
+describe('/product', () => {
 
     let http;
-    let newCustomer;
+    let newProduct;
 
     it('POST /', async () => {
         try {
             // Login
             http = await loginAsAdmin();
 
-            // Create customer
-            let customer = { 
-                company_name : "SAP", company_email : "sap@gmail.com", 
-                p1_name : "John Doe", p1_phone_number : "98727674", 
-                p2_name : null, p2_phone_number : null, 
-                address : "21 Jump Street", postal_code : "472648", 
-                charged_under_id: 1, gst : true, 
-                gst_show : true, description : "Software Application Platforms" 
+            // Create product
+            let product = { 
+                name: "Maggi ketchup", 
+                description: "Best ketchup ever", 
+                unit: "bottles", 
+                min_inventory_level: 100
             }
-            const { data: postData } = await http.post(`/customer`, customer);
+            const { data: postData } = await http.post(`/product`, product);
 
             // Retrieve customer
-            const { data: getData } = await http.get(`/customer?id=${postData.id}`);
+            const { data: getData } = await http.get(`/product?id=${postData.id}`);
 
             // Assert changes
             assert.notEqual(getData, null);
-            newCustomer = getData;
+            newProduct = getData;
 
         } catch(err) {
             if (err.response) {
@@ -41,17 +39,16 @@ describe('/customer', () => {
 
     it('UPDATE /', async () => {
         try {
-            // Update customer
-            const modifyCustomer = {...newCustomer, p2_name: "Jane Doe", p2_phone_number: "99998888" };
-            const { data: putData } = await http.put(`/customer`, modifyCustomer);
+            // Update product
+            const modifyProduct = {...newProduct, min_inventory_level: 150 };
+            const { data: putData } = await http.put(`/product`, modifyProduct);
 
-            // Retrieve customer
-            const { data: getData } = await http.get(`/customer?id=${newCustomer.id}`);
+            // Retrieve product
+            const { data: getData } = await http.get(`/product?id=${newProduct.id}`);
             assert.notEqual(getData, null);
 
             // Assert changes
-            assert.equal(getData.p2_name, "Jane Doe");
-            assert.equal(getData.p2_phone_number, "99998888");
+            assert.equal(getData.min_inventory_level, 150);
 
         } catch(err) {
             if (err.response) {
@@ -65,11 +62,11 @@ describe('/customer', () => {
 
     it('DELETE /', async () => {
         try {
-            // Delete customer
-            await http.delete(`/customer?id=${newCustomer.id}`);
+            // Delete product
+            await http.delete(`/product?id=${newProduct.id}`);
 
-            // Retrieve customer
-            const { data: getData } = await http.get(`/customer?id=${newCustomer.id}`);
+            // Retrieve product
+            const { data: getData } = await http.get(`/product?id=${newProduct.id}`);
 
             // Assert changes
             assert.equal(getData.deleted, true);
@@ -86,8 +83,8 @@ describe('/customer', () => {
 
     it('GET /', async () => {
         try {
-            // Retrieve customer
-            const { data: getData } = await http.get(`/customer`);
+            // Retrieve product
+            const { data: getData } = await http.get(`/product`);
 
             // Assert changes
             assert.notEqual(getData.length, 0);

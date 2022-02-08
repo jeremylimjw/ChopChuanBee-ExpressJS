@@ -1,7 +1,8 @@
 var express = require('express');
 const { generateToken, TOKEN_NAME, removeToken } = require('../auth');
-const { compare } = require('../auth/bcrypt');
-const { Employee, AccessRight, Role } = require('../models/Employee');
+const { compareHash } = require('../auth/bcrypt');
+const { AccessRight } = require('../models/AccessRight');
+const { Employee, Role } = require('../models/Employee');
 const View = require('../models/View');
 var router = express.Router();
 
@@ -22,10 +23,15 @@ router.post('/', async function(req, res, next) {
             return;
         }
 
+        if (employee.deleted == true) {
+            res.status(400).send("This account does not exist anymore.");
+            return;
+        }
+
         const user = employee.toJSON();
 
         // Verify user credentials
-        const match = await compare(password, user.password)
+        const match = await compareHash(password, user.password)
         if (!match) {
             res.status(400).send("Invalid username or password.");
             return;

@@ -148,7 +148,7 @@ router.delete('/', requireAccess(ViewType.CRM, true), async function(req, res, n
   }
 
   try {
-    const customer = await Customer.findByPk(id, { include: ChargedUnder });
+    const customer = await Customer.findByPk(id);
 
     // If 'id' is not found return 400 Bad Request, if found then return the 'id'
     if (customer == null) {

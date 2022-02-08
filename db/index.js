@@ -1,8 +1,11 @@
-const { hash } = require('../auth/bcrypt');
+const { hashPassword } = require('../auth/bcrypt');
 const { Sequelize, DataTypes } = require('sequelize');
 const ViewType = require('../common/ViewType');
 const RoleType = require('../common/RoleType');
 const ChargedUnderType = require('../common/ChargedUnderType');
+const LeaveTypeEnum = require('../common/LeaveTypeEnum');
+const LeaveStatusEnum = require('../common/LeaveStatusEnum');
+const ProductCategoryEnum = require('../common/ProductCategory');
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
@@ -21,7 +24,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
     await require('../models')();
 
     // Data initiation
-    const { Employee, Role, AccessRight } = require('../models/Employee');
+    const { Employee, Role } = require('../models/Employee');
+    const { AccessRight } = require('../models/AccessRight');
     const employees = await Employee.findOne();
 
     if (employees == null) {
@@ -29,14 +33,25 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       const View = require('../models/View');
       const { ChargedUnder } = require('../models/Customer');
+      const {LeaveType, LeaveAccount} = require('../models/LeaveAccount');
+      const {LeaveStatus} = require('../models/LeaveApplication');
+      const { ProductCategory } = require('../models/Product');
 
       await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
       await Role.bulkCreate(Object.keys(RoleType).map(key => RoleType[key]));
       await ChargedUnder.bulkCreate(Object.keys(ChargedUnderType).map(key => ChargedUnderType[key]));
+      await LeaveType.bulkCreate(Object.keys(LeaveTypeEnum).map(key => LeaveTypeEnum[key]));
+      await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
+     /*  await LeaveAccount.bulkCreate([ 
+        { entitled_days: 14, entitled_rollover: 3, leave_type_id: LeaveTypeEnum.ANNUAL.id },
+        { entitled_days: 14, entitled_rollover: 3, leave_type_id: LeaveTypeEnum.ANNUAL.id }
 
+      ]); */
+      await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
+     
       await Employee.bulkCreate([
-        { name: "Admin", username: "admin", password: await hash('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id },
-        { name: "Alice", username: "alice", password: await hash('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id },
+        { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id },
+        { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id },
       ])
 
       const alice = await Employee.findOne({ where: { name: "Alice" } });

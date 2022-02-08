@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../db');
 
-const Employee = sequelize.define('employee', {
+const Product = sequelize.define('product', {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -11,36 +11,27 @@ const Employee = sequelize.define('employee', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  username: {
+  description: {
     type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
   },
-  password: {
+  unit: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
+  min_inventory_level: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
   deleted: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
   },
-  contact_number: DataTypes.STRING,
-  nok_name: DataTypes.STRING,
-  nok_number: DataTypes.STRING,
-  address: DataTypes.STRING,
-  postal_code: DataTypes.STRING,
-  discharge_date: DataTypes.DATE,
-}, {
+},{
   updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
   createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
 });
 
-const Role = sequelize.define('role', {
+const ProductCategory = sequelize.define('product_category', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -50,7 +41,7 @@ const Role = sequelize.define('role', {
     allowNull: false
   },
 }, { 
-  timestamps: false 
+  timestamps: false // Dont record 'updatedAt' and 'createdAt'
 });
 
-module.exports = { Employee, Role };
+module.exports = { Product, ProductCategory };

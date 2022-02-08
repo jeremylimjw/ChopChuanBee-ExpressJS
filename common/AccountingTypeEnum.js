@@ -1,6 +1,6 @@
 const AccountingTypeEnum = {
-    ACCOUNT_RECEIVABLE: { id: 1, name: "Account receivable" },
-    ACCOUNT_PAYABLE: { id: 2, name: "Account payable" },
+    PAYABLE: { id: 1, name: "Payable" },
+    RECEIVABLE: { id: 2, name: "Receivable" },
 }
 
 module.exports = AccountingTypeEnum;

@@ -38,7 +38,7 @@ module.exports = async function() {
     ChargedUnder.hasMany(Customer, { foreignKey: { allowNull: false, name: 'charged_under_id' }}); // Foreign key defaults to chargedUnderId, change to standardize
     Customer.belongsTo(ChargedUnder, { foreignKey: { allowNull: false, name: 'charged_under_id' }});
 
-    const Supplier = require('./Supplier');
+    const { Supplier } = require('./Supplier');
     const { Product } = require('./Product');
     
     const { LeaveAccount, LeaveType } = require('./LeaveAccount');
@@ -56,13 +56,44 @@ module.exports = async function() {
 
     LeaveStatus.hasMany(LeaveApplication, { foreignKey: { allowNull: false, name: 'leave_status_id' }});
     LeaveApplication.belongsTo(LeaveStatus,  { foreignKey: { allowNull: false, name: 'leave_status_id' }});
-    
-    const { Payment, PaymentType , AccountingType} = require('./Payment');
 
-    PaymentType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'payment_type_id' }});
-    Payment.belongsTo(PaymentType,  { foreignKey: { allowNull: false, name: 'payment_type_id' }});
-    AccountingType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'accountint_type_id' }});
-    Payment.belongsTo(AccountingType,  { foreignKey: { allowNull: false, name: 'accountint_type_id' }});
+    const { PurchaseOrder, PurchaseOrderItem, PaymentTerm, POStatus } = require('../models/PurchaseOrder');
+
+    PaymentTerm.hasMany(PurchaseOrder, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
+    PurchaseOrder.belongsTo(PaymentTerm, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
+
+    POStatus.hasMany(PurchaseOrder, { foreignKey: { allowNull: false, name: 'purchase_order_status_id' }});
+    PurchaseOrder.belongsTo(POStatus, { foreignKey: { allowNull: false, name: 'purchase_order_status_id' }});
+
+    PurchaseOrder.hasMany(PurchaseOrderItem, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
+    PurchaseOrderItem.belongsTo(PurchaseOrder, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
+
+    Supplier.hasMany(PurchaseOrder, { foreignKey: { allowNull: false, name: 'supplier_id' }});
+    PurchaseOrder.belongsTo(Supplier, { foreignKey: { allowNull: false, name: 'supplier_id' }});
+
+    const { InventoryMovement } = require('../models/InventoryMovement');
+    const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
+
+    PurchaseOrderItem.hasOne(InventoryMovement, { foreignKey: { name: 'purchase_order_item_id' }});
+    InventoryMovement.belongsTo(PurchaseOrderItem, { foreignKey: { name: 'purchase_order_item_id' }});
+
+    PurchaseOrder.hasMany(Payment, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
+    Payment.belongsTo(PurchaseOrder, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
+
+    PaymentMethod.hasMany(Payment, { foreignKey: { allowNull: false, name: 'payment_method_id' }});
+    Payment.belongsTo(PaymentMethod, { foreignKey: { allowNull: false, name: 'payment_method_id' }});
+
+    AccountingType.hasMany(Payment, { foreignKey: { name: 'accounting_type_id' }});
+    Payment.belongsTo(AccountingType, { foreignKey: { name: 'accounting_type_id' }});
+    
+    const { MovementType } = require('../models/MovementType');
+
+    MovementType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+    Payment.belongsTo(MovementType, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+
+    MovementType.hasMany(InventoryMovement, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+    InventoryMovement.belongsTo(MovementType, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+ 
     
     await sequelize.sync(); // This will create tables if not exists
     //await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create

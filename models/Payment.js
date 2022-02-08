@@ -7,7 +7,6 @@ const Payment = sequelize.define('payment', {
         primaryKey: true,
         autoIncrement: true,
     },
-    transaction_id: DataTypes.STRING,
     amount: {
         type: DataTypes.DECIMAL,
         allowNull: false,

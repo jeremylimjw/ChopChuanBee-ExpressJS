@@ -68,13 +68,16 @@ module.exports = async function() {
     PurchaseOrder.hasMany(PurchaseOrderItem, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
     PurchaseOrderItem.belongsTo(PurchaseOrder, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
 
+    Product.hasMany(PurchaseOrderItem, { foreignKey: { allowNull: false, name: 'product_id' }});
+    PurchaseOrderItem.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
+
     Supplier.hasMany(PurchaseOrder, { foreignKey: { allowNull: false, name: 'supplier_id' }});
     PurchaseOrder.belongsTo(Supplier, { foreignKey: { allowNull: false, name: 'supplier_id' }});
 
     const { InventoryMovement } = require('../models/InventoryMovement');
     const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
 
-    PurchaseOrderItem.hasOne(InventoryMovement, { foreignKey: { name: 'purchase_order_item_id' }});
+    PurchaseOrderItem.hasMany(InventoryMovement, { foreignKey: { name: 'purchase_order_item_id' }});
     InventoryMovement.belongsTo(PurchaseOrderItem, { foreignKey: { name: 'purchase_order_item_id' }});
 
     PurchaseOrder.hasMany(Payment, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});

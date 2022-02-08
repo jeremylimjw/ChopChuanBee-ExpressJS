@@ -5,9 +5,11 @@ const { PurchaseOrder, PurchaseOrderItem, PaymentTerm, POStatus } = require('../
 const Log = require('../models/Log');
 const ViewType = require('../common/ViewType');
 const { Supplier } = require('../models/Supplier');
+const { Product } = require('../models/Product');
 const { Payment } = require('../models/Payment');
 const { InventoryMovement } = require('../models/InventoryMovement');
 const { parseRequest, assertNotNull } = require('../common/helpers');
+const { Sequelize } = require('sequelize');
 
 
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
@@ -15,7 +17,7 @@ router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, nex
   const predicate = parseRequest(req.query);
 
   try {
-    predicate.include = [PurchaseOrderItem, Supplier, PaymentTerm, POStatus];
+    predicate.include = [{ model: PurchaseOrderItem, include: [InventoryMovement, Product] }, Supplier, PaymentTerm, POStatus, Payment];
     const purchaseOrders = await PurchaseOrder.findAll(predicate);
     res.send(purchaseOrders);
 
@@ -27,8 +29,36 @@ router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, nex
 });
 
 
+router.get('/item', async function(req, res, next) {
+  // This is a dynamic query where user can search using any column
+  // const predicate = parseRequest(req.query, ['supplier_item_name']);
+
+  const { supplier_id, supplier_item_name } = req.query;
+
+  try {
+    // predicate.include = [{ model: PurchaseOrder, include: [Supplier] }];
+    const purchaseOrders = await PurchaseOrderItem.findAll({ 
+      where: {
+        supplier_item_name: { [Sequelize.Op.iLike] : `%${supplier_item_name}%` }
+      },
+      include: [
+        { model: PurchaseOrder, where: { supplier_id: supplier_id } },
+        Product
+      ] 
+    });
+    // const purchaseOrders = await PurchaseOrderItem.findAll({ where: { 'purchase_order.supplier_id': supplier_id }, include: [PurchaseOrder] });
+    res.send(purchaseOrders);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
 router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
-  const { supplier_id, gst_rate, is_payment_received, payment_received, offset, 
+  const { supplier_id, gst_rate, is_payment_made, payment_amount, offset, 
     supplier_invoice_id, remarks, payment_term_id, payment_method_id, 
     purchase_order_status_id, purchase_order_items } = req.body;
 
@@ -45,15 +75,15 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
     const total = (1 + (gst_rate/100)) * purchase_order_items.reduce((prev, current) => prev + current.subtotal, 0) - offset;
 
     // Register payment
-    if (is_payment_received == true) {
+    if (is_payment_made == true) {
       purchaseOrder.payments = [
         { amount: total, payment_method_id: payment_method_id, movement_type_id: 1 },
       ]
     } else {
-      if (payment_received > 0) {
+      if (payment_amount > 0) {
         purchaseOrder.payments = [
           { amount: total, accounting_type_id: 1, payment_method_id: payment_method_id, movement_type_id: 1 },
-          { amount: -payment_received, accounting_type_id: 1, payment_method_id: payment_method_id, movement_type_id: 1 },
+          { amount: -payment_amount, accounting_type_id: 1, payment_method_id: payment_method_id, movement_type_id: 1 },
         ]
       }
     }
@@ -61,7 +91,7 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
     // Register inventory movement
     for (let item of purchase_order_items) {
       const net_unit_cost = (1 + (gst_rate/100)) * item.unit_cost;
-      item.inventory_movement = { unit_cost: net_unit_cost, quantity: item.received_quantity, movement_type_id: 1 };
+      item.inventory_movements = [{ unit_cost: net_unit_cost, quantity: item.received_quantity, movement_type_id: 1 }];
     }
 
     const newPurchaseOrder = await PurchaseOrder.create(purchaseOrder, { include: [{ model: PurchaseOrderItem, include: InventoryMovement }, Payment] });

@@ -6,7 +6,7 @@ const Log = require('../models/Log');
 const ViewType = require('../common/ViewType');
 const { Supplier } = require('../models/Supplier');
 const { Product } = require('../models/Product');
-const { Payment } = require('../models/Payment');
+const { Payment, PaymentMethod } = require('../models/Payment');
 const { InventoryMovement } = require('../models/InventoryMovement');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const { Sequelize } = require('sequelize');
@@ -17,7 +17,7 @@ router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, nex
   const predicate = parseRequest(req.query);
 
   try {
-    predicate.include = [{ model: PurchaseOrderItem, include: [InventoryMovement, Product] }, Supplier, PaymentTerm, POStatus, Payment];
+    predicate.include = [{ model: PurchaseOrderItem, include: [InventoryMovement, Product] }, Supplier, PaymentTerm, POStatus, { model: Payment, include: [PaymentMethod] }];
     const purchaseOrders = await PurchaseOrder.findAll(predicate);
     res.send(purchaseOrders);
 
@@ -29,32 +29,32 @@ router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, nex
 });
 
 
-router.get('/item', async function(req, res, next) {
-  // This is a dynamic query where user can search using any column
-  // const predicate = parseRequest(req.query, ['supplier_item_name']);
+// router.get('/item', async function(req, res, next) {
+//   // This is a dynamic query where user can search using any column
+//   // const predicate = parseRequest(req.query, ['supplier_item_name']);
 
-  const { supplier_id, supplier_item_name } = req.query;
+//   const { supplier_id, supplier_item_name } = req.query;
 
-  try {
-    // predicate.include = [{ model: PurchaseOrder, include: [Supplier] }];
-    const purchaseOrders = await PurchaseOrderItem.findAll({ 
-      where: {
-        supplier_item_name: { [Sequelize.Op.iLike] : `%${supplier_item_name}%` }
-      },
-      include: [
-        { model: PurchaseOrder, where: { supplier_id: supplier_id } },
-        Product
-      ] 
-    });
-    // const purchaseOrders = await PurchaseOrderItem.findAll({ where: { 'purchase_order.supplier_id': supplier_id }, include: [PurchaseOrder] });
-    res.send(purchaseOrders);
+//   try {
+//     // predicate.include = [{ model: PurchaseOrder, include: [Supplier] }];
+//     const purchaseOrders = await PurchaseOrderItem.findAll({ 
+//       where: {
+//         supplier_item_name: { [Sequelize.Op.iLike] : `%${supplier_item_name}%` }
+//       },
+//       include: [
+//         { model: PurchaseOrder, where: { supplier_id: supplier_id } },
+//         Product
+//       ] 
+//     });
+//     // const purchaseOrders = await PurchaseOrderItem.findAll({ where: { 'purchase_order.supplier_id': supplier_id }, include: [PurchaseOrder] });
+//     res.send(purchaseOrders);
 
-  } catch(err) {
-    console.log(err);
-    res.status(500).send(err);
-  }
+//   } catch(err) {
+//     console.log(err);
+//     res.status(500).send(err);
+//   }
 
-});
+// });
 
 
 router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {

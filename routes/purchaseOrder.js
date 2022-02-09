@@ -58,9 +58,7 @@ router.get('/item', async function(req, res, next) {
 
 
 router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
-  const { supplier_id, gst_rate, is_payment_made, payment_amount, offset, 
-    supplier_invoice_id, remarks, payment_term_id, payment_method_id, 
-    purchase_order_status_id, purchase_order_items } = req.body;
+  const { supplier_id, gst_rate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items, payments } = req.body;
 
   // Validation here
   try {
@@ -71,30 +69,9 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
   }
 
   try {
-    const purchaseOrder = { supplier_id, gst_rate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items };
-    const total = (1 + (gst_rate/100)) * purchase_order_items.reduce((prev, current) => prev + current.subtotal, 0) - offset;
-
-    // Register payment
-    if (is_payment_made == true) {
-      purchaseOrder.payments = [
-        { amount: total, payment_method_id: payment_method_id, movement_type_id: 1 },
-      ]
-    } else {
-      if (payment_amount > 0) {
-        purchaseOrder.payments = [
-          { amount: total, accounting_type_id: 1, payment_method_id: payment_method_id, movement_type_id: 1 },
-          { amount: -payment_amount, accounting_type_id: 1, payment_method_id: payment_method_id, movement_type_id: 1 },
-        ]
-      }
-    }
-
-    // Register inventory movement
-    for (let item of purchase_order_items) {
-      const net_unit_cost = (1 + (gst_rate/100)) * item.unit_cost;
-      item.inventory_movements = [{ unit_cost: net_unit_cost, quantity: item.received_quantity, movement_type_id: 1 }];
-    }
-
-    const newPurchaseOrder = await PurchaseOrder.create(purchaseOrder, { include: [{ model: PurchaseOrderItem, include: InventoryMovement }, Payment] });
+    const newPurchaseOrder = await PurchaseOrder.create(
+      { supplier_id, gst_rate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items, payments }, 
+      { include: [PurchaseOrderItem, Payment] });
 
     // Record to admin logs
     const user = res.locals.user;

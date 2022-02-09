@@ -51,6 +51,9 @@ module.exports = {
                 res.status(333).send("Session timed out due to inactivity, please login again.");
                 return;
             }
+
+            // Extend the token
+            tokens[token].expireOn = new Date(new Date().getTime() + SESSION_DURATION_MS);
             
             // Assign user to variable to be used further down the pipeline
             res.locals.user = tokens[token].user;

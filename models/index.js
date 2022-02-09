@@ -83,8 +83,8 @@ module.exports = async function() {
     PurchaseOrder.hasMany(Payment, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
     Payment.belongsTo(PurchaseOrder, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
 
-    PaymentMethod.hasMany(Payment, { foreignKey: { allowNull: false, name: 'payment_method_id' }});
-    Payment.belongsTo(PaymentMethod, { foreignKey: { allowNull: false, name: 'payment_method_id' }});
+    PaymentMethod.hasMany(Payment, { foreignKey: { name: 'payment_method_id' }});
+    Payment.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
 
     AccountingType.hasMany(Payment, { foreignKey: { name: 'accounting_type_id' }});
     Payment.belongsTo(AccountingType, { foreignKey: { name: 'accounting_type_id' }});

@@ -2,15 +2,15 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../db');
 
 const Payment = sequelize.define('payment', {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    },
-    amount: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
-    },
+  id: {
+    type: DataTypes.UUID,
+    primaryKey: true,
+    defaultValue: DataTypes.UUIDV4
+  },
+  amount: {
+      type: DataTypes.DECIMAL,
+      allowNull: false,
+  },
 }, {
     updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
     createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'

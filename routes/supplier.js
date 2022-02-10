@@ -1,10 +1,12 @@
 var express = require('express');
 var router = express.Router();
 const { requireAccess } = require('../auth');
-const { Supplier } = require('../models/Supplier');
+const { Supplier, SupplierMenu } = require('../models/Supplier');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { Sequelize } = require('sequelize');
+const { parseRequest } = require('../common/helpers');
+const { Product } = require('../models/Product');
 
 //Read supplier (find 1 or find all depending if ID was given)
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
@@ -163,6 +165,24 @@ router.delete('/', requireAccess(ViewType.SCM, true), async function(req, res, n
       res.status(500).send(err);
     }
   
-  });
+});
+
+
+router.get('/menu', requireAccess(ViewType.GENERAL, false), async function(req, res, next) {
+  // This is a dynamic query where user can search using any column
+  const predicate = parseRequest(req.query);
+
+  try {
+    predicate.include = [Product];
+    const supplierMenu = await SupplierMenu.findAll(predicate);
+    res.send(supplierMenu);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
   
 module.exports = router;

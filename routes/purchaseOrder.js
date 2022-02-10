@@ -58,11 +58,11 @@ router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, nex
 
 
 router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
-  const { supplier_id, gst_rate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items, payments } = req.body;
+  const { supplier_id, purchase_order_status_id, purchase_order_items } = req.body;
 
   // Validation here
   try {
-    assertNotNull(req.body, ['supplier_id', 'gst_rate', 'offset', 'remarks', 'payment_term_id', 'purchase_order_status_id', 'purchase_order_items'])
+    assertNotNull(req.body, ['supplier_id', 'purchase_order_status_id', 'purchase_order_items'])
   } catch(err) {
     res.status(400).send(err);
     return;
@@ -70,8 +70,8 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
 
   try {
     const newPurchaseOrder = await PurchaseOrder.create(
-      { supplier_id, gst_rate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items, payments }, 
-      { include: [PurchaseOrderItem, Payment] });
+      { supplier_id, purchase_order_status_id, purchase_order_items }, 
+      { include: [PurchaseOrderItem] });
 
     // Record to admin logs
     const user = res.locals.user;

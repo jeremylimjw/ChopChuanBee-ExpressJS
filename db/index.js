@@ -4,7 +4,7 @@ const ViewType = require('../common/ViewType');
 const RoleType = require('../common/RoleType');
 const ChargedUnderType = require('../common/ChargedUnderType');
 const PaymentTermType = require('../common/PaymentTermType');
-const POStatusType = require('../common/POStatusType');
+const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
 const LeaveStatusEnum = require('../common/LeaveStatusEnum');
 const ProductCategoryEnum = require('../common/ProductCategory');
@@ -38,8 +38,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       const View = require('../models/View');
       const { ChargedUnder } = require('../models/Customer');
-      const {LeaveType, LeaveAccount} = require('../models/LeaveAccount');
-      const {LeaveStatus} = require('../models/LeaveApplication');
+      const { LeaveType } = require('../models/LeaveAccount');
+      const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
 
       await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
@@ -76,7 +76,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       const { PurchaseOrder, PaymentTerm, POStatus } = require('../models/PurchaseOrder');
       await PaymentTerm.bulkCreate(Object.keys(PaymentTermType).map(key => PaymentTermType[key]));
-      await POStatus.bulkCreate(Object.keys(POStatusType).map(key => POStatusType[key]));
+      await POStatus.bulkCreate(Object.keys(PurchaseOrderStatusType).map(key => PurchaseOrderStatusType[key]));
 
       const { PaymentMethod, AccountingType } = require('../models/Payment');
       await PaymentMethod.bulkCreate(Object.keys(PaymentMethodType).map(key => PaymentMethodType[key]));

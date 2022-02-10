@@ -75,17 +75,39 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { name: "Soy Sauce", unit: "bottle", min_inventory_level: "80" },
       ]);
 
-      const { PurchaseOrder, PaymentTerm, POStatus } = require('../models/PurchaseOrder');
+      const { PurchaseOrder, PaymentTerm, POStatus, PurchaseOrderItem } = require('../models/PurchaseOrder');
       await PaymentTerm.bulkCreate(Object.keys(PaymentTermType).map(key => PaymentTermType[key]));
       await POStatus.bulkCreate(Object.keys(POStatusType).map(key => POStatusType[key]));
 
-      const { PaymentMethod, AccountingType } = require('../models/Payment');
+      const heng = await Supplier.findOne({ where: { company_name: "Heng Heng" } });
+      await PurchaseOrder.bulkCreate([
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: heng.id },
+      ]);
+
+      const ikanBilis = await Product.findOne({ where: { name: "Ikan Bilis" } });
+      await PurchaseOrderItem.bulkCreate([
+        { unit_cost: 1,  quantity: 20, purchase_order_id: 1, product_id: ikanBilis.id }
+      ]);
+
+      const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
       await PaymentMethod.bulkCreate(Object.keys(PaymentMethodType).map(key => PaymentMethodType[key]));
       await AccountingType.bulkCreate(Object.keys(AccountingTypeEnum).map(key => AccountingTypeEnum[key]));
 
       const { MovementType } = require('../models/MovementType');
       await MovementType.bulkCreate(Object.keys(MovementTypeEnum).map(key => MovementTypeEnum[key]));
+      
+      await Payment.bulkCreate([
+        { amount: 100, purchase_order_id: 1, accounting_type_id: 1, movement_type_id:1 },
+        { amount: -50, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 },
+      ]);
 
+      const { InventoryMovement } = require('../models/InventoryMovement');
+      const lineItem = await PurchaseOrderItem.findOne({ where: { product_id: ikanBilis.id } });
+      await InventoryMovement.bulkCreate([
+        { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1 },
+        { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 },
+        { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 }
+      ]);
     }
   
   } catch (err) {

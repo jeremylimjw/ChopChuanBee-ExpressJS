@@ -10,5 +10,6 @@ router.use("/product", require("./product"));
 router.use("/employee", require("./employee"));
 router.use("/employee", require("./accessRight"));
 router.use("/employee/leave", require("./leave"));
+router.use("/accounting", require("./accounting"));
 
 module.exports = router;

@@ -15,6 +15,7 @@ const PurchaseOrder = sequelize.define('purchase_order', {
         type: DataTypes.DECIMAL,
         defaultValue: 0,
     },
+    has_gst: DataTypes.INTEGER,
     supplier_invoice_id: DataTypes.STRING,
     remarks: DataTypes.STRING,
     closed_on: DataTypes.DATE,

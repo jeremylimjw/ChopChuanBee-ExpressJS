@@ -5,40 +5,22 @@ const { Supplier, SupplierMenu } = require('../models/Supplier');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { Sequelize } = require('sequelize');
-const { parseRequest } = require('../common/helpers');
+const { parseRequest, assertNotNull } = require('../common/helpers');
 const { Product } = require('../models/Product');
 
 //Read supplier (find 1 or find all depending if ID was given)
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
-    const { id, company_name } = req.query;;
+  const predicate = parseRequest(req.query);
   
-    try {
-      if (id != null) { // Retrieve single supplier
-        const supplier = await Supplier.findOne({ where: { id } });
+  try {
+    const suppliers = await Supplier.findAll(predicate);
+    res.send(suppliers);
     
-        if (supplier == null) {
-          res.status(400).send(`supplier id ${id} not found.`);
-          return;
-        }
-        
-        res.send(supplier.toJSON());
-
-      } else if (company_name != null) {
-        const suppliers = await Supplier.findAll({  where: { company_name: { [Sequelize.Op.iLike]: `%${company_name}%` } } });
-        
-        res.send(suppliers);
-    
-      } else { // Retrieve ALL suppliers
-        const suppliers = await Supplier.findAll();
-        
-        res.send(suppliers);
-      }
-    } catch(err) {
-      // Catch and return any uncaught exceptions while inserting into database
-      console.log(err);
-      res.status(500).send(err);
-    }
-
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
 
 });
 
@@ -168,7 +150,7 @@ router.delete('/', requireAccess(ViewType.SCM, true), async function(req, res, n
 });
 
 
-router.get('/menu', requireAccess(ViewType.GENERAL, false), async function(req, res, next) {
+router.get('/menu', requireAccess(ViewType.SCM, false), async function(req, res, next) {
   // This is a dynamic query where user can search using any column
   const predicate = parseRequest(req.query);
 
@@ -176,6 +158,52 @@ router.get('/menu', requireAccess(ViewType.GENERAL, false), async function(req, 
     predicate.include = [Product];
     const supplierMenu = await SupplierMenu.findAll(predicate);
     res.send(supplierMenu);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+router.post('/menu', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { supplier_menu_items } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['supplier_menu_items']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const newSupplierMenus = await SupplierMenu.bulkCreate(supplier_menu_items);
+    res.send(newSupplierMenus);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+router.delete('/menu', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { supplier_id, product_id } = req.query;
+
+  // Validation here
+  try {
+    assertNotNull(req.query, ['supplier_id', 'product_id']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    await SupplierMenu.destroy({ where: { supplier_id, product_id } });
+    res.send({ id: supplier_id });
 
   } catch(err) {
     console.log(err);

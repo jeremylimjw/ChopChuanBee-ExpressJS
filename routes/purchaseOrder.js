@@ -9,18 +9,17 @@ const { Product } = require('../models/Product');
 const { Payment, PaymentMethod } = require('../models/Payment');
 const { InventoryMovement } = require('../models/InventoryMovement');
 const { parseRequest, assertNotNull } = require('../common/helpers');
-const { Sequelize } = require('sequelize');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 
 
 router.get('/', requireAccess(ViewType.GENERAL, false), async function(req, res, next) {
-  // This is a dynamic query where user can search using any column
   const predicate = parseRequest(req.query);
 
   try {
     predicate.include = [{ model: PurchaseOrderItem, include: [InventoryMovement, Product] }, Supplier, PaymentTerm, POStatus, { model: Payment, include: [PaymentMethod] }];
     predicate.order = [['created_at', 'DESC']]
     const purchaseOrders = await PurchaseOrder.findAll(predicate);
+
     res.send(purchaseOrders);
 
   } catch(err) {
@@ -31,7 +30,7 @@ router.get('/', requireAccess(ViewType.GENERAL, false), async function(req, res,
 });
 
 
-router.post('/', requireAccess(ViewType.GENERAL, true), async function(req, res, next) {
+router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
   const { supplier_id, purchase_order_status_id, purchase_order_items } = req.body;
 
   // Validation here
@@ -49,9 +48,9 @@ router.post('/', requireAccess(ViewType.GENERAL, true), async function(req, res,
 
     // Record to admin logs
     const user = res.locals.user;
-    Log.create({ 
+    await Log.create({ 
       employee_id: user.id, 
-      view_id: ViewType.GENERAL.id,
+      view_id: ViewType.SCM.id,
       text: `${user.name} created a purchase order with ID ${newPurchaseOrder.id}`, 
     });
 
@@ -65,8 +64,8 @@ router.post('/', requireAccess(ViewType.GENERAL, true), async function(req, res,
 });
 
 
-router.put('/', requireAccess(ViewType.GENERAL, true), async function(req, res, next) {
-  const { id, purchase_order_items, payments, purchase_order_status_id } = req.body;
+router.put('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { id, purchase_order_items, purchase_order_status_id } = req.body;
 
   // Validation here
   try {
@@ -87,7 +86,7 @@ router.put('/', requireAccess(ViewType.GENERAL, true), async function(req, res, 
 
       if (purchase_order_items != null) {
         // Update order items
-        const purchaseOrder = await PurchaseOrder.findByPk(id, { include: [{ model: PurchaseOrderItem, include: InventoryMovement }, Payment] });
+        const purchaseOrder = await PurchaseOrder.findByPk(id, { include: [PurchaseOrderItem] });
         for (let item of purchaseOrder.purchase_order_items) {
           if (purchase_order_items.filter(x => x.id == item.id).length === 0) {
             await PurchaseOrderItem.destroy({ where: { id: item.id }});
@@ -95,12 +94,6 @@ router.put('/', requireAccess(ViewType.GENERAL, true), async function(req, res, 
         }
         for (let item of purchase_order_items) {
           await PurchaseOrderItem.upsert(item);
-        }
-      }
-      
-      if (payments != null) {
-        for (let payment of payments) {
-          await Payment.upsert({ ...payment, purchase_order_id: id });
         }
       }
 
@@ -115,7 +108,7 @@ router.put('/', requireAccess(ViewType.GENERAL, true), async function(req, res, 
 
       await Log.create({ 
         employee_id: user.id, 
-        view_id: ViewType.GENERAL.id,
+        view_id: ViewType.SCM.id,
         text: text, 
       });
 
@@ -125,6 +118,76 @@ router.put('/', requireAccess(ViewType.GENERAL, true), async function(req, res, 
 
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+router.post('/payment', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { purchase_order_id, amount, payment_method_id, accounting_type_id, movement_type_id } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['purchase_order_id', 'amount', 'movement_type_id']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const newPayment = await Payment.create({ purchase_order_id, amount, payment_method_id, accounting_type_id, movement_type_id });
+
+    // Record to admin logs
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.SCM.id,
+      text: `${user.name} made payment to purchase order ID ${purchase_order_id}`, 
+    });
+
+    res.send(newPayment.toJSON())
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+// Create inventory movements in bulk
+router.post('/inventory', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { inventory_movements } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['inventory_movements']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const newInventoryMovements = await InventoryMovement.bulkCreate(inventory_movements);
+
+    // Record to admin logs
+    const user = res.locals.user;
+    const logs = [];
+    for (let movement of inventory_movements) {
+      const purchaseOrderItem = await PurchaseOrderItem.findByPk(movement.purchase_order_item_id, { include: Product });
+      logs.push(({ 
+        employee_id: user.id, 
+        view_id: ViewType.SCM.id,
+        text: `${user.name} received delivery for ${purchaseOrderItem.product.name} with ${movement.quantity} quantity`, 
+      }))
+    }
+    await Log.bulkCreate(logs);
+
+    res.send(newInventoryMovements)
+
+  } catch(err) {
     console.log(err);
     res.status(500).send(err);
   }

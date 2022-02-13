@@ -9,8 +9,7 @@ const { parseRequest, assertNotNull } = require('../common/helpers');
 
 
 router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, res, next) {
-    // This is a dynamic query where user can search using any column
-    const predicate = parseRequest(req.query, ['name']);
+    const predicate = parseRequest(req.query);
   
     try {
       const products = await Product.findAll(predicate);

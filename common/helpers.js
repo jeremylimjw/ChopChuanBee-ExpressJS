@@ -19,12 +19,11 @@ module.exports = {
         }
     
         // Transform fields into Sequelize.Op.iLike query
-        if (useiLike != null) {
-            for (let key of useiLike) {
-                if (queries[`${key}`] != null) {
-                    predicate.where[`${key}`] = { [Sequelize.Op.iLike]: "%"+queries[`${key}`]+"%" }
-                    delete queries[`${key}`];
-                }
+        for (let key of Object.keys(queries)) {
+            if (key.endsWith('_like')) {
+                const newKey = key.replace('_like', '');
+                predicate.where[`${newKey}`] = { [Sequelize.Op.iLike]: "%"+queries[key]+"%" }
+                delete queries[key];
             }
         }
     

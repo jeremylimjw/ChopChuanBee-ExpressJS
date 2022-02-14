@@ -50,4 +50,6 @@ const SupplierMenu = sequelize.define('supplier_menu', {
   timestamps: false,
 });
 
-module.exports = { Supplier, SupplierMenu };
+const GUEST_ID = '00000000-0000-0000-0000-000000000000';
+
+module.exports = { Supplier, SupplierMenu, GUEST_ID };

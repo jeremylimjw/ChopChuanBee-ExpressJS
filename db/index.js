@@ -57,16 +57,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const alice = await Employee.findOne({ where: { name: "Alice" } });
       await AccessRight.create({ has_write_access: true, employee_id: alice.id, view_id: ViewType.HR.id })
       await AccessRight.create({ has_write_access: false, employee_id: alice.id, view_id: ViewType.INVENTORY.id })
-
       
-      const { Supplier } = require('../models/Supplier');
-      await Supplier.bulkCreate([
-        { company_name: "Heng Heng", s1_name: "Ah Heng", s1_phone_number: "82663467", address: "21 Heng St", postal_code: "745728" },
-        { company_name: "Sheng Shiong", s1_name: "David King", s1_phone_number: "9277472", address: "Hougang Ave 8", postal_code: "565523" },
-        { company_name: "Fairprice", s1_name: "Laurie", s1_phone_number: "87476828", address: "2 Buona Vista Rd", postal_code: "845125" },
-      ]);
-
-      
+      // REMEMBER DELETE
       const { Product } = require('../models/Product');
       await Product.bulkCreate([
         { name: "Ketchup", unit: "bottle", min_inventory_level: "100" },
@@ -84,6 +76,16 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       const { MovementType } = require('../models/MovementType');
       await MovementType.bulkCreate(Object.keys(MovementTypeEnum).map(key => MovementTypeEnum[key]));
+
+      const { Supplier, GUEST_ID } = require('../models/Supplier');
+      await Supplier.create({ id: GUEST_ID, company_name: 'Guest', s1_name: 'Guest', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA' });
+
+      // REMEMBER DELETE
+      await Supplier.bulkCreate([
+        { company_name: "Heng Heng", s1_name: "Ah Heng", s1_phone_number: "82663467", address: "21 Heng St", postal_code: "745728" },
+        { company_name: "Sheng Shiong", s1_name: "David King", s1_phone_number: "9277472", address: "Hougang Ave 8", postal_code: "565523" },
+        { company_name: "Fairprice", s1_name: "Laurie", s1_phone_number: "87476828", address: "2 Buona Vista Rd", postal_code: "845125" },
+      ]);
 
     }
   

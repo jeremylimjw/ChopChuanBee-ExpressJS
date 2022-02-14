@@ -245,7 +245,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
         include: [
           { 
             model: LeaveAccount, 
-            include: [{ model: Employee, attributes: [] }, LeaveType], 
+            include: [{ model: Employee, attributes: ['id', 'name'] }, LeaveType], 
             attributes: ['employee_id']
           }, 
           LeaveStatus
@@ -273,7 +273,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
         include: [
           { 
             model: LeaveAccount, 
-            include: [{ model: Employee, attributes: [] }, LeaveType], 
+            include: [{ model: Employee, attributes: ['id', 'name'] }, LeaveType], 
             attributes: ['employee_id'] 
           }, 
           LeaveStatus
@@ -294,7 +294,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
       const leaveApplications = await LeaveApplication.findAll({ include: [
         { 
           model: LeaveAccount, 
-          include: [{ model: Employee, attributes: [] }, LeaveType], 
+          include: [{ model: Employee, attributes: ['id', 'name'] }, LeaveType], 
           attributes: ['employee_id'],
           where: { employee_id } 
         }, 
@@ -319,7 +319,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
         return;
       }
 
-      const leaveApplications = await LeaveApplication.findAll({ include: [{ model: LeaveAccount, include: Employee, attributes: ['id'] }, LeaveStatus] });
+      const leaveApplications = await LeaveApplication.findAll({ include: [{ model: LeaveAccount, include: { model: Employee, attributes: ['id', 'name'] } }, LeaveStatus] });
       res.send(leaveApplications);
 
     }

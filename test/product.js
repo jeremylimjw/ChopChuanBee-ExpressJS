@@ -24,8 +24,8 @@ describe('/product', () => {
             const { data: getData } = await http.get(`/product?id=${postData.id}`);
 
             // Assert changes
-            assert.notEqual(getData, null);
-            newProduct = getData;
+            assert.notEqual(getData[0].length, 0);
+            newProduct = getData[0];
 
         } catch(err) {
             if (err.response) {
@@ -45,10 +45,10 @@ describe('/product', () => {
 
             // Retrieve product
             const { data: getData } = await http.get(`/product?id=${newProduct.id}`);
-            assert.notEqual(getData, null);
+            assert.notEqual(getData.length, 0);
 
             // Assert changes
-            assert.equal(getData.min_inventory_level, 150);
+            assert.equal(getData[0].min_inventory_level, 150);
 
         } catch(err) {
             if (err.response) {
@@ -69,7 +69,7 @@ describe('/product', () => {
             const { data: getData } = await http.get(`/product?id=${newProduct.id}`);
 
             // Assert changes
-            assert.equal(getData.deleted, true);
+            assert.equal(getData[0].deleted, true);
 
         } catch(err) {
             if (err.response) {

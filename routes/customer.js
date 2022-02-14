@@ -4,6 +4,7 @@ var router = express.Router();
 const { Customer, ChargedUnder } = require('../models/Customer');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
+const { parseRequest, assertNotNull } = require('../common/helpers');
 
 /**
  * Customer route
@@ -12,35 +13,22 @@ const Log = require('../models/Log');
 
 
 /**
- *  GET method: View all customers or a single customer if id is given
+ *  GET method: Get customers
  *  - e.g. /api/customer OR /api/customer?id=123
  *  - requireAccess(ViewType.CRM, false) because this is only reading data
  * */ 
 router.get('/', requireAccess(ViewType.CRM, false), async function(req, res, next) {
-  const { id } = req.query; // This is same as `const id = req.params.id`;
+  const predicate = parseRequest(req.query);
   
   try {
-    if (id != null) { // Retrieve single customer
-      const customer = await Customer.findOne({ where: { id: id }, include: ChargedUnder });
-  
-      if (customer == null) {
-        res.status(400).send(`Customer id ${id} not found.`);
-        return;
-      }
-      
-      res.send(customer.toJSON());
-  
-    } else { // Retrieve ALL customers
-      const customers = await Customer.findAll({ include: ChargedUnder});
-      
-      res.send(customers);
-    }
+    const customers = await Customer.findAll(predicate);
+    res.send(customers);
+    
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
     console.log(err);
     res.status(500).send(err);
   }
-
 
 });
 
@@ -52,13 +40,11 @@ router.get('/', requireAccess(ViewType.CRM, false), async function(req, res, nex
  * */ 
 router.post('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description } = req.body;
-
-  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (company_name == null || p1_name == null 
-      || p1_phone_number == null || address == null 
-      || postal_code == null || charged_under_id == null 
-      || gst == null || gst_show == null) {
-    res.status(400).send("'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'charged_under_id', 'gst', 'gst_show' are required.", )
+  
+  try {
+    assertNotNull(req.body, ['company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'charged_under_id', 'gst', 'gst_show'])
+  } catch(err) {
+    res.status(400).send(err);
     return;
   }
 
@@ -92,12 +78,10 @@ router.post('/', requireAccess(ViewType.CRM, true), async function(req, res, nex
 router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description } = req.body;
 
-  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (id == null || company_name == null 
-      || p1_name == null || p1_phone_number == null 
-      || address == null || postal_code == null 
-      || charged_under_id == null || gst == null || gst_show == null) {
-    res.status(400).send("'id', 'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'charged_under_id', 'gst', 'gst_show' are required.", )
+  try {
+    assertNotNull(req.body, ['id', 'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'charged_under_id', 'gst', 'gst_show'])
+  } catch(err) {
+    res.status(400).send(err);
     return;
   }
 

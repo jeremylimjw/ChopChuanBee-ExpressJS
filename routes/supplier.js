@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const { requireAccess } = require('../auth');
-const Supplier = require('../models/Supplier');
+const { Supplier } = require('../models/Supplier');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');

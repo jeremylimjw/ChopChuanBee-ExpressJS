@@ -33,8 +33,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       const View = require('../models/View');
       const { ChargedUnder } = require('../models/Customer');
-      const {LeaveType, LeaveAccount} = require('../models/LeaveAccount');
-      const {LeaveStatus} = require('../models/LeaveApplication');
+      const { LeaveType, LeaveAccount } = require('../models/LeaveAccount');
+      const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
 
       await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
@@ -42,11 +42,6 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       await ChargedUnder.bulkCreate(Object.keys(ChargedUnderType).map(key => ChargedUnderType[key]));
       await LeaveType.bulkCreate(Object.keys(LeaveTypeEnum).map(key => LeaveTypeEnum[key]));
       await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
-     /*  await LeaveAccount.bulkCreate([ 
-        { entitled_days: 14, entitled_rollover: 3, leave_type_id: LeaveTypeEnum.ANNUAL.id },
-        { entitled_days: 14, entitled_rollover: 3, leave_type_id: LeaveTypeEnum.ANNUAL.id }
-
-      ]); */
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
      
       await Employee.bulkCreate([
@@ -57,6 +52,9 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const alice = await Employee.findOne({ where: { name: "Alice" } });
       await AccessRight.create({ has_write_access: true, employee_id: alice.id, view_id: ViewType.HR.id })
       await AccessRight.create({ has_write_access: false, employee_id: alice.id, view_id: ViewType.CRM.id })
+
+      const { Supplier, GUEST_ID } = require('../models/Supplier');
+      await Supplier.create({ id: GUEST_ID, company_name: 'Guest', s1_name: 'Guest', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA' });
 
     }
   

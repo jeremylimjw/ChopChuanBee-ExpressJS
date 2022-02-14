@@ -5,6 +5,7 @@ const { Product } = require('../models/Product');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');
+const { SupplierMenu, GUEST_ID } = require('../models/Supplier');
 
 
 router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, res, next) {
@@ -35,6 +36,9 @@ router.post('/', requireAccess(ViewType.INVENTORY, true), async function(req, re
   
   try {
     const newProduct = await Product.create({ name, description, unit, min_inventory_level });
+
+    // Add product to Guest supplier's menu
+    await SupplierMenu.create({ supplier_id: GUEST_ID, product_id: newProduct.id });
     
     // Record to admin logs
     const user = res.locals.user;

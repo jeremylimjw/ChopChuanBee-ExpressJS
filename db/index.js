@@ -16,7 +16,11 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
   host: process.env.PGHOST,
   dialect: 'postgres',
   port: 5432,
-  logging: false
+  logging: false,
+  dialectOptions: {
+    useUTC: false
+  },
+  timezone: '+08:00'
 });
 
 (async () => {

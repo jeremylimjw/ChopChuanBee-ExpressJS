@@ -8,6 +8,10 @@ const IncomeStatement = sequelize.define('income_statement', {
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     revenue: {
       type: DataTypes.DECIMAL,
       defaultValue: 0,
@@ -105,6 +109,10 @@ const IncomeStatement = sequelize.define('income_statement', {
     end_date: {
       type: DataTypes.DATE,
       allowNull: false,
+    },
+    deleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
 });
-module.exports = { IncomeStatement };
+module.exports =  IncomeStatement;

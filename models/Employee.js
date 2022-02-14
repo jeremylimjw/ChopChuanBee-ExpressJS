@@ -25,16 +25,13 @@ const Employee = sequelize.define('employee', {
     allowNull: false,
     unique: true,
   },
-  deleted: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
   contact_number: DataTypes.STRING,
   nok_name: DataTypes.STRING,
   nok_number: DataTypes.STRING,
   address: DataTypes.STRING,
   postal_code: DataTypes.STRING,
   discharge_date: DataTypes.DATE,
+  last_active: DataTypes.DATE,
 }, {
   updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
   createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'

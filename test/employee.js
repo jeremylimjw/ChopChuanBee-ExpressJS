@@ -38,7 +38,7 @@ describe('/employee', () => {
             const { data: getData } = await http.get(`/employee?id=${postData.id}`);
 
             // Assert changes
-            assert.notEqual(getData, null);
+            assert.notEqual(getData.length, 0);
 
         } catch(err) {
             if (err.response) {
@@ -60,12 +60,12 @@ describe('/employee', () => {
 
             // Retrieve employee
             const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
-            assert.notEqual(getData, null);
+            assert.notEqual(getData.length, 0);
 
             // Assert changes
-            assert.equal(getData.address, "Kent Ridge Hall");
-            assert.equal(getData.postal_code, "123456");
-            assert.equal(getData.access_rights[0].has_write_access, false);
+            assert.equal(getData[0].address, "Kent Ridge Hall");
+            assert.equal(getData[0].postal_code, "123456");
+            assert.equal(getData[0].access_rights[0].has_write_access, false);
 
         } catch(err) {
             if (err.response) {
@@ -117,11 +117,11 @@ describe('/employee', () => {
             const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
 
             // Assert changes
-            assert.equal(getData.access_rights.length, 3);
-            assert.equal(getData.access_rights[1].view_id, 2);
-            assert.equal(getData.access_rights[1].has_write_access, false);
-            assert.equal(getData.access_rights[2].view_id, 3);
-            assert.equal(getData.access_rights[2].has_write_access, true);
+            assert.equal(getData[0].access_rights.length, 3);
+            assert.equal(getData[0].access_rights[1].view_id, 2);
+            assert.equal(getData[0].access_rights[1].has_write_access, false);
+            assert.equal(getData[0].access_rights[2].view_id, 3);
+            assert.equal(getData[0].access_rights[2].has_write_access, true);
 
         } catch(err) {
             if (err.response) {
@@ -142,11 +142,11 @@ describe('/employee', () => {
 
             // Retrieve employee
             const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
-            assert.notEqual(getData, null);
+            assert.notEqual(getData.length, 0);
 
             // Assert changes
-            assert.equal(getData.address, "Yusof Ishak House");
-            assert.equal(getData.postal_code, "987654");
+            assert.equal(getData[0].address, "Yusof Ishak House");
+            assert.equal(getData[0].postal_code, "987654");
 
         } catch(err) {
             if (err.response) {
@@ -180,11 +180,11 @@ describe('/employee', () => {
             const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
 
             // Assert changes
-            assert.equal(getData.access_rights.length, 3);
-            assert.equal(getData.access_rights[1].view_id, 2);
-            assert.equal(getData.access_rights[1].has_write_access, true);
-            assert.equal(getData.access_rights[2].view_id, 3);
-            assert.equal(getData.access_rights[2].has_write_access, true);
+            assert.equal(getData[0].access_rights.length, 3);
+            assert.equal(getData[0].access_rights[1].view_id, 2);
+            assert.equal(getData[0].access_rights[1].has_write_access, true);
+            assert.equal(getData[0].access_rights[2].view_id, 3);
+            assert.equal(getData[0].access_rights[2].has_write_access, true);
 
         } catch(err) {
             if (err.response) {
@@ -213,9 +213,9 @@ describe('/employee', () => {
             const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
 
             // Assert changes
-            assert.equal(getData.access_rights.length, 2);
-            assert.equal(getData.access_rights[1].view_id, 3);
-            assert.equal(getData.access_rights[1].has_write_access, true);
+            assert.equal(getData[0].access_rights.length, 2);
+            assert.equal(getData[0].access_rights[1].view_id, 3);
+            assert.equal(getData[0].access_rights[1].has_write_access, true);
 
         } catch(err) {
             if (err.response) {
@@ -248,19 +248,19 @@ describe('/employee', () => {
         }
     });
 
-    it('DELETE /', async () => {
+    it('POST /deactivate', async () => {
         try {
             // Login as Admin
             http = await loginAsAdmin();
 
-            // Delete employee
-            await http.delete(`/employee?id=${newEmployee.id}`);
+            // Update employee
+            await http.post(`/employee/deactivate`, newEmployee);
 
             // Retrieve employee
             const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
 
             // Assert changes
-            assert.equal(getData.deleted, true);
+            assert.notEqual(getData[0].discharge_date, null);
 
         } catch(err) {
             if (err.response) {
@@ -275,8 +275,35 @@ describe('/employee', () => {
         try {
             http = await login(newEmployee.username, newPassword);
         } catch(err) { 
-            assert.equal(err.response.data, "This account does not exist anymore.");
+            assert.equal(err.response.data, "This account has been deactivated.");
         }
+    });
+
+    it('POST /activate', async () => {
+        try {
+            // Login as Admin
+            http = await loginAsAdmin();
+
+            // Update employee
+            await http.post(`/employee/activate`, newEmployee);
+
+            // Retrieve employee
+            const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
+
+            // Assert changes
+            assert.equal(getData[0].discharge_date, null);
+
+        } catch(err) {
+            if (err.response) {
+                console.log(err.response.status, err.response.data);
+            } else {
+                console.log(err);
+            }
+            assert.fail();
+        }
+
+        // Can login again
+        await login(newEmployee.username, newPassword);
     });
 
 })

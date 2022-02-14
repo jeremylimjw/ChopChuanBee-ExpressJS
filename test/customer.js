@@ -26,8 +26,8 @@ describe('/customer', () => {
             const { data: getData } = await http.get(`/customer?id=${postData.id}`);
 
             // Assert changes
-            assert.notEqual(getData, null);
-            newCustomer = getData;
+            assert.notEqual(getData[0], 0);
+            newCustomer = getData[0];
 
         } catch(err) {
             if (err.response) {
@@ -47,11 +47,11 @@ describe('/customer', () => {
 
             // Retrieve customer
             const { data: getData } = await http.get(`/customer?id=${newCustomer.id}`);
-            assert.notEqual(getData, null);
+            assert.notEqual(getData.length, 0);
 
             // Assert changes
-            assert.equal(getData.p2_name, "Jane Doe");
-            assert.equal(getData.p2_phone_number, "99998888");
+            assert.equal(getData[0].p2_name, "Jane Doe");
+            assert.equal(getData[0].p2_phone_number, "99998888");
 
         } catch(err) {
             if (err.response) {
@@ -72,7 +72,7 @@ describe('/customer', () => {
             const { data: getData } = await http.get(`/customer?id=${newCustomer.id}`);
 
             // Assert changes
-            assert.equal(getData.deleted, true);
+            assert.equal(getData[0].deleted, true);
 
         } catch(err) {
             if (err.response) {

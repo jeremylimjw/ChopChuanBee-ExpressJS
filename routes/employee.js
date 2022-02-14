@@ -11,6 +11,7 @@ const Log = require('../models/Log');
 const { sendEmailTo } = require('../emailer/index');
 const { Sequelize, DataTypes } = require('sequelize');
 const { AccessRight, validateAccessRights, removeAccessRights, insertAccessRights } = require('../models/AccessRight');
+const { assertNotNull, parseRequest } = require('../common/helpers');
 
 /**
  * Employee route
@@ -19,35 +20,22 @@ const { AccessRight, validateAccessRights, removeAccessRights, insertAccessRight
 
 
 /**
- *  GET method: View all employees or a single employee if id is given
+ *  GET method: Get employees
  *  - e.g. /api/employee OR /api/employee?id=123
  *  - requireAccess(ViewType.HR, false)
  * */ 
 router.get('/', requireAccess(ViewType.HR, false), async function(req, res, next) {
-    const { id } = req.query;
-
+    const predicate = parseRequest(req.query);
+    
     try {
-        // Retrieve a single employee
-        if (id != null) {
-            const employee = await Employee.findOne({ where: { id: id }, include: [{ model: AccessRight, include: View }, Role] });
-            if (employee == null) {
-                res.status(400).send(`Employee id ${id} not found.`);
-                return;
-            }
-
-            res.send(employee.toJSON());
-
-        } 
-        // Retrieve ALL employees
-        else {
-            const employees = await Employee.findAll({ include: [{ model: AccessRight, include: View }, Role] });
-
-            res.send(employees);
-        }
+        predicate.include = [{ model: AccessRight, include: View }, Role]
+        const employees = await Employee.findAll(predicate);
+        res.send(employees);
+      
     } catch(err) {
-        // Catch and return any uncaught exceptions while inserting into database
-        console.log(err);
-        res.status(500).send(err);
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
     }
 
 });
@@ -146,14 +134,12 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
  * */ 
 router.put('/', requireAccess(ViewType.HR), async function(req, res, next) {
     const { id, name, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights } = req.body;
-
-    // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-    if (id == null || name == null || email == null ||
-        role_id == null || contact_number == null ||
-        nok_name == null || nok_number == null ||
-        address == null || postal_code == null) {
-        res.status(400).send("'id', 'name', 'username', 'email', 'role_id', 'contact_number', 'nok_name', 'nok_number', 'address', 'postal_code' are required.", )
-        return;
+    
+    try {
+      assertNotNull(req.body, ['id', 'name', 'username', 'email', 'role_id', 'contact_number', 'nok_name', 'nok_number', 'address', 'postal_code'])
+    } catch(err) {
+      res.status(400).send(err);
+      return;
     }
     
     const user = res.locals.user;
@@ -209,15 +195,48 @@ router.put('/', requireAccess(ViewType.HR), async function(req, res, next) {
 });
 
 
-/**
- *  DELETE method: Update a employee 'deleted' attribute
- *  - /api/employee
- *  - requireAccess(ViewType.HR, true) because this is writing data
- * */ 
-router.delete('/', requireAccess(ViewType.HR, true), async function(req, res, next) {
-  const { id } = req.query;
+router.post('/deactivate', requireAccess(ViewType.HR, true), async function(req, res, next) {
+    const { id } = req.body;
 
-  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
+    if (id == null) {
+        res.status(400).send("'id' is required.", )
+        return;
+    }
+
+    try {
+        const employee = await Employee.findByPk(id);
+
+        if (employee == null) {
+        res.status(400).send(`Employee id ${id} not found.`)
+
+        } else {
+        employee.discharge_date = new Date();
+        employee.save();
+
+        // Record to admin logs
+        const user = res.locals.user;
+        await Log.create({ 
+            employee_id: user.id, 
+            view_id: ViewType.HR.id,
+            text: `${user.name} deactivated ${employee.name}'s record`, 
+        });
+
+        res.send({ id: employee.id });
+        }
+
+
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+router.post('/activate', requireAccess(ViewType.HR, true), async function(req, res, next) {
+  const { id } = req.body;
+
   if (id == null) {
     res.status(400).send("'id' is required.", )
     return;
@@ -226,12 +245,11 @@ router.delete('/', requireAccess(ViewType.HR, true), async function(req, res, ne
   try {
     const employee = await Employee.findByPk(id);
 
-    // If 'id' is not found return 400 Bad Request, if found then return the 'id'
     if (employee == null) {
       res.status(400).send(`Employee id ${id} not found.`)
 
     } else {
-      employee.deleted = true;
+      employee.discharge_date = null;
       employee.save();
 
       // Record to admin logs
@@ -239,7 +257,7 @@ router.delete('/', requireAccess(ViewType.HR, true), async function(req, res, ne
       await Log.create({ 
         employee_id: user.id, 
         view_id: ViewType.HR.id,
-        text: `${user.name} deleted ${employee.name}'s record`, 
+        text: `${user.name} activated ${employee.name}'s record`, 
       });
 
       res.send({ id: employee.id });

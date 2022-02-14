@@ -26,7 +26,7 @@ router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
   
   try {
     const currentBalances = await sequelize.query(
-      `SELECT leave_accounts.id, leave_accounts.entitled_days, entitled_days - COALESCE(SUM(num_days), 0) AS balance, leave_types.name leave_type_name, leave_types.id leave_type_id
+      `SELECT leave_accounts.id, leave_accounts.entitled_days, entitled_days - COALESCE(SUM(num_days), 0) AS balance, employee_id, leave_types.name leave_type_name, leave_types.id leave_type_id
         FROM leave_accounts LEFT OUTER JOIN 
           (SELECT * FROM leave_applications WHERE leave_status_id = 2 AND EXTRACT(year FROM start_date) = EXTRACT(year FROM CURRENT_DATE) ) active_leave_applications
           ON active_leave_applications.leave_account_id = leave_accounts.id 
@@ -245,7 +245,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
         include: [
           { 
             model: LeaveAccount, 
-            include: [{ model: Employee, attributes: [] }, LeaveType], 
+            include: [{ model: Employee, attributes: ['id', 'name'] }, LeaveType], 
             attributes: ['employee_id']
           }, 
           LeaveStatus
@@ -273,7 +273,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
         include: [
           { 
             model: LeaveAccount, 
-            include: [{ model: Employee, attributes: [] }, LeaveType], 
+            include: [{ model: Employee, attributes: ['id', 'name'] }, LeaveType], 
             attributes: ['employee_id'] 
           }, 
           LeaveStatus
@@ -294,7 +294,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
       const leaveApplications = await LeaveApplication.findAll({ include: [
         { 
           model: LeaveAccount, 
-          include: [{ model: Employee, attributes: [] }, LeaveType], 
+          include: [{ model: Employee, attributes: ['id', 'name'] }, LeaveType], 
           attributes: ['employee_id'],
           where: { employee_id } 
         }, 
@@ -319,7 +319,11 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
         return;
       }
 
+<<<<<<< HEAD
       const leaveApplications = await LeaveApplication.findAll({ include: [{ model: LeaveAccount, include: Employee, attributes: [] }, LeaveStatus] });
+=======
+      const leaveApplications = await LeaveApplication.findAll({ include: [{ model: LeaveAccount, include: { model: Employee, attributes: ['id', 'name'] } }, LeaveStatus] });
+>>>>>>> master
       res.send(leaveApplications);
 
     }

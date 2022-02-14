@@ -24,7 +24,7 @@ describe('/product', () => {
             const { data: getData } = await http.get(`/product?id=${postData.id}`);
 
             // Assert changes
-            assert.notEqual(getData.length, 0);
+            assert.notEqual(getData[0].length, 0);
             newProduct = getData[0];
 
         } catch(err) {
@@ -69,7 +69,6 @@ describe('/product', () => {
             const { data: getData } = await http.get(`/product?id=${newProduct.id}`);
 
             // Assert changes
-            assert.notEqual(getData[0].length, 0);
             assert.equal(getData[0].deleted, true);
 
         } catch(err) {

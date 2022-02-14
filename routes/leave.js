@@ -319,11 +319,7 @@ router.get('/application', requireAccess(ViewType.GENERAL), async function(req, 
         return;
       }
 
-<<<<<<< HEAD
-      const leaveApplications = await LeaveApplication.findAll({ include: [{ model: LeaveAccount, include: Employee, attributes: [] }, LeaveStatus] });
-=======
       const leaveApplications = await LeaveApplication.findAll({ include: [{ model: LeaveAccount, include: { model: Employee, attributes: ['id', 'name'] } }, LeaveStatus] });
->>>>>>> master
       res.send(leaveApplications);
 
     }

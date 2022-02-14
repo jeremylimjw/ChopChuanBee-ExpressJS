@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 const { requireAccess } = require('../auth');
-<<<<<<< HEAD
 const { Supplier, SupplierMenu } = require('../models/Supplier');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
@@ -10,14 +9,6 @@ const { parseRequest, assertNotNull } = require('../common/helpers');
 const { Product } = require('../models/Product');
 
 //Read supplier (find 1 or find all depending if ID was given)
-=======
-const Supplier = require('../models/Supplier');
-const ViewType = require('../common/ViewType');
-const Log = require('../models/Log');
-const { parseRequest, assertNotNull } = require('../common/helpers');
-
-
->>>>>>> master
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
   const predicate = parseRequest(req.query);
   
@@ -37,18 +28,10 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
 
     const { company_name, s1_name, s1_phone_number, address, postal_code, description, company_email, s2_name, s2_phone_number} = req.body;
 
-<<<<<<< HEAD
-    // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-    if (company_name == null || s1_name == null 
-        || s1_phone_number == null || address == null 
-        || postal_code == null ) {
-      res.status(400).send("'company_name', 's1_name', 's1_phone_number', 'address', 'postal_code' are required.", )
-=======
     try {
       assertNotNull(req.body, ['company_name', 's1_name', 's1_phone_number', 'address', 'postal_code'])
     } catch(err) {
       res.status(400).send(err);
->>>>>>> master
       return;
     }
   

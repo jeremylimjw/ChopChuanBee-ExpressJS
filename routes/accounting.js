@@ -64,13 +64,12 @@ router.get('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(req
 //incomeStatement  
 router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
     const { start_date , end_date } = req.query;
-    const newStart_date = new Date(start_date).toISOString();
     const revenue = await sequelize.query(
         `SELECT sum(amount) 
         FROM payments
-        WHERE movement_type_id = 1
-        AND created_at >= '${start_date}'
-        AND created_at <= '${end_date}'`,
+        WHERE movement_type_id = 2
+        AND created_at::DATE >= '${start_date}'
+        AND created_at::DATE <= '${end_date}'`,
         { 
           raw: true, 
           type: sequelize.QueryTypes.SELECT 
@@ -80,9 +79,9 @@ router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async 
       const COGS = await sequelize.query(
         `SELECT sum(qty_unitcost.total) as cost_of_goods_sold
         FROM (select (quantity * unit_cost) as total, created_at, movement_type_id FROM inventory_movements) qty_unitcost
-        WHERE movement_type_id = 1
-        AND created_at >= '${start_date}'
-        AND created_at <= '${end_date}'`,
+        WHERE movement_type_id = 2
+        AND created_at::DATE >= '${start_date}'
+        AND created_at::DATE <= '${end_date}'`,
         { 
           raw: true, 
           type: sequelize.QueryTypes.SELECT 
@@ -91,7 +90,7 @@ router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async 
      
 
       const created_at = await sequelize.query(
-        `SELECT created_at
+        `SELECT created_at::DATE
         FROM payments
         WHERE movement_type_id = 1
         order by created_at desc
@@ -101,16 +100,14 @@ router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async 
           type: sequelize.QueryTypes.SELECT 
         }
       );
-      console.log("ISO : "+newStart_date);
-      console.log("normal start date : "+start_date);
-      console.log(created_at);
+      
 
     const customer_sales_return = await sequelize.query(
         `SELECT sum(qty_unitcost.total) as sales
         FROM (select (quantity * (unit_price - unit_cost)) as total, created_at, movement_type_id FROM inventory_movements) qty_unitcost
         WHERE movement_type_id = 3
-        AND created_at >= '${start_date}'
-        AND created_at <= '${end_date}'`,
+        AND created_at::DATE >= '${start_date}'
+        AND created_at::DATE <= '${end_date}'`,
         { 
           raw: true, 
           type: sequelize.QueryTypes.SELECT 

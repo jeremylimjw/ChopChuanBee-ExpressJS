@@ -42,10 +42,9 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       const View = require('../models/View');
       const { ChargedUnder } = require('../models/Customer');
-      const {LeaveType, LeaveAccount} = require('../models/LeaveAccount');
-      const {LeaveStatus} = require('../models/LeaveApplication');
+      const { LeaveType, LeaveAccount } = require('../models/LeaveAccount');
+      const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
-    
 
       await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
       await Role.bulkCreate(Object.keys(RoleType).map(key => RoleType[key]));
@@ -86,13 +85,13 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const heng = await Supplier.findOne({ where: { company_name: "Heng Heng" } });
       await PurchaseOrder.bulkCreate([
         { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: heng.id },
-      ]);
+      ]); 
 
       const ikanBilis = await Product.findOne({ where: { name: "Ikan Bilis" } });
       await PurchaseOrderItem.bulkCreate([
         { unit_cost: 1,  quantity: 20, purchase_order_id: 1, product_id: ikanBilis.id }
-      ]);
-
+      ]); 
+ 
       const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
       await PaymentMethod.bulkCreate(Object.keys(PaymentMethodType).map(key => PaymentMethodType[key]));
       await AccountingType.bulkCreate(Object.keys(AccountingTypeEnum).map(key => AccountingTypeEnum[key]));
@@ -100,19 +99,22 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const { MovementType } = require('../models/MovementType');
       await MovementType.bulkCreate(Object.keys(MovementTypeEnum).map(key => MovementTypeEnum[key]));
       
-      await Payment.bulkCreate([
+       await Payment.bulkCreate([
         { amount: 100, purchase_order_id: 1, accounting_type_id: 1, movement_type_id:1 },
         { amount: -50, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 },
-      ]);
+      ]); 
 
       const { InventoryMovement } = require('../models/InventoryMovement');
-      const lineItem = await PurchaseOrderItem.findOne({ where: { product_id: ikanBilis.id } });
+       const lineItem = await PurchaseOrderItem.findOne({ where: { product_id: ikanBilis.id } });
       await InventoryMovement.bulkCreate([
         { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1 },
         { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 },
         { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 }
-      ]);
-    }
+      ]); 
+       const { GUEST_ID } = require('../models/Supplier');
+      await Supplier.create({ id: GUEST_ID, company_name: 'Guest', s1_name: 'Guest', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA' });
+    
+    } 
   
   } catch (err) {
     console.log("Connection to database failed.");

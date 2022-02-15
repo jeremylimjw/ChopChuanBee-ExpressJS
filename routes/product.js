@@ -4,43 +4,48 @@ const { requireAccess } = require('../auth');
 const { Product } = require('../models/Product');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
-const { Sequelize } = require('sequelize');
 const { parseRequest, assertNotNull } = require('../common/helpers');
+const { SupplierMenu, GUEST_ID } = require('../models/Supplier');
 
 
 router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, res, next) {
-    // This is a dynamic query where user can search using any column
-    const predicate = parseRequest(req.query, ['name']);
+  const predicate = parseRequest(req.query);
   
-    try {
-      const products = await Product.findAll(predicate);
-      res.send(products);
+  try {
+    const products = await Product.findAll(predicate);
+    res.send(products);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
 
-    } catch(err) {
-      console.log(err);
-      res.status(500).send(err);
-    }
 });
 
 router.post('/', requireAccess(ViewType.INVENTORY, true), async function(req, res, next) { 
-  const { name, description, unit, min_inventory_level } = req.body;
 
-  // Validation here
+  const {name, description, unit, min_inventory_level } = req.body;
+    
   try {
-    assertNotNull(req.body, ['name', 'unit', 'min_inventory_level']);
+    assertNotNull(req.body, ['name', 'unit', 'min_inventory_level'])
   } catch(err) {
     res.status(400).send(err);
     return;
   }
-
+  
   try {
     const newProduct = await Product.create({ name, description, unit, min_inventory_level });
+
+    // Add product to Guest supplier's menu
+    await SupplierMenu.create({ supplier_id: GUEST_ID, product_id: newProduct.id });
     
     // Record to admin logs
-    Log.create({ 
-      employee_id: res.locals.user.id, 
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
       view_id: ViewType.INVENTORY.id,
-      text: `${res.locals.user.name} created a product record for ${name}`, 
+      text: `${user.name} created a product record for ${name}`, 
     });
 
     res.send(newProduct.toJSON());
@@ -56,10 +61,10 @@ router.post('/', requireAccess(ViewType.INVENTORY, true), async function(req, re
 router.put('/', requireAccess(ViewType.INVENTORY, true), async function(req, res, next) {
   const { id, name, description, unit, min_inventory_level } = req.body;
 
-  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-  if (id == null || name == null 
-      || unit == null || min_inventory_level == null) {
-    res.status(400).send("'id', 'name' , 'unit', min_inventory_level' are required.", )
+  try {
+    assertNotNull(req.body, ['id', 'name', 'unit', 'min_inventory_level'])
+  } catch(err) {
+    res.status(400).send(err);
     return;
   }
 
@@ -91,7 +96,6 @@ router.put('/', requireAccess(ViewType.INVENTORY, true), async function(req, res
     console.log(err);
     res.status(500).send(err);
   }
-  
 });
 
 

@@ -38,8 +38,16 @@ module.exports = async function() {
     ChargedUnder.hasMany(Customer, { foreignKey: { allowNull: false, name: 'charged_under_id' }}); // Foreign key defaults to chargedUnderId, change to standardize
     Customer.belongsTo(ChargedUnder, { foreignKey: { allowNull: false, name: 'charged_under_id' }});
 
-    const { Supplier } = require('./Supplier');
+    const { Supplier, SupplierMenu } = require('./Supplier');
     const { Product } = require('./Product');
+
+    // M-M association
+    Supplier.belongsToMany(Product, { through: SupplierMenu, foreignKey: { allowNull: false, name: 'supplier_id' } });
+    Product.belongsToMany(Supplier, { through: SupplierMenu, foreignKey: { allowNull: false, name: 'product_id' } });
+    Supplier.hasMany(SupplierMenu, { foreignKey: { allowNull: false, name: 'supplier_id' }});
+    SupplierMenu.belongsTo(Supplier, { foreignKey: { allowNull: false, name: 'supplier_id' }});
+    Product.hasMany(SupplierMenu, { foreignKey: { allowNull: false, name: 'product_id' }});
+    SupplierMenu.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
     
     const { LeaveAccount, LeaveType } = require('./LeaveAccount');
     const { LeaveApplication, LeaveStatus } = require('./LeaveApplication');

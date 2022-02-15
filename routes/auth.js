@@ -23,8 +23,8 @@ router.post('/', async function(req, res, next) {
             return;
         }
 
-        if (employee.deleted == true) {
-            res.status(400).send("This account does not exist anymore.");
+        if (employee.dischargeDate != null) {
+            res.status(400).send("This account has been deactivated.");
             return;
         }
 
@@ -36,6 +36,9 @@ router.post('/', async function(req, res, next) {
             res.status(400).send("Invalid username or password.");
             return;
         }
+
+        // Update employee last_active field
+        await Employee.update({ last_active: new Date() }, { where: { id: employee.id }});
 
         delete user.password;
         

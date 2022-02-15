@@ -4,39 +4,21 @@ const { requireAccess } = require('../auth');
 const { Supplier } = require('../models/Supplier');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
-const { Sequelize } = require('sequelize');
+const { parseRequest, assertNotNull } = require('../common/helpers');
 
-//Read supplier (find 1 or find all depending if ID was given)
+
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
-    const { id, company_name } = req.query;;
+  const predicate = parseRequest(req.query);
   
-    try {
-      if (id != null) { // Retrieve single supplier
-        const supplier = await Supplier.findOne({ where: { id } });
+  try {
+    const suppliers = await Supplier.findAll(predicate);
+    res.send(suppliers);
     
-        if (supplier == null) {
-          res.status(400).send(`supplier id ${id} not found.`);
-          return;
-        }
-        
-        res.send(supplier.toJSON());
-
-      } else if (company_name != null) {
-        const suppliers = await Supplier.findAll({  where: { company_name: { [Sequelize.Op.iLike]: `%${company_name}%` } } });
-        
-        res.send(suppliers);
-    
-      } else { // Retrieve ALL suppliers
-        const suppliers = await Supplier.findAll();
-        
-        res.send(suppliers);
-      }
-    } catch(err) {
-      // Catch and return any uncaught exceptions while inserting into database
-      console.log(err);
-      res.status(500).send(err);
-    }
-
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
 
 });
 
@@ -44,11 +26,10 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
 
     const { company_name, s1_name, s1_phone_number, address, postal_code, description, company_email, s2_name, s2_phone_number} = req.body;
 
-    // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-    if (company_name == null || s1_name == null 
-        || s1_phone_number == null || address == null 
-        || postal_code == null ) {
-      res.status(400).send("'company_name', 's1_name', 's1_phone_number', 'address', 'postal_code' are required.", )
+    try {
+      assertNotNull(req.body, ['company_name', 's1_name', 's1_phone_number', 'address', 'postal_code'])
+    } catch(err) {
+      res.status(400).send(err);
       return;
     }
   
@@ -81,11 +62,10 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
  router.put('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
     const { id, company_name,s1_name, s1_phone_number, address, postal_code, description, company_email,s2_name, s2_phone_number} = req.body;
   
-    // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-    if ( id == null || company_name == null || s1_name == null 
-        || s1_phone_number == null || address == null 
-        || postal_code == null ) {
-      res.status(400).send("'id','company_name', 's1_name', 's1_phone_number', 'address', 'postal_code' are required.", )
+    try {
+      assertNotNull(req.body, ['id', 'company_name', 's1_name', 's1_phone_number', 'address', 'postal_code'])
+    } catch(err) {
+      res.status(400).send(err);
       return;
     }
   

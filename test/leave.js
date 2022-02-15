@@ -190,6 +190,8 @@ describe('/employee/leave', () => {
             const { data: getData4 } = await http.get(`/employee/leave/application`);
             assert.notEqual(getData4.length, 0);
 
+            console.log (getData4);
+
         } catch(err) {
             if (err.response) {
                 console.log(err.response.status, err.response.data);

@@ -39,6 +39,7 @@ const Customer = sequelize.define('customer', {
     type: DataTypes.BOOLEAN,
     defaultValue: false
   },
+  description: DataTypes.STRING,
   company_email: DataTypes.STRING,
   p2_name: DataTypes.STRING,
   p2_phone_number: DataTypes.STRING,

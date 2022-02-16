@@ -4,20 +4,14 @@ const { requireAccess } = require('../auth');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');
-const { Employee } = require('../models/Employee');
-const Sequelize = require('sequelize');
 
 
 router.get('/', requireAccess(ViewType.ADMIN, false), async function(req, res, next) {
-    const { name } = req.query;
-    delete req.query.name;
     const predicate = parseRequest(req.query);
   
     try {
-        predicate.include = [{ model: Employee, where: { name: { [Sequelize.Op.iLike]: `%${name || ''}%` }}}];
-        
-        const suppliers = await Log.findAll(predicate);
-        res.send(suppliers);
+        const logs = await Log.findAll(predicate);
+        res.send(logs);
         
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database

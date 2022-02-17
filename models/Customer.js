@@ -61,4 +61,18 @@ const ChargedUnder = sequelize.define('charged_under', {
   timestamps: false // Dont record 'updatedAt' and 'createdAt'
 });
 
-module.exports = { Customer, ChargedUnder };
+const CustomerMenu = sequelize.define('customer_menu', {
+  id: {
+    type: DataTypes.UUID,
+    primaryKey: true,
+    defaultValue: DataTypes.UUIDV4
+  },
+  product_alias: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+}, {
+  timestamps: false,
+});
+
+module.exports = { Customer, CustomerMenu, ChargedUnder };

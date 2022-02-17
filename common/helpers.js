@@ -1,30 +1,5 @@
-const { query } = require('express');
 const { Sequelize } = require('sequelize');
-const { AccessRight } = require('../models/AccessRight');
-const { Customer } = require('../models/Customer');
-const { Employee } = require('../models/Employee');
-const { LeaveAccount } = require('../models/LeaveAccount');
-const { LeaveApplication } = require('../models/LeaveApplication');
-const Log = require('../models/Log');
-const { Product } = require('../models/Product');
-const { Supplier } = require('../models/Supplier');
-const View = require('../models/View');
-
-function getModel(name) {
-    switch (name) {
-        case 'access_right': return AccessRight;
-        case 'customer': return Customer;
-        case 'employee': return Employee;
-        case 'leave_account': return LeaveAccount;
-        case 'leave_application': return LeaveApplication;
-        case 'log': return Log;
-        case 'product': return Product;
-        case 'supplier': return Supplier;
-        case 'view': return View;
-        default: return null;
-    }
-}
-
+const { getModel } = require('../models');
 
 const parseRequest = (queries) => {
     const predicate = {

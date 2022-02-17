@@ -21,7 +21,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
     console.log("Connection to database established");
 
     // Load and initialize all tables/associations
-    await require('../models')();
+    const { syncAssociations } = require('../models');
+    await syncAssociations();
 
     // Data initiation
     const { Employee, Role } = require('../models/Employee');

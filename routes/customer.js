@@ -1,7 +1,7 @@
 var express = require('express');
 const { requireAccess } = require('../auth');
 var router = express.Router();
-const { Customer, ChargedUnder } = require('../models/Customer');
+const { Customer, CustomerMenu } = require('../models/Customer');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');
@@ -156,6 +156,67 @@ router.delete('/', requireAccess(ViewType.CRM, true), async function(req, res, n
 
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+router.get('/menu', requireAccess(ViewType.CRM, false), async function(req, res, next) {
+  const predicate = parseRequest(req.query);
+
+  try {
+    const customerMenu = await CustomerMenu.findAll(predicate);
+    res.send(customerMenu);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+router.post('/menu', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { customer_menu_items } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['customer_menu_items']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const newCustomerMenus = await CustomerMenu.bulkCreate(customer_menu_items);
+    res.send(newCustomerMenus);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+router.delete('/menu', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { id } = req.query;
+
+  // Validation here
+  try {
+    assertNotNull(req.query, ['id']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    await CustomerMenu.destroy({ where: { id } });
+    res.send({ id: id });
+
+  } catch(err) {
     console.log(err);
     res.status(500).send(err);
   }

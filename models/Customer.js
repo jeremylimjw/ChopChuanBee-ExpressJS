@@ -35,10 +35,7 @@ const Customer = sequelize.define('customer', {
     type: DataTypes.BOOLEAN,
     allowNull: false
   },
-  deleted: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
+  deactivated_date: DataTypes.DATE,
   description: DataTypes.STRING,
   company_email: DataTypes.STRING,
   p2_name: DataTypes.STRING,

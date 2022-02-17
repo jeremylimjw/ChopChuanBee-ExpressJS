@@ -63,16 +63,37 @@ describe('/customer', () => {
         }
     });
 
-    it('DELETE /', async () => {
+    it('POST /deactivate', async () => {
         try {
             // Delete customer
-            await http.delete(`/customer?id=${newCustomer.id}`);
+            await http.post(`/customer/deactivate`, { id: newCustomer.id });
 
             // Retrieve customer
             const { data: getData } = await http.get(`/customer?id=${newCustomer.id}`);
 
             // Assert changes
-            assert.equal(getData[0].deleted, true);
+            assert.notEqual(getData[0].deactivated_date, null);
+
+        } catch(err) {
+            if (err.response) {
+                console.log(err.response.status, err.response.data);
+            } else {
+                console.log(err);
+            }
+            assert.fail();
+        }
+    });
+
+    it('POST /activate', async () => {
+        try {
+            // Delete customer
+            await http.post(`/customer/activate`, { id: newCustomer.id });
+
+            // Retrieve customer
+            const { data: getData } = await http.get(`/customer?id=${newCustomer.id}`);
+
+            // Assert changes
+            assert.equal(getData[0].deactivated_date, null);
 
         } catch(err) {
             if (err.response) {

@@ -54,6 +54,83 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
 });
 
 
+router.post('/deactivate', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { id } = req.body;
+
+  if (id == null) {
+      res.status(400).send("'id' is required.", )
+      return;
+  }
+
+  try {
+      const supplier = await Supplier.findByPk(id);
+
+      if (supplier == null) {
+      res.status(400).send(`supplier id ${id} not found.`)
+
+      } else {
+      supplier.deactivated_date = new Date();
+      supplier.save();
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+          employee_id: user.id, 
+          view_id: ViewType.SCM.id,
+          text: `${user.name} deactivated ${supplier.name}'s record`, 
+      });
+
+      res.send({ id: supplier.id });
+      }
+
+
+  } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+  }
+
+});
+
+
+router.post('/activate', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { id } = req.body;
+
+  if (id == null) {
+    res.status(400).send("'id' is required.", )
+    return;
+  }
+
+  try {
+    const supplier = await Supplier.findByPk(id);
+
+    if (supplier == null) {
+      res.status(400).send(`Supplier id ${id} not found.`)
+
+    } else {
+      supplier.deactivated_date = null;
+      supplier.save();
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.SCM.id,
+        text: `${user.name} activated ${supplier.name}'s record`, 
+      });
+
+      res.send({ id: supplier.id });
+    }
+
+
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
 /**
  *  PUT method: Update a supplier given the data in the HTTP body
  *  - /api/supplier
@@ -99,50 +176,6 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
     }
   
   });
-  
-/**
- *  DELETE method: Update a supplier 'deleted' attribute
- *  - /api/supplier
- *  - requireAccess(ViewType.CRM, true) because this is writing data
- * */ 
-router.delete('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
-    const { id } = req.query;
-  
-    // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-    if (id == null) {
-      res.status(400).send("'id' is required.", )
-      return;
-    }
-  
-    try {
-      const supplier = await Supplier.findByPk(id);
-  
-      // If 'id' is not found return 400 Bad Request, if found then return the 'id'
-      if (supplier == null) {
-        res.status(400).send(`Supplier id ${id} not found.`)
-  
-      } else {
-        supplier.deleted = true;
-        supplier.save();
-  
-        // Record to admin logs
-        const user = res.locals.user;
-        await Log.create({ 
-          employee_id: user.id, 
-          view_id: ViewType.SCM.id,
-          text: `${user.name} deleted ${supplier.company_name}'s supplier record`, 
-        });
-  
-        res.send({ id: id });
-      }
-  
-  
-    } catch(err) {
-      // Catch and return any uncaught exceptions while inserting into database
-      console.log(err);
-      res.status(500).send(err);
-    }
-  
-  });
+
   
 module.exports = router;

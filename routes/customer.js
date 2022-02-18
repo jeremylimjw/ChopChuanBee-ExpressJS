@@ -195,59 +195,22 @@ router.post('/activate', requireAccess(ViewType.CRM, true), async function(req, 
 });
 
 
-router.get('/menu', requireAccess(ViewType.CRM, false), async function(req, res, next) {
-  const predicate = parseRequest(req.query);
-
-  try {
-    const customerMenu = await CustomerMenu.findAll(predicate);
-    res.send(customerMenu);
-
-  } catch(err) {
-    console.log(err);
-    res.status(500).send(err);
-  }
-
-});
-
-
-router.post('/menu', requireAccess(ViewType.CRM, true), async function(req, res, next) {
-  const { customer_menu_items } = req.body;
+router.put('/menu', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { customer_id, customer_menus } = req.body;
 
   // Validation here
   try {
-    assertNotNull(req.body, ['customer_menu_items']);
+    assertNotNull(req.body, ['customer_id', 'customer_menus']);
   } catch(err) {
     res.status(400).send(err);
     return;
   }
 
   try {
-    const results = await CustomerMenu.bulkCreate(customer_menu_items);
-    const newCustomerMenuItems = await CustomerMenu.findAll({ where: { id: results.map(x => x.id) }, include: [Product]})
-    res.send(newCustomerMenuItems);
-
-  } catch(err) {
-    console.log(err);
-    res.status(500).send(err);
-  }
-
-});
-
-
-router.delete('/menu', requireAccess(ViewType.CRM, true), async function(req, res, next) {
-  const { id } = req.query;
-
-  // Validation here
-  try {
-    assertNotNull(req.query, ['id']);
-  } catch(err) {
-    res.status(400).send(err);
-    return;
-  }
-
-  try {
-    await CustomerMenu.destroy({ where: { id } });
-    res.send({ id: id });
+    await CustomerMenu.destroy({ where: { customer_id }})
+    await CustomerMenu.bulkCreate(customer_menus);
+    const newItems = await CustomerMenu.findAll({ where: { customer_id }, include: [Product], order: ['product_alias'] });
+    res.send(newItems);
 
   } catch(err) {
     console.log(err);

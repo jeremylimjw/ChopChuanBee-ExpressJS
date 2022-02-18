@@ -5,6 +5,7 @@ const { Customer, CustomerMenu } = require('../models/Customer');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');
+const { Product } = require('../models/Product');
 
 /**
  * Customer route
@@ -221,8 +222,9 @@ router.post('/menu', requireAccess(ViewType.CRM, true), async function(req, res,
   }
 
   try {
-    const newCustomerMenus = await CustomerMenu.bulkCreate(customer_menu_items);
-    res.send(newCustomerMenus);
+    const results = await CustomerMenu.bulkCreate(customer_menu_items);
+    const newCustomerMenuItems = await CustomerMenu.findAll({ where: { id: results.map(x => x.id) }, include: [Product]})
+    res.send(newCustomerMenuItems);
 
   } catch(err) {
     console.log(err);

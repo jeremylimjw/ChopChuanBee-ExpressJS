@@ -56,6 +56,22 @@ const parseRequest = (queries) => {
         delete queries.order_by;
     }
 
+    // Transform between query Sequelize.Op.is or Sequelize.Op.not query
+    for (let key of Object.keys(queries)) {
+        if (key.endsWith('_is_null')) {
+            const newKey = key.replace('_is_null', '');
+            predicate.where[`${newKey}`] = { [Sequelize.Op.is]: null }
+
+            delete queries[key];
+        }
+        if (key.endsWith('_is_nn')) {
+            const newKey = key.replace('_is_nn', '');
+            predicate.where[`${newKey}`] = { [Sequelize.Op.not]: null }
+
+            delete queries[key];
+        }
+    }
+
     // Transform between query Sequelize.Op.between query
     for (let key of Object.keys(queries)) {
         if (key.endsWith('_from')) {

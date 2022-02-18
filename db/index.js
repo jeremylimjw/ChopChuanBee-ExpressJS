@@ -6,6 +6,7 @@ const ChargedUnderType = require('../common/ChargedUnderType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
 const LeaveStatusEnum = require('../common/LeaveStatusEnum');
 const ProductCategoryEnum = require('../common/ProductCategory');
+const { insertDemoData } = require('../demo');
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
@@ -33,7 +34,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       console.log("First run detected, running data init");
 
       const View = require('../models/View');
-      const { ChargedUnder } = require('../models/Customer');
+      const { ChargedUnder, Customer } = require('../models/Customer');
       const { LeaveType, LeaveAccount } = require('../models/LeaveAccount');
       const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
@@ -56,6 +57,9 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       const { Supplier, GUEST_ID } = require('../models/Supplier');
       await Supplier.create({ id: GUEST_ID, company_name: 'Guest', s1_name: 'Guest', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA' });
+
+      // Comment this out if u don't want large dataset to init
+      await insertDemoData();
 
     }
   

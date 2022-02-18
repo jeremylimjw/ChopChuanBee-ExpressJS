@@ -195,6 +195,20 @@ router.post('/activate', requireAccess(ViewType.CRM, true), async function(req, 
 });
 
 
+router.get('/menu', requireAccess(ViewType.CRM, false), async function(req, res, next) {
+  const predicate = parseRequest(req.query);
+
+  try {
+    const customerMenu = await CustomerMenu.findAll(predicate);
+    res.send(customerMenu);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
 router.put('/menu', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { customer_id, customer_menus } = req.body;
 

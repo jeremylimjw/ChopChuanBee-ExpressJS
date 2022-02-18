@@ -15,10 +15,7 @@ const Product = sequelize.define('product', {
     type: DataTypes.INTEGER,
     defaultValue: 0
   },
-  deleted: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
+  deactivated_date: DataTypes.DATE,
   description: DataTypes.STRING,
   unit: DataTypes.STRING,
 },{

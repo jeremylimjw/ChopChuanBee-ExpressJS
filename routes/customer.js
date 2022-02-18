@@ -141,7 +141,7 @@ router.post('/deactivate', requireAccess(ViewType.CRM, true), async function(req
       await Log.create({ 
           employee_id: user.id, 
           view_id: ViewType.CRM.id,
-          text: `${user.name} deactivated ${customer.name}'s record`, 
+          text: `${user.name} deactivated ${customer.company_name}'s record`, 
       });
 
       res.send({ id: customer.id, deactivated_date: customer.deactivated_date });
@@ -178,7 +178,7 @@ router.post('/activate', requireAccess(ViewType.CRM, true), async function(req, 
       const user = res.locals.user;
       await Log.create({ 
         employee_id: user.id, 
-        view_id: ViewType.HR.id,
+        view_id: ViewType.CRM.id,
         text: `${user.name} activated ${customer.name}'s record`, 
       });
 

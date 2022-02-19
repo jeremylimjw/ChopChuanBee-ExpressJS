@@ -109,25 +109,25 @@ router.post('/deactivate', requireAccess(ViewType.SCM, true), async function(req
   }
 
   try {
-      const supplier = await Supplier.findByPk(id);
+    const supplier = await Supplier.findByPk(id);
 
-      if (supplier == null) {
-      res.status(400).send(`Supplier id ${id} not found.`)
+    if (supplier == null) {
+    res.status(400).send(`Supplier id ${id} not found.`)
 
-      } else {
-      supplier.deactivated_date = new Date();
-      supplier.save();
+    } else {
+    supplier.deactivated_date = new Date();
+    supplier.save();
 
-      // Record to admin logs
-      const user = res.locals.user;
-      await Log.create({ 
-          employee_id: user.id, 
-          view_id: ViewType.SCM.id,
-          text: `${user.name} deactivated ${supplier.name}'s record`, 
-      });
+    // Record to admin logs
+    const user = res.locals.user;
+    await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.SCM.id,
+        text: `${user.name} deactivated ${supplier.name}'s record`, 
+    });
 
-      res.send({ id: supplier.id });
-      }
+    res.send({ id: supplier.id, deactivated_date: supplier.deactivated_date });
+  }
 
 
   } catch(err) {
@@ -165,7 +165,7 @@ router.post('/activate', requireAccess(ViewType.SCM, true), async function(req, 
         text: `${user.name} activated ${supplier.name}'s record`, 
       });
 
-      res.send({ id: supplier.id });
+      res.send({ id: supplier.id, deactivated_date: null });
     }
 
 

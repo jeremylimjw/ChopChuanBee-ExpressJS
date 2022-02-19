@@ -112,5 +112,20 @@ module.exports = {
                 throw `'${key}' is required.`;
             }
         }
+    },
+    compare(oldItems, newItems, key) {
+        const toRemove = [];
+        const toAdd = [];
+        for (let item of oldItems) {
+            const index = newItems.findIndex(x => x[`${key}`] === item[`${key}`])
+            if (index === -1) 
+                toRemove.push(item)
+        }
+        for (let item of newItems) {
+            const index = oldItems.findIndex(x => x[`${key}`] === item[`${key}`])
+            if (index === -1) 
+                toAdd.push(item)
+        }
+        return [toRemove, toAdd];
     }
 }

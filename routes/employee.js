@@ -31,7 +31,7 @@ router.get('/', requireAccess(ViewType.HR, false), async function(req, res, next
         predicate.order = predicate.order || [];
         predicate.include = [{ model: AccessRight, include: View }, Role]
         predicate.order.push([AccessRight, 'has_write_access', 'DESC'])
-        
+
         const employees = await Employee.findAll(predicate);
         res.send(employees);
       
@@ -57,14 +57,6 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
     } catch(err) {
       res.status(400).send(err);
       return;
-    }
-    
-    // Access Rights Validation
-    try {
-        validateAccessRights(access_rights);
-    } catch(err) {
-        res.status(400).send(err);
-        return;
     }
 
     try {

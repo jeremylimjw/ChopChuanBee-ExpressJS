@@ -3,10 +3,9 @@ const { requireAccess } = require('../auth');
 const { compare, assertNotNull } = require('../common/helpers');
 var router = express.Router();
 const ViewType = require('../common/ViewType');
-const { insertAccessRights, validateAccessRights, removeAccessRights, validateRemoveAccessRights, AccessRight, createAccessRight, deleteAccessRight } = require('../models/AccessRight');
+const { AccessRight } = require('../models/AccessRight');
 const { Employee } = require('../models/Employee');
 const Log = require('../models/Log');
-
 
 
 router.put('/accessRight', requireAccess(ViewType.ADMIN, true), async function(req, res, next) {
@@ -22,26 +21,35 @@ router.put('/accessRight', requireAccess(ViewType.ADMIN, true), async function(r
     try {
         const employee = await Employee.findByPk(id, { include: AccessRight });
         
-        const [toRemove, toAdd] = compare(employee.access_rights, access_rights, 'view_id');
+        const toRemove = compare(employee.access_rights, access_rights, 'view_id');
 
         // Remove old access rights
         for (let item of toRemove) {
-            const predicate = { 
-                employee_id: employee.id, 
-                view_id: item.view_id 
-            }
-            await deleteAccessRight(predicate, res.locals.user, employee);
+            await AccessRight.destroy({ 
+                where: { 
+                    employee_id: employee.id, 
+                    view_id: item.view_id 
+                } 
+            });
         }
 
-        // Insert new access rights
+        // Upsert remaining access rights
         for (let item of access_rights) {
             const newItem = {
                 employee_id: employee.id,
                 view_id: item.view_id,
                 has_write_access: item.has_write_access,
             }
-            await createAccessRight(newItem, res.locals.user, employee);
+            await AccessRight.upsert(newItem);
         }
+
+        // Record in logs
+        const user = res.locals.user;
+        await Log.create({ 
+            employee_id: user.id, 
+            view_id: ViewType.ADMIN.id,
+            text: `${user.name} updated ${employee.name} access rights`, 
+        });
 
         res.send({ id: id });
 

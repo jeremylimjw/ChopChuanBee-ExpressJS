@@ -66,16 +66,37 @@ describe('/supplier', () => {
         }
     });
 
-    it('DELETE /', async () => {
+    it('POST /deactivate', async () => {
         try {
-            // Delete supplier
-            const { data: deleteData } = await http.delete(`/supplier?id=${newSupplier.id}`);
+            // Deactivate supplier
+            await http.post(`/supplier/deactivate`, { id: newSupplier.id });
 
             // Retrieve supplier
             const { data: getData } = await http.get(`/supplier?id=${newSupplier.id}`);
 
             // Assert changes
-            assert.equal(getData[0].deleted, true);
+            assert.notEqual(getData[0].deactivated_date, null);
+
+        } catch(err) {
+            if (err.response) {
+                console.log(err.response.status, err.response.data);
+            } else {
+                console.log(err);
+            }
+            assert.fail();
+        }
+    });
+
+    it('POST /activate', async () => {
+        try {
+            // Activate supplier
+            await http.post(`/supplier/activate`, { id: newSupplier.id });
+
+            // Retrieve supplier
+            const { data: getData } = await http.get(`/supplier?id=${newSupplier.id}`);
+
+            // Assert changes
+            assert.equal(getData[0].deactivated_date, null);
 
         } catch(err) {
             if (err.response) {

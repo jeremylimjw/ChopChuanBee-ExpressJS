@@ -66,7 +66,7 @@ router.post('/deactivate', requireAccess(ViewType.SCM, true), async function(req
       const supplier = await Supplier.findByPk(id);
 
       if (supplier == null) {
-      res.status(400).send(`supplier id ${id} not found.`)
+      res.status(400).send(`Supplier id ${id} not found.`)
 
       } else {
       supplier.deactivated_date = new Date();

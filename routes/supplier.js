@@ -207,8 +207,8 @@ router.put('/menu', requireAccess(ViewType.SCM, true), async function(req, res, 
   try {
     await SupplierMenu.destroy({ where: { supplier_id }})
     await SupplierMenu.bulkCreate(supplier_menus);
-    const newItems = await SupplierMenu.findAll({ where: { supplier_id }, include: [Product], order: [[Product, 'name']] });
-    res.send(newItems);
+    
+    res.send({ id: supplier_id });
 
   } catch(err) {
     console.log(err);

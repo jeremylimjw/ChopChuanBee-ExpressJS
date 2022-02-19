@@ -223,8 +223,8 @@ router.put('/menu', requireAccess(ViewType.CRM, true), async function(req, res, 
   try {
     await CustomerMenu.destroy({ where: { customer_id }})
     await CustomerMenu.bulkCreate(customer_menus);
-    const newItems = await CustomerMenu.findAll({ where: { customer_id }, include: [Product], order: ['product_alias'] });
-    res.send(newItems);
+    
+    res.send({ id: customer_id });
 
   } catch(err) {
     console.log(err);

@@ -5,7 +5,7 @@ module.exports = [
         "company_name": "Fitzgerald Kitchens Ltd",
         "description": "Function-Based Didactic Matrix",
         "postal_code": "408564",
-        "s1_name": "GregoryFitzgerald",
+        "s1_name": "Gregory Fitzgerald",
         "s1_phone_number": "67411927"
     },
     {
@@ -14,7 +14,7 @@ module.exports = [
         "company_name": "East View Manufacturing Ltd",
         "description": "Devolved Zerodefect Array",
         "postal_code": "627788",
-        "s1_name": "RenaNeville",
+        "s1_name": "Rena Neville",
         "s1_phone_number": "68638461"
     },
     {
@@ -23,7 +23,7 @@ module.exports = [
         "company_name": "Elerick Office Furniture Ltd",
         "description": "Adaptive Cohesive Analyzer",
         "postal_code": "079903",
-        "s1_name": "LiamElerick",
+        "s1_name": "Liam Elerick",
         "s1_phone_number": "62241892"
     },
     {
@@ -32,7 +32,7 @@ module.exports = [
         "company_name": "Dover Cycles Ltd",
         "description": "Organic Exuding Architecture",
         "postal_code": "530630",
-        "s1_name": "HannahDover",
+        "s1_name": "Hannah Dover",
         "s1_phone_number": "62831946"
     },
     {
@@ -41,7 +41,7 @@ module.exports = [
         "company_name": "Illsley Cleaning Products Ltd",
         "description": "Multi-Lateral Motivating Moderator",
         "postal_code": "539215",
-        "s1_name": "MatthewIllsley",
+        "s1_name": "Matthew Illsley",
         "s1_phone_number": "62845263"
     },
     {
@@ -50,7 +50,7 @@ module.exports = [
         "company_name": "Pryor Motorcycles Ltd",
         "description": "Cross-Group Tertiary Customerloyalty",
         "postal_code": "048581",
-        "s1_name": "JoannePryor",
+        "s1_name": "Joanne Pryor",
         "s1_phone_number": "62204724"
     },
     {
@@ -59,7 +59,7 @@ module.exports = [
         "company_name": "Hadfield Fixings Ltd",
         "description": "Integrated Web-Enabled Monitoring",
         "postal_code": "188061",
-        "s1_name": "JamesHadfield",
+        "s1_name": "James Hadfield",
         "s1_phone_number": "62975364"
     },
     {
@@ -68,7 +68,7 @@ module.exports = [
         "company_name": "Patrick Health Products Ltd",
         "description": "Profound Optimizing Policy",
         "postal_code": "408701",
-        "s1_name": "LucyPatrick",
+        "s1_name": "Lucy Patrick",
         "s1_phone_number": "67460814"
     },
     {
@@ -77,7 +77,7 @@ module.exports = [
         "company_name": "Hadfield Watches Ltd",
         "description": "Enhanced Cohesive Function",
         "postal_code": "228213",
-        "s1_name": "MalcolmHadfield",
+        "s1_name": "Malcolm Hadfield",
         "s1_phone_number": "65-67381799"
     },
     {
@@ -86,7 +86,7 @@ module.exports = [
         "company_name": "Rawlinson Agency Ltd",
         "description": "Sharable Discrete Model",
         "postal_code": "038988",
-        "s1_name": "DonnaRawlinson",
+        "s1_name": "Donna Rawlinson",
         "s1_phone_number": "62388964"
     },
     {
@@ -95,7 +95,7 @@ module.exports = [
         "company_name": "Sylvester Luxury Cars Ltd",
         "description": "Visionary Dynamic Matrix",
         "postal_code": "179097",
-        "s1_name": "PatrickSylvester",
+        "s1_name": "Patrick Sylvester",
         "s1_phone_number": "63342212"
     },
     {
@@ -104,7 +104,7 @@ module.exports = [
         "company_name": "Zuckerman Carpenters Ltd",
         "description": "Multi-Lateral Global Utilisation",
         "postal_code": "199597",
-        "s1_name": "AnnaZuckerman",
+        "s1_name": "Anna Zuckerman",
         "s1_phone_number": "63363975"
     },
     {
@@ -113,7 +113,7 @@ module.exports = [
         "company_name": "Sutton Nursing Supplies Ltd",
         "description": "Front-Line 3Rdgeneration Support",
         "postal_code": "307644",
-        "s1_name": "YusefSutton",
+        "s1_name": "Yusef Sutton",
         "s1_phone_number": "62543333"
     },
     {
@@ -122,7 +122,7 @@ module.exports = [
         "company_name": "Brooks Motorcycles Ltd",
         "description": "De-Engineered Optimizing Task-Force",
         "postal_code": "319191",
-        "s1_name": "VioletBrooks",
+        "s1_name": "Violet Brooks",
         "s1_phone_number": "0 6354 5139"
     },
     {
@@ -131,7 +131,7 @@ module.exports = [
         "company_name": "Keays Traders Ltd",
         "description": "Exclusive Actuating Neural-Net",
         "postal_code": "128384",
-        "s1_name": "ScottKeays",
+        "s1_name": "Scott Keays",
         "s1_phone_number": "63922546"
     },
     {
@@ -140,7 +140,7 @@ module.exports = [
         "company_name": "Pinter Finishing Ltd",
         "description": "Open-Architected Assymetric Parallelism",
         "postal_code": "609649",
-        "s1_name": "FayPinter",
+        "s1_name": "Fay Pinter",
         "s1_phone_number": "65-955-41168"
     },
     {
@@ -149,7 +149,7 @@ module.exports = [
         "company_name": "Quality Care Services Ltd",
         "description": "Sharable 3Rdgeneration Ability",
         "postal_code": "079903",
-        "s1_name": "ChristopherNewbry",
+        "s1_name": "Christopher Newbry",
         "s1_phone_number": "65-68534321"
     },
     {
@@ -158,7 +158,7 @@ module.exports = [
         "company_name": "Hadden Tools Ltd",
         "description": "Facetoface Tertiary Flexibility",
         "postal_code": "460115",
-        "s1_name": "KatieHadden",
+        "s1_name": "Katie Hadden",
         "s1_phone_number": "64253425"
     },
     {
@@ -167,7 +167,7 @@ module.exports = [
         "company_name": "Classic Carpenters Ltd",
         "description": "Compatible Context-Sensitive Database",
         "postal_code": "238875",
-        "s1_name": "BenjaminHancock",
+        "s1_name": "Benjamin Hancock",
         "s1_phone_number": "67323156"
     },
     {
@@ -176,7 +176,7 @@ module.exports = [
         "company_name": "Houston Scooters Ltd",
         "description": "Synergistic Discrete Circuit",
         "postal_code": "239924",
-        "s1_name": "RoseHouston",
+        "s1_name": "Rose Houston",
         "s1_phone_number": "63385887"
     },
     {
@@ -185,7 +185,7 @@ module.exports = [
         "company_name": "Silver Manufacturing Ltd",
         "description": "Compatible Non-Volatile Superstructure",
         "postal_code": "530457",
-        "s1_name": "PhillipCartwright",
+        "s1_name": "Phillip Cartwright",
         "s1_phone_number": "63850560"
     },
     {
@@ -194,7 +194,7 @@ module.exports = [
         "company_name": "Macarthur Publications Ltd",
         "description": "Customer-Focused Nextgeneration Analyzer",
         "postal_code": "680503",
-        "s1_name": "EleanorMacarthur",
+        "s1_name": "Eleanor Macarthur",
         "s1_phone_number": "65-00-64016376"
     },
     {
@@ -203,7 +203,7 @@ module.exports = [
         "company_name": "Atkins Brewery Ltd",
         "description": "Multi-Tiered Neutral Project",
         "postal_code": "128234",
-        "s1_name": "JulianAtkins",
+        "s1_name": "Julian Atkins",
         "s1_phone_number": "63410044"
     },
     {
@@ -212,7 +212,7 @@ module.exports = [
         "company_name": "On Time Timepieces Ltd",
         "description": "Multi-Tiered Intangible Capability",
         "postal_code": "823102",
-        "s1_name": "HelenBarker",
+        "s1_name": "Helen Barker",
         "s1_phone_number": "65-94502751"
     },
     {
@@ -221,7 +221,7 @@ module.exports = [
         "company_name": "Newbry Glassware Ltd",
         "description": "Customizable Content-Based Analyzer",
         "postal_code": "600353",
-        "s1_name": "AdamNewbry",
+        "s1_name": "Adam Newbry",
         "s1_phone_number": "68998146"
     },
     {
@@ -230,7 +230,7 @@ module.exports = [
         "company_name": "Tatlow Marketing Ltd",
         "description": "Profit-Focused Contextually-Based Ability",
         "postal_code": "270043",
-        "s1_name": "LilyTatlow",
+        "s1_name": "Lily Tatlow",
         "s1_phone_number": "65 6776 0082"
     },
     {
@@ -239,7 +239,7 @@ module.exports = [
         "company_name": "Talbot Recycling Ltd",
         "description": "Universal Bi-Directional Orchestration",
         "postal_code": "159402",
-        "s1_name": "KeithTalbot",
+        "s1_name": "Keith Talbot",
         "s1_phone_number": "62744592"
     },
     {
@@ -248,7 +248,7 @@ module.exports = [
         "company_name": "Pressman Beauty Products Ltd",
         "description": "Implemented Multimedia Time-Frame",
         "postal_code": "188970",
-        "s1_name": "CynthiaPressman",
+        "s1_name": "Cynthia Pressman",
         "s1_phone_number": "63383424"
     },
     {
@@ -257,7 +257,7 @@ module.exports = [
         "company_name": "Finch Training Ltd",
         "description": "Versatile Regional Ability",
         "postal_code": "400006",
-        "s1_name": "RonaldFinch",
+        "s1_name": "Ronald Finch",
         "s1_phone_number": "67440077"
     },
     {
@@ -266,7 +266,7 @@ module.exports = [
         "company_name": "Newbry Office Furniture Ltd",
         "description": "Compatible Multi-Tasking Algorithm",
         "postal_code": "449876",
-        "s1_name": "IreneNewbry",
+        "s1_name": "Irene Newbry",
         "s1_phone_number": "(65) 62444415"
     },
     {
@@ -275,7 +275,7 @@ module.exports = [
         "company_name": "Alexander Meat Wholesalers Ltd",
         "description": "Fully-Configurable Exuding Migration",
         "postal_code": "738603",
-        "s1_name": "DouglasAlexander",
+        "s1_name": "Douglas Alexander",
         "s1_phone_number": "(65) 63689717"
     },
     {
@@ -284,7 +284,7 @@ module.exports = [
         "company_name": "Nixon Recycling Ltd",
         "description": "Adaptive Systemic Strategy",
         "postal_code": "619742",
-        "s1_name": "LindaNixon",
+        "s1_name": "Linda Nixon",
         "s1_phone_number": "62651617"
     },
     {
@@ -293,7 +293,7 @@ module.exports = [
         "company_name": "Dimbleby Signs Ltd",
         "description": "Streamlined Responsive Infrastructure",
         "postal_code": "050335",
-        "s1_name": "StevenDimbleby",
+        "s1_name": "Steven Dimbleby",
         "s1_phone_number": "62207750"
     },
     {
@@ -302,7 +302,7 @@ module.exports = [
         "company_name": "On Point Fruit Importers Ltd",
         "description": "Robust Web-Enabled Definition",
         "postal_code": "640928",
-        "s1_name": "YasminSanders",
+        "s1_name": "Yasmin Sanders",
         "s1_phone_number": "65-63372285-63372285"
     },
     {
@@ -311,7 +311,7 @@ module.exports = [
         "company_name": "Silver Cleaning Products Ltd",
         "description": "De-Engineered User-Facing Capacity",
         "postal_code": "118223",
-        "s1_name": "BrianKilbane",
+        "s1_name": "Brian Kilbane",
         "s1_phone_number": "67779643"
     },
     {
@@ -320,7 +320,7 @@ module.exports = [
         "company_name": "Ashford Plant Hire Ltd",
         "description": "Re-Contextualized Cohesive Superstructure",
         "postal_code": "437844",
-        "s1_name": "NormaAshford",
+        "s1_name": "Norma Ashford",
         "s1_phone_number": "63454754"
     },
     {
@@ -329,7 +329,7 @@ module.exports = [
         "company_name": "Ashdown Builders Ltd",
         "description": "Realigned Bandwidth-Monitored Orchestration",
         "postal_code": "419734",
-        "s1_name": "MichaelAshdown",
+        "s1_name": "Michael Ashdown",
         "s1_phone_number": "65 6417 5493"
     },
     {
@@ -338,7 +338,7 @@ module.exports = [
         "company_name": "Barber Caterers Ltd",
         "description": "Re-Engineered Value-Added Adapter",
         "postal_code": "128036",
-        "s1_name": "CatherineBarber",
+        "s1_name": "Catherine Barber",
         "s1_phone_number": "67766098"
     },
     {
@@ -347,7 +347,7 @@ module.exports = [
         "company_name": "Illsley Party Supplies Ltd",
         "description": "Diverse Modular Firmware",
         "postal_code": "189721",
-        "s1_name": "GregoryIllsley",
+        "s1_name": "Gregory Illsley",
         "s1_phone_number": "62934960"
     },
     {
@@ -356,7 +356,7 @@ module.exports = [
         "company_name": "Farrow Timepieces Ltd",
         "description": "Function-Based Explicit Openarchitecture",
         "postal_code": "247854",
-        "s1_name": "RubyFarrow",
+        "s1_name": "Ruby Farrow",
         "s1_phone_number": "65-65-67350216"
     },
     {
@@ -365,7 +365,7 @@ module.exports = [
         "company_name": "Zanetti Scooters Ltd",
         "description": "Re-Engineered Object-Oriented Emulation",
         "postal_code": "417818",
-        "s1_name": "KevinZanetti",
+        "s1_name": "Kevin Zanetti",
         "s1_phone_number": "62960934"
     },
     {
@@ -374,7 +374,7 @@ module.exports = [
         "company_name": "Saddlemore Agency Ltd",
         "description": "Versatile Clear-Thinking Database",
         "postal_code": "320002",
-        "s1_name": "KimberleySaddlemore",
+        "s1_name": "Kimberley Saddlemore",
         "s1_phone_number": "62516019"
     },
     {
@@ -383,7 +383,7 @@ module.exports = [
         "company_name": "Newbold Scaffolding Ltd",
         "description": "Devolved Fresh-Thinking Concept",
         "postal_code": "049962",
-        "s1_name": "StephenNewbold",
+        "s1_name": "Stephen Newbold",
         "s1_phone_number": "65361331"
     },
     {
@@ -392,7 +392,7 @@ module.exports = [
         "company_name": "Grant Insulation Services Ltd",
         "description": "Stand-Alone Disintermediate Interface",
         "postal_code": "049015",
-        "s1_name": "CarrieGrant",
+        "s1_name": "Carrie Grant",
         "s1_phone_number": "64350824"
     },
     {
@@ -401,7 +401,7 @@ module.exports = [
         "company_name": "Caulkin Arts Ltd",
         "description": "User-Centric Non-Volatile Migration",
         "postal_code": "038983",
-        "s1_name": "JeffreyCaulkin",
+        "s1_name": "Jeffrey Caulkin",
         "s1_phone_number": "63337575"
     },
     {
@@ -410,7 +410,7 @@ module.exports = [
         "company_name": "Brooks Electricals Ltd",
         "description": "Extended Web-Enabled Superstructure",
         "postal_code": "238876",
-        "s1_name": "KimBrooks",
+        "s1_name": "Kim Brooks",
         "s1_phone_number": "68360674"
     },
     {
@@ -419,7 +419,7 @@ module.exports = [
         "company_name": "East View Cakes Ltd",
         "description": "Synergized Client-Driven Forecast",
         "postal_code": "268817",
-        "s1_name": "JayWilkinson",
+        "s1_name": "Jay Wilkinson",
         "s1_phone_number": "64635140"
     },
     {
@@ -428,7 +428,7 @@ module.exports = [
         "company_name": "Alexander Pet Supplies Ltd",
         "description": "Re-Contextualized Multimedia Productivity",
         "postal_code": "079907",
-        "s1_name": "DanielleAlexander",
+        "s1_name": "Danielle Alexander",
         "s1_phone_number": "62221111"
     },
     {
@@ -437,7 +437,7 @@ module.exports = [
         "company_name": "Dorsey Cars Ltd",
         "description": "Centralized Real-Time Core",
         "postal_code": "347805",
-        "s1_name": "MichaelDorsey",
+        "s1_name": "Michael Dorsey",
         "s1_phone_number": "65 6844 3758"
     },
     {
@@ -446,7 +446,7 @@ module.exports = [
         "company_name": "Roth Supplements Ltd",
         "description": "Robust Asynchronous Alliance",
         "postal_code": "238869",
-        "s1_name": "CynthiaRoth",
+        "s1_name": "Cynthia Roth",
         "s1_phone_number": "67348245"
     },
     {
@@ -455,7 +455,7 @@ module.exports = [
         "company_name": "Valley Party Supplies Ltd",
         "description": "Balanced Needs-Based Hierarchy",
         "postal_code": "228213",
-        "s1_name": "JayO'Grady",
+        "s1_name": "Jay O'Grady",
         "s1_phone_number": "67341150"
     },
     {
@@ -464,7 +464,7 @@ module.exports = [
         "company_name": "Phoenix Worktops Ltd",
         "description": "Realigned Didactic Matrix",
         "postal_code": "319071",
-        "s1_name": "BellaQuinn",
+        "s1_name": "Bella Quinn",
         "s1_phone_number": "65-62521479"
     },
     {
@@ -473,7 +473,7 @@ module.exports = [
         "company_name": "Newbry Demolition Ltd",
         "description": "Decentralized Analyzing Complexity",
         "postal_code": "659528",
-        "s1_name": "FrankNewbry",
+        "s1_name": "Frank Newbry",
         "s1_phone_number": "65662347"
     },
     {
@@ -482,7 +482,7 @@ module.exports = [
         "company_name": "Pinter Lab Equipment Ltd",
         "description": "Multi-Tiered Impactful Attitude",
         "postal_code": "468982",
-        "s1_name": "TammyPinter",
+        "s1_name": "Tammy Pinter",
         "s1_phone_number": "62446612"
     },
     {
@@ -491,7 +491,7 @@ module.exports = [
         "company_name": "Jackson Glassware Ltd",
         "description": "Operative Fault-Tolerant Benchmark",
         "postal_code": "507605",
-        "s1_name": "FrederickJackson",
+        "s1_name": "Frederick Jackson",
         "s1_phone_number": "67479928"
     },
     {
@@ -500,7 +500,7 @@ module.exports = [
         "company_name": "Leadbetter Recycling Ltd",
         "description": "Front-Line Fresh-Thinking Implementation",
         "postal_code": "069046",
-        "s1_name": "TiffanyLeadbetter",
+        "s1_name": "Tiffany Leadbetter",
         "s1_phone_number": "63233131"
     },
     {
@@ -509,7 +509,7 @@ module.exports = [
         "company_name": "Peak Fitness Products Ltd",
         "description": "Re-Engineered Analyzing Orchestration",
         "postal_code": "209273",
-        "s1_name": "AlbertTravis",
+        "s1_name": "Albert Travis",
         "s1_phone_number": "63920116"
     },
     {
@@ -518,7 +518,7 @@ module.exports = [
         "company_name": "Raymond Insurance Brokers Ltd",
         "description": "Adaptive Intermediate Matrix",
         "postal_code": "528883",
-        "s1_name": "CathyRaymond",
+        "s1_name": "Cathy Raymond",
         "s1_phone_number": "67407408"
     },
     {
@@ -527,7 +527,7 @@ module.exports = [
         "company_name": "Yolander Footwear Ltd",
         "description": "User-Centric Methodical Opensystem",
         "postal_code": "431011",
-        "s1_name": "CurtisYolander",
+        "s1_name": "Curtis Yolander",
         "s1_phone_number": "63457558"
     },
     {
@@ -536,7 +536,7 @@ module.exports = [
         "company_name": "Super Computing Ltd",
         "description": "Fundamental Attitude-Oriented Concept",
         "postal_code": "738955",
-        "s1_name": "GraceWebb",
+        "s1_name": "Grace Webb",
         "s1_phone_number": "67569723"
     },
     {
@@ -545,7 +545,7 @@ module.exports = [
         "company_name": "Northwood Compressors Ltd",
         "description": "Implemented 4Thgeneration Encoding",
         "postal_code": "638712",
-        "s1_name": "CarlMalloney",
+        "s1_name": "Carl Malloney",
         "s1_phone_number": "0 6861 0936"
     },
     {
@@ -554,7 +554,7 @@ module.exports = [
         "company_name": "South View Sporting Goods Ltd",
         "description": "Monitored Bandwidth-Monitored Groupware",
         "postal_code": "539215",
-        "s1_name": "LauraKeaton",
+        "s1_name": "Laura Keaton",
         "s1_phone_number": "62884650"
     },
     {
@@ -563,7 +563,7 @@ module.exports = [
         "company_name": "Nesmith Cleaning Products Ltd",
         "description": "Business-Focused Interactive Help-Desk",
         "postal_code": "808932",
-        "s1_name": "HenryNesmith",
+        "s1_name": "Henry Nesmith",
         "s1_phone_number": "64832074"
     },
     {
@@ -572,7 +572,7 @@ module.exports = [
         "company_name": "Young Cycles Ltd",
         "description": "Universal Background Openarchitecture",
         "postal_code": "038985",
-        "s1_name": "TracyYoung",
+        "s1_name": "Tracy Young",
         "s1_phone_number": "63388680"
     },
     {
@@ -581,7 +581,7 @@ module.exports = [
         "company_name": "East Fitness Products Ltd",
         "description": "Customer-Focused Neutral Migration",
         "postal_code": "200808",
-        "s1_name": "TobyEast",
+        "s1_name": "Toby East",
         "s1_phone_number": "65-90282835"
     },
     {
@@ -590,7 +590,7 @@ module.exports = [
         "company_name": "Parker Video Services Ltd",
         "description": "Re-Engineered Client-Driven Openarchitecture",
         "postal_code": "048660",
-        "s1_name": "LindaParker",
+        "s1_name": "Linda Parker",
         "s1_phone_number": "65570260"
     },
     {
@@ -599,7 +599,7 @@ module.exports = [
         "company_name": "Metcalfe Automotive Ltd",
         "description": "Up-Sized Actuating Success",
         "postal_code": "416110",
-        "s1_name": "OwenMetcalfe",
+        "s1_name": "Owen Metcalfe",
         "s1_phone_number": "65-6741 4529"
     },
     {
@@ -608,7 +608,7 @@ module.exports = [
         "company_name": "Sixsmith Refrigeration Ltd",
         "description": "Multi-Lateral Dedicated Hierarchy",
         "postal_code": "368330",
-        "s1_name": "CarlaSixsmith",
+        "s1_name": "Carla Sixsmith",
         "s1_phone_number": "67415925"
     },
     {
@@ -617,7 +617,7 @@ module.exports = [
         "company_name": "Williams Kitchens Ltd",
         "description": "Profound Demand-Driven Challenge",
         "postal_code": "048441",
-        "s1_name": "WilliamWilliams",
+        "s1_name": "William Williams",
         "s1_phone_number": "64382659"
     },
     {
@@ -626,7 +626,7 @@ module.exports = [
         "company_name": "Zagorski Exhibitions Ltd",
         "description": "Automated Impactful Synergy",
         "postal_code": "387537",
-        "s1_name": "HollyZagorski",
+        "s1_name": "Holly Zagorski",
         "s1_phone_number": "67435767"
     },
     {
@@ -635,7 +635,7 @@ module.exports = [
         "company_name": "Phoenix Automotive Ltd",
         "description": "Re-Engineered Content-Based Solution",
         "postal_code": "110024",
-        "s1_name": "CecilHadley",
+        "s1_name": "Cecil Hadley",
         "s1_phone_number": "67748265"
     },
     {
@@ -644,7 +644,7 @@ module.exports = [
         "company_name": "Wilton Cash & Carry Ltd",
         "description": "Persevering Disintermediate Project",
         "postal_code": "408564",
-        "s1_name": "DeborahWilton",
+        "s1_name": "Deborah Wilton",
         "s1_phone_number": "65-9673 9621"
     },
     {
@@ -653,7 +653,7 @@ module.exports = [
         "company_name": "Newbold Waste Services Ltd",
         "description": "Customizable Multimedia Budgetarymanagement",
         "postal_code": "079907",
-        "s1_name": "MalcolmNewbold",
+        "s1_name": "Malcolm Newbold",
         "s1_phone_number": "62250579"
     },
     {
@@ -662,7 +662,7 @@ module.exports = [
         "company_name": "Kingfisher Automotive Ltd",
         "description": "Advanced Cohesive Circuit",
         "postal_code": "760715",
-        "s1_name": "TanyaKingfisher",
+        "s1_name": "Tanya Kingfisher",
         "s1_phone_number": "62957129"
     },
     {
@@ -671,7 +671,7 @@ module.exports = [
         "company_name": "Gibson Business Services Ltd",
         "description": "Polarised Zerodefect Complexity",
         "postal_code": "239924",
-        "s1_name": "DennisGibson",
+        "s1_name": "Dennis Gibson",
         "s1_phone_number": "63345889"
     },
     {
@@ -680,7 +680,7 @@ module.exports = [
         "company_name": "Hancock Sprayers Ltd",
         "description": "Triple-Buffered Full-Range Functionalities",
         "postal_code": "238965",
-        "s1_name": "JuliaHancock",
+        "s1_name": "Julia Hancock",
         "s1_phone_number": "62876163"
     },
     {
@@ -689,7 +689,7 @@ module.exports = [
         "company_name": "Templeman Cash & Carry Ltd",
         "description": "Team-Oriented Web-Enabled Openarchitecture",
         "postal_code": "118254",
-        "s1_name": "JerryTempleman",
+        "s1_name": "Jerry Templeman",
         "s1_phone_number": "67781637"
     },
     {
@@ -698,7 +698,7 @@ module.exports = [
         "company_name": "Rowley Double Glazing Ltd",
         "description": "Profit-Focused 4Thgeneration Hierarchy",
         "postal_code": "270041",
-        "s1_name": "MelissaRowley",
+        "s1_name": "Melissa Rowley",
         "s1_phone_number": "67784761"
     },
     {
@@ -707,7 +707,7 @@ module.exports = [
         "company_name": "Kingston Promotions Ltd",
         "description": "Managed Intermediate Moderator",
         "postal_code": "238841",
-        "s1_name": "ReginaldKingston",
+        "s1_name": "Reginald Kingston",
         "s1_phone_number": "97472135"
     },
     {
@@ -716,7 +716,7 @@ module.exports = [
         "company_name": "Vantage Entertainment Ltd",
         "description": "Implemented 5Thgeneration Openarchitecture",
         "postal_code": "199591",
-        "s1_name": "IrenePoole",
+        "s1_name": "Irene Poole",
         "s1_phone_number": "62962588"
     },
     {
@@ -725,7 +725,7 @@ module.exports = [
         "company_name": "Yarwood Health Products Ltd",
         "description": "Diverse Composite Synergy",
         "postal_code": "079903",
-        "s1_name": "GeorgeYarwood",
+        "s1_name": "George Yarwood",
         "s1_phone_number": "62238137"
     },
     {
@@ -734,7 +734,7 @@ module.exports = [
         "company_name": "Miller Watches Ltd",
         "description": "Synchronised Scalable Functionalities",
         "postal_code": "268386",
-        "s1_name": "StacyMiller",
+        "s1_name": "Stacy Miller",
         "s1_phone_number": "62270013"
     },
     {
@@ -743,7 +743,7 @@ module.exports = [
         "company_name": "Adams Scooters Ltd",
         "description": "User-Friendly Well-Modulated Challenge",
         "postal_code": "669569",
-        "s1_name": "ZaneAdams",
+        "s1_name": "Zane Adams",
         "s1_phone_number": "68925760"
     },
     {
@@ -752,7 +752,7 @@ module.exports = [
         "company_name": "Ferguson Fruit Importers Ltd",
         "description": "Re-Engineered Intangible Graphicaluserinterface",
         "postal_code": "049317",
-        "s1_name": "ChelseaFerguson",
+        "s1_name": "Chelsea Ferguson",
         "s1_phone_number": "64382293"
     },
     {
@@ -761,7 +761,7 @@ module.exports = [
         "company_name": "Webb Coverings Ltd",
         "description": "De-Engineered Optimal Infrastructure",
         "postal_code": "787912",
-        "s1_name": "ZakWebb",
+        "s1_name": "Zak Webb",
         "s1_phone_number": "64540176"
     },
     {
@@ -770,7 +770,7 @@ module.exports = [
         "company_name": "Elliott Bridal Wear Ltd",
         "description": "Vision-Oriented 3Rdgeneration Parallelism",
         "postal_code": "568046",
-        "s1_name": "ElaineElliott",
+        "s1_name": "Elaine Elliott",
         "s1_phone_number": "64513143"
     },
     {
@@ -779,7 +779,7 @@ module.exports = [
         "company_name": "Nesbitt Waste Disposal Ltd",
         "description": "Profound Object-Oriented Leverage",
         "postal_code": "659480",
-        "s1_name": "AlvinNesbitt",
+        "s1_name": "Alvin Nesbitt",
         "s1_phone_number": "65-6-4569947"
     },
     {
@@ -788,7 +788,7 @@ module.exports = [
         "company_name": "Hughes Productions Ltd",
         "description": "Switchable 24/7 Application",
         "postal_code": "049317",
-        "s1_name": "RuthHughes",
+        "s1_name": "Ruth Hughes",
         "s1_phone_number": "62226996"
     },
     {
@@ -797,7 +797,7 @@ module.exports = [
         "company_name": "Pickering Office Supplies Ltd",
         "description": "Profit-Focused 24Hour Graphicaluserinterface",
         "postal_code": "117628",
-        "s1_name": "RickyPickering",
+        "s1_name": "Ricky Pickering",
         "s1_phone_number": "68734640"
     },
     {
@@ -806,7 +806,7 @@ module.exports = [
         "company_name": "Barnett Publications Ltd",
         "description": "Fully-Configurable Motivating Workforce",
         "postal_code": "598729",
-        "s1_name": "ShirleyBarnett",
+        "s1_name": "Shirley Barnett",
         "s1_phone_number": "65-68927617"
     },
     {
@@ -815,7 +815,7 @@ module.exports = [
         "company_name": "Keating Office Furniture Ltd",
         "description": "Networked Nextgeneration Challenge",
         "postal_code": "569870",
-        "s1_name": "JacobKeating",
+        "s1_name": "Jacob Keating",
         "s1_phone_number": "64831322"
     },
     {
@@ -824,7 +824,7 @@ module.exports = [
         "company_name": "Hughes Manufacturing Ltd",
         "description": "Cross-Group Bandwidth-Monitored Implementation",
         "postal_code": "539449",
-        "s1_name": "StephanieHughes",
+        "s1_name": "Stephanie Hughes",
         "s1_phone_number": "64876326"
     },
     {
@@ -833,7 +833,7 @@ module.exports = [
         "company_name": "Denon Software Ltd",
         "description": "Self-Enabling Human-Resource Implementation",
         "postal_code": "149596",
-        "s1_name": "DouglasDenon",
+        "s1_name": "Douglas Denon",
         "s1_phone_number": "(65) 64710710"
     },
     {
@@ -842,7 +842,7 @@ module.exports = [
         "company_name": "Newsome Insurance Brokers Ltd",
         "description": "Expanded Optimizing Neural-Net",
         "postal_code": "739108",
-        "s1_name": "GraceNewsome",
+        "s1_name": "Grace Newsome",
         "s1_phone_number": "62690816"
     },
     {
@@ -851,7 +851,7 @@ module.exports = [
         "company_name": "Northwood Fixings Ltd",
         "description": "User-Centric National Adapter",
         "postal_code": "079903",
-        "s1_name": "MichaelWalcott",
+        "s1_name": "Michael Walcott",
         "s1_phone_number": "67771928"
     },
     {
@@ -860,7 +860,7 @@ module.exports = [
         "company_name": "O'Connor Publishing Ltd",
         "description": "User-Friendly Fault-Tolerant Model",
         "postal_code": "247933",
-        "s1_name": "EllaO'Connor",
+        "s1_name": "Ella O'Connor",
         "s1_phone_number": "65 6735 3485"
     },
     {
@@ -869,7 +869,7 @@ module.exports = [
         "company_name": "Earsley Design Ltd",
         "description": "Reverse-Engineered Discrete Hub",
         "postal_code": "188867",
-        "s1_name": "AlvinEarsley",
+        "s1_name": "Alvin Earsley",
         "s1_phone_number": "63348727"
     },
     {
@@ -878,7 +878,7 @@ module.exports = [
         "company_name": "Morgan Memorabilia Ltd",
         "description": "Enterprise-Wide Client-Server Paradigm",
         "postal_code": "079024",
-        "s1_name": "DianeMorgan",
+        "s1_name": "Diane Morgan",
         "s1_phone_number": "63230730"
     },
     {
@@ -887,7 +887,7 @@ module.exports = [
         "company_name": "Keats Furnishings Ltd",
         "description": "Distributed Directional Interface",
         "postal_code": "460202",
-        "s1_name": "YusefKeats",
+        "s1_name": "Yusef Keats",
         "s1_phone_number": "65 6445 9562"
     },
     {
@@ -896,7 +896,7 @@ module.exports = [
         "company_name": "Nixon Networks Ltd",
         "description": "User-Centric Exuding Focusgroup",
         "postal_code": "429009",
-        "s1_name": "FionaNixon",
+        "s1_name": "Fiona Nixon",
         "s1_phone_number": "63449840"
     }
 ]

@@ -5,7 +5,7 @@ const { hashPassword, compareHash } = require('../auth/bcrypt');
 const router = express.Router();
 const ViewType = require('../common/ViewType');
 const { Employee, Role } = require('../models/Employee');
-const { LeaveAccount } = require('../models/LeaveAccount');
+const { LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
 const View = require('../models/View');
 const Log = require('../models/Log');
 const { sendEmailTo } = require('../emailer/index');
@@ -72,18 +72,9 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
         const passwordPlaintext = crypto.createHash('sha1').update(Math.random().toString()).digest('hex').substring(0, 8);
         const password = await hashPassword(passwordPlaintext);
 
-        // Standard leave accounts
-        const leave_accounts = [
-            { entitled_days : 14, leave_type_id : 1 },
-            { entitled_days : 0, leave_type_id : 2 },
-            { entitled_days : 0, leave_type_id : 3 },
-            { entitled_days : 0, leave_type_id : 4 },
-            { entitled_days : 0, leave_type_id : 5 },
-        ];
-
         // Create new employee
         const newEmployee = await Employee.create(
-            { name, username, password, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights, leave_accounts }, 
+            { name, username, password, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights, leave_accounts: STANDARD_LEAVE_ACCOUNTS }, 
             { include: [AccessRight, LeaveAccount] }
         );
 

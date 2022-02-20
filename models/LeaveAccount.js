@@ -67,5 +67,13 @@ async function updateLeaveAccounts(leave_accounts, employee, user, avoidLogging)
         }
     }
 }
+
+const STANDARD_LEAVE_ACCOUNTS = [
+  { entitled_days : 14, leave_type_id : 1 },
+  { entitled_days : 0, leave_type_id : 2 },
+  { entitled_days : 0, leave_type_id : 3 },
+  { entitled_days : 0, leave_type_id : 4 },
+  { entitled_days : 0, leave_type_id : 5 },
+];
   
-module.exports = { LeaveAccount, LeaveType, validateLeaveAccounts, updateLeaveAccounts };
+module.exports = { LeaveAccount, LeaveType, validateLeaveAccounts, updateLeaveAccounts, STANDARD_LEAVE_ACCOUNTS };

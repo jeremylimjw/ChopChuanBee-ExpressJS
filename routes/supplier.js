@@ -182,7 +182,8 @@ router.get('/menu', requireAccess(ViewType.SCM, false), async function(req, res,
   const predicate = parseRequest(req.query);
 
   try {
-    predicate.order = [[Product, 'name']]
+    predicate.include = [Product];
+    predicate.order = [[Product, 'name']];
     const supplierMenu = await SupplierMenu.findAll(predicate);
     res.send(supplierMenu);
 

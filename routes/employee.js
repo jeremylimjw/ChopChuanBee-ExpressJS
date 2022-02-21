@@ -68,6 +68,14 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
             return;
         }
 
+        // Enforce email unique constraint
+        const hasEmail = await Employee.findOne({ where: { email: email }});
+
+        if (hasEmail != null) {
+            res.status(400).send(`Email ${email} is already taken.`)
+            return;
+        }
+
         // Generate random password
         const passwordPlaintext = crypto.createHash('sha1').update(Math.random().toString()).digest('hex').substring(0, 8);
         const password = await hashPassword(passwordPlaintext);

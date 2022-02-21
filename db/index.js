@@ -35,7 +35,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       const View = require('../models/View');
       const { ChargedUnder, Customer } = require('../models/Customer');
-      const { LeaveType, LeaveAccount } = require('../models/LeaveAccount');
+      const { LeaveType, LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
       const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
 
@@ -47,9 +47,9 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
      
       const employees = await Employee.bulkCreate([
-        { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id },
-        { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id },
-      ])
+        { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
+        { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
+      ], { include: LeaveAccount })
 
       await AccessRight.bulkCreate(Object.keys(ViewType).map(key => ({ employee_id: employees[1].id, view_id: ViewType[key].id, has_write_access: false })))
 

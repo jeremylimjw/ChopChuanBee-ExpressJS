@@ -8,7 +8,8 @@ router.use("/supplier", require("./supplier"));
 router.use("/product", require("./product"));
 router.use("/employee", require("./employee"));
 router.use("/employee", require("./accessRight"));
-router.use("/employee/leave", require("./leave"));
+router.use("/employee/leave", require("./leaveAccount"));
+router.use("/employee/leave/application", require("./leaveApplication"));
 router.use("/log", require("./log"));
 
 module.exports = router;

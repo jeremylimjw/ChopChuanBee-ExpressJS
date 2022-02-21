@@ -192,7 +192,7 @@ router.post('/deactivate', requireAccess(ViewType.HR, true), async function(req,
         const user = res.locals.user;
         await Log.create({ 
             employee_id: user.id, 
-            view_id: ViewType.HR.id,
+            view_id: ViewType.ADMIN.id,
             text: `${user.name} deactivated ${employee.name}'s record`, 
         });
 
@@ -231,7 +231,7 @@ router.post('/activate', requireAccess(ViewType.HR, true), async function(req, r
       const user = res.locals.user;
       await Log.create({ 
         employee_id: user.id, 
-        view_id: ViewType.HR.id,
+        view_id: ViewType.ADMIN.id,
         text: `${user.name} activated ${employee.name}'s record`, 
       });
 

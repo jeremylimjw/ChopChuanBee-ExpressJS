@@ -88,8 +88,8 @@ module.exports = async function() {
     PurchaseOrderItem.hasMany(InventoryMovement, { foreignKey: { name: 'purchase_order_item_id' }});
     InventoryMovement.belongsTo(PurchaseOrderItem, { foreignKey: { name: 'purchase_order_item_id' }});
 
-    PurchaseOrder.hasMany(Payment, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
-    Payment.belongsTo(PurchaseOrder, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
+    PurchaseOrder.hasMany(Payment, { foreignKey: { name: 'purchase_order_id' }});
+    Payment.belongsTo(PurchaseOrder, { foreignKey: { name: 'purchase_order_id' }});
 
     PaymentMethod.hasMany(Payment, { foreignKey: { name: 'payment_method_id' }});
     Payment.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
@@ -104,12 +104,45 @@ module.exports = async function() {
 
     MovementType.hasMany(InventoryMovement, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
     InventoryMovement.belongsTo(MovementType, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
- 
+
+    const {Expenses, ExpensesType} = require('../models/Expenses');
+    ExpensesType.hasMany(Expenses, { foreignKey: { allowNull: false, name: 'expenses_type_id' }}); // Foreign key defaults to chargedUnderId, change to standardize
+    Expenses.belongsTo(ExpensesType, { foreignKey: { allowNull: false, name: 'expenses_type_id' }});
+
+    const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
+
+    PaymentTerm.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
+    SalesOrder.belongsTo(PaymentTerm, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
+
+    SalesOrder.hasMany(SalesOrderItem, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+    SalesOrderItem.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+
+    Product.hasMany(SalesOrderItem, { foreignKey: { allowNull: false, name: 'product_id' }});
+    SalesOrderItem.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
+
+    SalesOrderItem.hasMany(InventoryMovement, { foreignKey: { name: 'sales_order_item_id' }});
+    InventoryMovement.belongsTo(SalesOrderItem, { foreignKey: { name: 'sales_order_item_id' }});
+
+    Customer.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'customer_id' }});
+    SalesOrder.belongsTo(Customer, { foreignKey: { allowNull: false, name: 'customer_id' }});
+
+    SalesOrder.hasMany(Payment, { foreignKey: { name: 'sales_order_id' }});
+    Payment.belongsTo(SalesOrder, { foreignKey: { name: 'sales_order_id' }});
+
+    const DeliveryOrder = require('../models/DeliveryOrder');
+
+    //Rename employee id to driver id to be more clear.
+    Employee.hasMany(DeliveryOrder, { foreignKey: { allowNull: false, name: 'driver_id' }});
+    DeliveryOrder.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
+
+    DeliveryOrder.hasOne(SalesOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
+    SalesOrder.belongsTo(DeliveryOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
+  
     const SOFP = require('../models/SOFP');
     const IncomeStatement = require('../models/IncomeStatement');
     
-   await sequelize.sync(); // This will create tables if not exists
-//    await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+   //await sequelize.sync(); // This will create tables if not exists
+   await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
 
     
 }

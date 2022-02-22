@@ -284,7 +284,7 @@ router.put('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async 
   
   });
 //deactivate sofp 
-router.post('/deactivate', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+router.post('/SOFP/deactivate', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
     const { id } = req.body;
   
     // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
@@ -324,7 +324,7 @@ router.post('/deactivate', requireAccess(ViewType.ACCOUNTING, true), async funct
   
   });
   //activate SOFP
-  router.post('/activate', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+  router.post('/SOFP/activate', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
     const { id } = req.body;
   
     if (id == null) {

@@ -137,7 +137,7 @@ const SOFP = sequelize.define('sofp', {
       defaultValue: 0,
       allowNull: false,
     },
-    warrent_payable: {
+    warranty_payable: {
       type: DataTypes.DECIMAL,
       defaultValue: 0,
       allowNull: false,
@@ -157,12 +157,12 @@ const SOFP = sequelize.define('sofp', {
       defaultValue: 0,
       allowNull: false,
     },
-    other_libility_1: {
+    other_liability_1: {
       type: DataTypes.DECIMAL,
       defaultValue: 0,
       allowNull: false,
     },
-    other_libility_2: {
+    other_liability_2: {
       type: DataTypes.DECIMAL,
       defaultValue: 0,
       allowNull: false,

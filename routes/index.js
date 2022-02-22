@@ -9,6 +9,9 @@ router.use("/purchaseOrder", require("./purchaseOrder"));
 router.use("/product", require("./product"));
 router.use("/employee", require("./employee"));
 router.use("/employee", require("./accessRight"));
-router.use("/employee/leave", require("./leave"));
+router.use("/employee/leave", require("./leaveAccount"));
+router.use("/employee/leave/application", require("./leaveApplication"));
+router.use("/log", require("./log"));
+router.use("/external", require("./external"));
 
 module.exports = router;

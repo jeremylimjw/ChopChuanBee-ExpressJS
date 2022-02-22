@@ -8,9 +8,13 @@ const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
 const LeaveStatusEnum = require('../common/LeaveStatusEnum');
 const ProductCategoryEnum = require('../common/ProductCategory');
+<<<<<<< HEAD
 const PaymentMethodType = require('../common/PaymentMethodType');
 const AccountingTypeEnum = require('../common/AccountingTypeEnum');
 const MovementTypeEnum = require('../common/MovementTypeEnum');
+=======
+const { insertDemoData } = require('../demo');
+>>>>>>> first-release
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
@@ -26,7 +30,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
     console.log("Connection to database established");
 
     // Load and initialize all tables/associations
-    await require('../models')();
+    const { syncAssociations } = require('../models');
+    await syncAssociations();
 
     // Data initiation
     const { Employee, Role } = require('../models/Employee');
@@ -37,8 +42,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       console.log("First run detected, running data init");
 
       const View = require('../models/View');
-      const { ChargedUnder } = require('../models/Customer');
-      const { LeaveType } = require('../models/LeaveAccount');
+      const { ChargedUnder, Customer } = require('../models/Customer');
+      const { LeaveType, LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
       const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
 
@@ -49,43 +54,18 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
      
-      await Employee.bulkCreate([
-        { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id },
-        { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id },
-      ])
+      const employees = await Employee.bulkCreate([
+        { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
+        { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
+      ], { include: LeaveAccount })
 
-      const alice = await Employee.findOne({ where: { name: "Alice" } });
-      await AccessRight.create({ has_write_access: true, employee_id: alice.id, view_id: ViewType.HR.id })
-      await AccessRight.create({ has_write_access: false, employee_id: alice.id, view_id: ViewType.INVENTORY.id })
-      
-      // REMEMBER DELETE
-      const { Product } = require('../models/Product');
-      await Product.bulkCreate([
-        { name: "Ketchup", unit: "bottle", min_inventory_level: "100" },
-        { name: "Ikan Bilis", unit: "kg", min_inventory_level: "50" },
-        { name: "Soy Sauce", unit: "bottle", min_inventory_level: "80" },
-      ]);
-
-      const { PurchaseOrder, PaymentTerm, POStatus } = require('../models/PurchaseOrder');
-      await PaymentTerm.bulkCreate(Object.keys(PaymentTermType).map(key => PaymentTermType[key]));
-      await POStatus.bulkCreate(Object.keys(PurchaseOrderStatusType).map(key => PurchaseOrderStatusType[key]));
-
-      const { PaymentMethod, AccountingType } = require('../models/Payment');
-      await PaymentMethod.bulkCreate(Object.keys(PaymentMethodType).map(key => PaymentMethodType[key]));
-      await AccountingType.bulkCreate(Object.keys(AccountingTypeEnum).map(key => AccountingTypeEnum[key]));
-
-      const { MovementType } = require('../models/MovementType');
-      await MovementType.bulkCreate(Object.keys(MovementTypeEnum).map(key => MovementTypeEnum[key]));
+      await AccessRight.bulkCreate(Object.keys(ViewType).map(key => ({ employee_id: employees[1].id, view_id: ViewType[key].id, has_write_access: false })))
 
       const { Supplier, GUEST_ID } = require('../models/Supplier');
       await Supplier.create({ id: GUEST_ID, company_name: 'Guest', s1_name: 'Guest', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA' });
 
-      // REMEMBER DELETE
-      await Supplier.bulkCreate([
-        { company_name: "Heng Heng", s1_name: "Ah Heng", s1_phone_number: "82663467", address: "21 Heng St", postal_code: "745728" },
-        { company_name: "Sheng Shiong", s1_name: "David King", s1_phone_number: "9277472", address: "Hougang Ave 8", postal_code: "565523" },
-        { company_name: "Fairprice", s1_name: "Laurie", s1_phone_number: "87476828", address: "2 Buona Vista Rd", postal_code: "845125" },
-      ]);
+      // Comment this out if u don't want large dataset to init
+      await insertDemoData();
 
     }
   

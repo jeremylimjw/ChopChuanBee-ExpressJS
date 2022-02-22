@@ -151,30 +151,6 @@ describe('/employee/leave', () => {
     })
 
 
-    it('DELETE /application', async () => {
-        try {
-            // Update applications to CANCELLED
-            for (let leaveApplication of newLeaveApplications) {
-                const { data: deleteData } = await http.delete(`/employee/leave/application?id=${leaveApplication.id}`);
-            }
-            
-            // Retrieve leave account balances
-            const { data: getData } = await http.get(`/employee/leave?leave_account_id=${newLeaveAccounts[0].id}`);
-
-            // Assert changes
-            assert.equal(getData.balance, 20)
-
-        } catch(err) {
-            if (err.response) {
-                console.log(err.response.status, err.response.data);
-            } else {
-                console.log(err);
-            }
-            assert.fail();
-        }
-    })
-
-
     it('GET /application', async () => {
         try {
             // Retrieve leave applications

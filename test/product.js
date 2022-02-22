@@ -60,16 +60,37 @@ describe('/product', () => {
         }
     });
 
-    it('DELETE /', async () => {
+    it('POST /deactivate', async () => {
         try {
             // Delete product
-            await http.delete(`/product?id=${newProduct.id}`);
+            await http.post(`/product/deactivate`, { id: newProduct.id });
 
             // Retrieve product
             const { data: getData } = await http.get(`/product?id=${newProduct.id}`);
 
             // Assert changes
-            assert.equal(getData[0].deleted, true);
+            assert.notEqual(getData[0].deactivated_date, null);
+
+        } catch(err) {
+            if (err.response) {
+                console.log(err.response.status, err.response.data);
+            } else {
+                console.log(err);
+            }
+            assert.fail();
+        }
+    });
+
+    it('POST /activate', async () => {
+        try {
+            // Delete product
+            await http.post(`/product/activate`, { id: newProduct.id });
+
+            // Retrieve product
+            const { data: getData } = await http.get(`/product?id=${newProduct.id}`);
+
+            // Assert changes
+            assert.equal(getData[0].deactivated_date, null);
 
         } catch(err) {
             if (err.response) {

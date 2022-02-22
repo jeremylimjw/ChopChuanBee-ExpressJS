@@ -283,9 +283,9 @@ router.put('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async 
     }
   
   });
-//delete sofp 
-router.delete('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
-    const { id } = req.query;
+//deactivate sofp 
+router.post('/deactivate', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+    const { id } = req.body;
   
     // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
     if (id == null) {
@@ -323,7 +323,47 @@ router.delete('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(
     }
   
   });
+  //activate SOFP
+  router.post('/activate', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+    const { id } = req.body;
   
+    if (id == null) {
+      res.status(400).send("'id' is required.", )
+      return;
+    }
+  
+    try {
+      const sofp = await SOFP.findByPk(id);
+  
+      if (sofp == null) {
+        res.status(400).send(`sofp id ${id} not found.`)
+  
+      } else {
+        sofp.deleted_date = null;
+        sofp.save();
+  
+        // Record to admin logs
+        const user = res.locals.user;
+        await Log.create({ 
+          employee_id: user.id, 
+          view_id: ViewType.CRM.id,
+          text: `$${user.name} reactivated  ${sofp.name}`, 
+        });
+  
+        res.send({ id: sofp.id });
+      }
+  
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+  
+  });
+
+
+
 //delete income_statement 
 router.delete('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
     const { id } = req.query;

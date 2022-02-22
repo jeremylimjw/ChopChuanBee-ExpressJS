@@ -301,7 +301,7 @@ router.delete('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(
         res.status(400).send(`sofp id ${id} not found.`)
   
       } else {
-        sofp.deleted = true;
+        sofp.deleted_date = new Date();
         sofp.save();
   
         // Record to admin logs

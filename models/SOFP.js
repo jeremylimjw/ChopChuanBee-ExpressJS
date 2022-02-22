@@ -196,10 +196,7 @@ const SOFP = sequelize.define('sofp', {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    deleted: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    }
+    deleted_date: DataTypes.DATE,
     }, {
     updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
     createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'

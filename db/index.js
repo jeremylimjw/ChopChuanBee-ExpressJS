@@ -11,6 +11,7 @@ const ProductCategoryEnum = require('../common/ProductCategory');
 const PaymentMethodType = require('../common/PaymentMethodType');
 const AccountingTypeEnum = require('../common/AccountingTypeEnum');
 const MovementTypeEnum = require('../common/MovementTypeEnum');
+const ExpensesTypeEnum = require('../common/ExpensesTypeEnum');
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
@@ -105,15 +106,18 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       ]); 
 
       const { InventoryMovement } = require('../models/InventoryMovement');
-       const lineItem = await PurchaseOrderItem.findOne({ where: { product_id: ikanBilis.id } });
+      const lineItem = await PurchaseOrderItem.findOne({ where: { product_id: ikanBilis.id } });
       await InventoryMovement.bulkCreate([
         { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1 },
         { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 },
         { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 }
       ]); 
-       const { GUEST_ID } = require('../models/Supplier');
+      const { GUEST_ID } = require('../models/Supplier');
       await Supplier.create({ id: GUEST_ID, company_name: 'Guest', s1_name: 'Guest', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA' });
     
+
+      const {ExpensesType} = require('../models/Expenses');
+      await ExpensesType.bulkCreate(Object.keys(ExpensesTypeEnum).map(key => ExpensesTypeEnum[key]));
     } 
   
   } catch (err) {

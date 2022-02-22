@@ -333,8 +333,9 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const po17a = await PurchaseOrderItem.findOne({ where: { unit_cost: 4.5,  quantity: 170 , purchase_order_id: 17, product_id: product4.id    } });
       const po17b = await PurchaseOrderItem.findOne({ where: { unit_cost: 5.2,  quantity: 170 , purchase_order_id: 17, product_id: product5.id    } });
       const po18a = await PurchaseOrderItem.findOne({ where: { unit_cost: 6.2,  quantity: 180 , purchase_order_id: 18, product_id: product6.id    } });
-      const po18b = await PurchaseOrderItem.findOne({ where: { unit_cost: 8.5,  quantity: 190 , purchase_order_id: 19, product_id: product8.id    } });
-      const po19a = await PurchaseOrderItem.findOne({ where: { unit_cost: 9.2,  quantity: 190 , purchase_order_id: 19, product_id: product9.id    } });
+      const po18b = await PurchaseOrderItem.findOne({ where: { unit_cost: 7.2,  quantity: 180 , purchase_order_id: 18, product_id: product7.id    } });
+      const po19a = await PurchaseOrderItem.findOne({ where: { unit_cost: 8.5,  quantity: 190 , purchase_order_id: 19, product_id: product8.id    } });
+      const po19b = await PurchaseOrderItem.findOne({ where: { unit_cost: 9.2,  quantity: 190 , purchase_order_id: 19, product_id: product9.id    } });
       const po20a = await PurchaseOrderItem.findOne({ where: { unit_cost: 10.2,  quantity: 200 , purchase_order_id: 20, product_id: product10.id     } });
       const po20b = await PurchaseOrderItem.findOne({ where: { unit_cost: 1.5,  quantity: 200 , purchase_order_id: 20, product_id: product1.id    } });
 
@@ -395,15 +396,68 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { amount: 2340, purchase_order_id: 20, accounting_type_id: 1, movement_type_id:1 }, // cash 
       ]); 
 
-
-
       //inventory movement
       await InventoryMovement.bulkCreate([
-        { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1 },
-        { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 },
-        { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 }
-      ]); 
+        //{ unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1 },
+        //{ unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 },
+        //{ unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 },
 
+        { unit_cost: 1.1,  quantity: 10 , purchase_order_item_id: po1a.id, movement_type_id: 1 }, //quantity = product id * 10, unit_cost = product id
+        { unit_cost: 2.1,  quantity: 10 , purchase_order_item_id: po1b.id, movement_type_id: 1  },
+        { unit_cost: 3.5,  quantity: 20 , purchase_order_item_id: po2a.id, movement_type_id: 1 },
+        { unit_cost: 4.5,  quantity: 20 , purchase_order_item_id: po2b.id, movement_type_id: 1  },
+        { unit_cost: 5.9,  quantity: 30 , purchase_order_item_id: po3a.id, movement_type_id: 1  },
+        { unit_cost: 6.2,  quantity: 30 , purchase_order_item_id: po3b.id, movement_type_id: 1 },
+        { unit_cost: 7.2,  quantity: 40 , purchase_order_item_id: po4a.id, movement_type_id: 1  },
+        { unit_cost: 8.5,  quantity: 40 , purchase_order_item_id: po4b.id, movement_type_id: 1  },
+        { unit_cost: 9.2,  quantity: 50 , purchase_order_item_id: po5a.id, movement_type_id: 1  },
+        { unit_cost: 0.9,  quantity: 50 , purchase_order_item_id: po5b.id, movement_type_id: 1  },
+        { unit_cost: 2.5,  quantity: 60 , purchase_order_item_id: po6a.id, movement_type_id: 1  },
+        { unit_cost: 3.1,  quantity: 60 , purchase_order_item_id: po6b.id, movement_type_id: 1  },
+        { unit_cost: 4.2,  quantity: 70 , purchase_order_item_id: po7a.id, movement_type_id: 1 },
+        { unit_cost: 5.2,  quantity: 70 , purchase_order_item_id: po7b.id, movement_type_id: 1  },
+        { unit_cost: 6.3,  quantity: 80 , purchase_order_item_id: po8a.id, movement_type_id: 1  },
+        { unit_cost: 7.2,  quantity: 80 , purchase_order_item_id: po8b.id, movement_type_id: 1  },
+        { unit_cost: 8.5,  quantity: 90 , purchase_order_item_id: po9a.id, movement_type_id: 1  },
+        { unit_cost: 9.5,  quantity: 90 , purchase_order_item_id: po9b.id, movement_type_id: 1  },
+        { unit_cost: 10.2,  quantity: 100 , purchase_order_item_id: po10a.id, movement_type_id: 1  },
+        { unit_cost: 1.2,  quantity: 100 , purchase_order_item_id: po10b.id, movement_type_id: 1  },
+        { unit_cost: 2.5,  quantity: 110 , purchase_order_item_id: po11a.id, movement_type_id: 1  },
+        { unit_cost: 3.5,  quantity: 110 , purchase_order_item_id: po11b.id, movement_type_id: 1  },
+        { unit_cost: 4.1,  quantity: 120 , purchase_order_item_id: po12a.id, movement_type_id: 1  },
+        { unit_cost: 5.8,  quantity: 120 , purchase_order_item_id: po12b.id, movement_type_id: 1  },
+        { unit_cost: 6.2,  quantity: 130 , purchase_order_item_id: po13a.id, movement_type_id: 1  },
+        { unit_cost: 7.6,  quantity: 130 , purchase_order_item_id: po13b.id, movement_type_id: 1  },
+        { unit_cost: 8.5,  quantity: 140 , purchase_order_item_id: po14a.id, movement_type_id: 1  },
+        { unit_cost: 9.2,  quantity: 140 , purchase_order_item_id: po14b.id, movement_type_id: 1  },
+        { unit_cost: 10.5,  quantity: 150 , purchase_order_item_id: po15a.id, movement_type_id: 1  },
+        { unit_cost: 1.1,  quantity: 150 , purchase_order_item_id: po15b.id, movement_type_id: 1  },
+        { unit_cost: 2.1,  quantity: 160 , purchase_order_item_id: po16a.id, movement_type_id: 1  },
+        { unit_cost: 3.5,  quantity: 160 , purchase_order_item_id: po16b.id, movement_type_id: 1  },
+        { unit_cost: 4.5,  quantity: 170 , purchase_order_item_id: po17a.id, movement_type_id: 1  },
+        { unit_cost: 5.2,  quantity: 170 , purchase_order_item_id: po17b.id, movement_type_id: 1  },
+        { unit_cost: 6.2,  quantity: 180 , purchase_order_item_id: po18a.id, movement_type_id: 1  },
+        { unit_cost: 7.2,  quantity: 180 , purchase_order_item_id: po18b.id, movement_type_id: 1  },
+        { unit_cost: 8.5,  quantity: 190 , purchase_order_item_id: po19a.id, movement_type_id: 1  },
+        { unit_cost: 9.2,  quantity: 190 , purchase_order_item_id: po19b.id, movement_type_id: 1  },
+        { unit_cost: 10.2,  quantity: 200 , purchase_order_item_id: po20a.id, movement_type_id: 1  },
+        { unit_cost: 1.5,  quantity: 200 , purchase_order_item_id: po20b.id, movement_type_id: 1  },
+
+
+        //recording refunds
+        { unit_cost: 2.5,  quantity: -50 , purchase_order_item_id: po11a.id, movement_type_id: 3  },
+        { unit_cost: 3.5,  quantity: -40 , purchase_order_item_id: po11b.id, movement_type_id: 3  },
+        { unit_cost: 4.1,  quantity: -60 , purchase_order_item_id: po12a.id, movement_type_id: 3  },
+        { unit_cost: 5.8,  quantity: -20 , purchase_order_item_id: po12b.id, movement_type_id: 3  },
+        { unit_cost: 6.2,  quantity: -30 , purchase_order_item_id: po13a.id, movement_type_id: 3  },
+        { unit_cost: 7.6,  quantity: -30 , purchase_order_item_id: po13b.id, movement_type_id: 3  },
+        { unit_cost: 8.5,  quantity: -40 , purchase_order_item_id: po14a.id, movement_type_id: 3  },
+        { unit_cost: 9.2,  quantity: -40 , purchase_order_item_id: po14b.id, movement_type_id: 3  },
+        { unit_cost: 10.5,  quantity: -50 , purchase_order_item_id: po15a.id, movement_type_id: 3  },
+        { unit_cost: 1.1,  quantity: -50 , purchase_order_item_id: po15b.id, movement_type_id: 3  },
+        { unit_cost: 2.1,  quantity: -60 , purchase_order_item_id: po16a.id, movement_type_id: 3  },
+        { unit_cost: 3.5,  quantity: -60 , purchase_order_item_id: po16b.id, movement_type_id: 3  },
+      ]); 
 
       const {ExpensesType} = require('../models/Expenses');
       await ExpensesType.bulkCreate(Object.keys(ExpensesTypeEnum).map(key => ExpensesTypeEnum[key]));

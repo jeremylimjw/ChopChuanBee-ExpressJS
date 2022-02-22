@@ -170,7 +170,7 @@ async function syncAssociations() {
     const SOFP = require('../models/SOFP');
     const IncomeStatement = require('../models/IncomeStatement');
     
-//    await sequelize.sync(); // This will create tables if not exists
+    // await sequelize.sync(); // This will create tables if not exists
     await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
     
     

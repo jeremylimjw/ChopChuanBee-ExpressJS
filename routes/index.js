@@ -11,5 +11,6 @@ router.use("/employee", require("./accessRight"));
 router.use("/employee/leave", require("./leaveAccount"));
 router.use("/employee/leave/application", require("./leaveApplication"));
 router.use("/log", require("./log"));
+router.use("/external", require("./external"));
 
 module.exports = router;

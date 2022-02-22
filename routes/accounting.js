@@ -312,7 +312,7 @@ router.post('/SOFP/deactivate', requireAccess(ViewType.ACCOUNTING, true), async 
           text: `${user.name} deleted ${sofp.name}`, 
         });
   
-        res.send({ id: sofp.id });
+        res.send({ id: sofp.id, deleted_date: sofp.deleted_date});
       }
   
   
@@ -350,7 +350,7 @@ router.post('/SOFP/deactivate', requireAccess(ViewType.ACCOUNTING, true), async 
           text: `$${user.name} reactivated  ${sofp.name}`, 
         });
   
-        res.send({ id: sofp.id });
+        res.send({ id: sofp.id, deleted_date: null });
       }
   
   

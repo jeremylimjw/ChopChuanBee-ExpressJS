@@ -9,6 +9,7 @@ const ViewType = {
     GENERAL: { id: 8, name: "General" },
     DISPATCH: { id: 9, name: "Dispatch" },
     CATALOGUE: { id: 10, name: "Catalogue" },
+    ANALYTICS: { id: 11, name: "Analytics" },
 }
 
 module.exports = ViewType;

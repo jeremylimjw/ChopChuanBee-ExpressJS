@@ -28,7 +28,7 @@ router.post('/', requireAccess(ViewType.INVENTORY, true), async function(req, re
   const {name, description, unit, min_inventory_level } = req.body;
     
   try {
-    assertNotNull(req.body, ['name', 'unit', 'min_inventory_level'])
+    assertNotNull(req.body, ['name', 'min_inventory_level'])
   } catch(err) {
     res.status(400).send(err);
     return;
@@ -62,7 +62,7 @@ router.put('/', requireAccess(ViewType.INVENTORY, true), async function(req, res
   const { id, name, description, unit, min_inventory_level } = req.body;
 
   try {
-    assertNotNull(req.body, ['id', 'name', 'unit', 'min_inventory_level'])
+    assertNotNull(req.body, ['id', 'name', 'min_inventory_level'])
   } catch(err) {
     res.status(400).send(err);
     return;
@@ -99,10 +99,47 @@ router.put('/', requireAccess(ViewType.INVENTORY, true), async function(req, res
 });
 
 
-router.delete('/', requireAccess(ViewType.INVENTORY, true), async function(req, res, next) {
-  const { id } = req.query;
+router.post('/deactivate', requireAccess(ViewType.INVENTORY, true), async function(req, res, next) {
+  const { id } = req.body;
 
-  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
+  if (id == null) {
+      res.status(400).send("'id' is required.", )
+      return;
+  }
+
+  try {
+    const product = await Product.findByPk(id);
+
+    if (product == null) {
+      res.status(400).send(`Product id ${id} not found.`)
+
+    } else {
+      product.deactivated_date = new Date();
+      product.save();
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+          employee_id: user.id, 
+          view_id: ViewType.CRM.id,
+          text: `${user.name} deactivated product ${product.name}`, 
+      });
+
+      res.send({ id: product.id, deactivated_date: product.deactivated_date });
+    }
+
+  } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+  }
+
+});
+
+
+router.post('/activate', requireAccess(ViewType.INVENTORY, true), async function(req, res, next) {
+  const { id } = req.body;
+
   if (id == null) {
     res.status(400).send("'id' is required.", )
     return;
@@ -111,23 +148,22 @@ router.delete('/', requireAccess(ViewType.INVENTORY, true), async function(req, 
   try {
     const product = await Product.findByPk(id);
 
-    // If 'id' is not found return 400 Bad Request, if found then return the 'id'
     if (product == null) {
       res.status(400).send(`Product id ${id} not found.`)
 
     } else {
-      product.deleted = true;
+      product.deactivated_date = null;
       product.save();
 
       // Record to admin logs
       const user = res.locals.user;
       await Log.create({ 
         employee_id: user.id, 
-        view_id: ViewType.INVENTORY.id,
-        text: `${user.name} deleted ${product.name}'s product record`, 
+        view_id: ViewType.CRM.id,
+        text: `${user.name} activated product ${product.name}`, 
       });
 
-      res.send({ id: id });
+      res.send({ id: product.id, deactivated_date: null });
     }
 
 

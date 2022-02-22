@@ -54,7 +54,6 @@ describe('/employee', () => {
         try {
             // Update employee
             const modifyEmployee = {...newEmployee, address: "Kent Ridge Hall", postal_code: "123456" };
-            modifyEmployee.access_rights[0].has_write_access = false;
 
             await http.put(`/employee`, modifyEmployee);
 
@@ -65,7 +64,6 @@ describe('/employee', () => {
             // Assert changes
             assert.equal(getData[0].address, "Kent Ridge Hall");
             assert.equal(getData[0].postal_code, "123456");
-            assert.equal(getData[0].access_rights[0].has_write_access, false);
 
         } catch(err) {
             if (err.response) {
@@ -95,33 +93,52 @@ describe('/employee', () => {
         }
     });
 
-    it('POST /grant', async () => {
+    it('PUT /accessRight', async () => {
         try {
             // Create AccessRights
             let accessRights = { 
-                employee_id: newEmployee.id, 
+                id: newEmployee.id, 
                 access_rights: [
-                    {
-                        view_id: 2,
-                        has_write_access: false
-                    },
-                    {
-                        view_id: 3,
-                        has_write_access: true
-                    },
+                    { view_id: 1, has_write_access: true },
                 ]
             }
-            await http.post(`/employee/grant`, accessRights);
+            await http.put(`/employee/accessRight`, accessRights);
 
             // Retrieve employee
-            const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
+            const { data: getData1 } = await http.get(`/employee?id=${newEmployee.id}`);
 
             // Assert changes
-            assert.equal(getData[0].access_rights.length, 3);
-            assert.equal(getData[0].access_rights[1].view_id, 2);
-            assert.equal(getData[0].access_rights[1].has_write_access, false);
-            assert.equal(getData[0].access_rights[2].view_id, 3);
-            assert.equal(getData[0].access_rights[2].has_write_access, true);
+            assert.equal(getData1[0].access_rights.length, 1);
+            assert.equal(getData1[0].access_rights[0].view_id, 1);
+            assert.equal(getData1[0].access_rights[0].has_write_access, true);
+
+            accessRights = { 
+                id: newEmployee.id, 
+                access_rights: [
+                    { view_id: 1, has_write_access: false },
+                ]
+            }
+            await http.put(`/employee/accessRight`, accessRights);
+
+            // Retrieve employee
+            const { data: getData2 } = await http.get(`/employee?id=${newEmployee.id}`);
+
+            // Assert changes
+            assert.equal(getData2[0].access_rights.length, 1);
+            assert.equal(getData2[0].access_rights[0].view_id, 1);
+            assert.equal(getData2[0].access_rights[0].has_write_access, false);
+
+            accessRights = { 
+                id: newEmployee.id, 
+                access_rights: []
+            }
+            await http.put(`/employee/accessRight`, accessRights);
+
+            // Retrieve employee
+            const { data: getData3 } = await http.get(`/employee?id=${newEmployee.id}`);
+
+            // Assert changes
+            assert.equal(getData3[0].access_rights.length, 0);
 
         } catch(err) {
             if (err.response) {
@@ -157,75 +174,6 @@ describe('/employee', () => {
             assert.fail();
         }
     });
-
-    it('POST /grant (upsert)', async () => {
-        try {
-            // Create AccessRights
-            let accessRights = { 
-                employee_id: newEmployee.id, 
-                access_rights: [
-                    {
-                        view_id: 2,
-                        has_write_access: true
-                    },
-                    {
-                        view_id: 3,
-                        has_write_access: true
-                    },
-                ]
-            }
-            await http.post(`/employee/grant`, accessRights);
-
-            // Retrieve employee
-            const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
-
-            // Assert changes
-            assert.equal(getData[0].access_rights.length, 3);
-            assert.equal(getData[0].access_rights[1].view_id, 2);
-            assert.equal(getData[0].access_rights[1].has_write_access, true);
-            assert.equal(getData[0].access_rights[2].view_id, 3);
-            assert.equal(getData[0].access_rights[2].has_write_access, true);
-
-        } catch(err) {
-            if (err.response) {
-                console.log(err.response.status, err.response.data);
-            } else {
-                console.log(err);
-            }
-            assert.fail();
-        }
-    })
-
-    it('POST /revoke', async () => {
-        try {
-            // Remove AccessRights
-            let accessRights = { 
-                employee_id: newEmployee.id, 
-                access_rights: [
-                    {
-                        view_id: 2,
-                    },
-                ]
-            }
-            await http.post(`/employee/revoke`, accessRights);
-
-            // Retrieve employee
-            const { data: getData } = await http.get(`/employee?id=${newEmployee.id}`);
-
-            // Assert changes
-            assert.equal(getData[0].access_rights.length, 2);
-            assert.equal(getData[0].access_rights[1].view_id, 3);
-            assert.equal(getData[0].access_rights[1].has_write_access, true);
-
-        } catch(err) {
-            if (err.response) {
-                console.log(err.response.status, err.response.data);
-            } else {
-                console.log(err);
-            }
-            assert.fail();
-        }
-    })
 
     it('POST /changePassword', async () => {
         try {

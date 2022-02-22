@@ -1,10 +1,11 @@
 var express = require('express');
 const { requireAccess } = require('../auth');
 var router = express.Router();
-const { Customer, ChargedUnder } = require('../models/Customer');
+const { Customer, CustomerMenu } = require('../models/Customer');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');
+const { Product } = require('../models/Product');
 
 /**
  * Customer route
@@ -117,15 +118,47 @@ router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next
 });
 
 
-/**
- *  DELETE method: Update a customer 'deleted' attribute
- *  - /api/customer
- *  - requireAccess(ViewType.CRM, true) because this is writing data
- * */ 
-router.delete('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
-  const { id } = req.query;
+router.post('/deactivate', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { id } = req.body;
 
-  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
+  if (id == null) {
+      res.status(400).send("'id' is required.", )
+      return;
+  }
+
+  try {
+    const customer = await Customer.findByPk(id);
+
+    if (customer == null) {
+      res.status(400).send(`Customer id ${id} not found.`)
+
+    } else {
+      customer.deactivated_date = new Date();
+      customer.save();
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+          employee_id: user.id, 
+          view_id: ViewType.CRM.id,
+          text: `${user.name} deactivated ${customer.company_name}'s record`, 
+      });
+
+      res.send({ id: customer.id, deactivated_date: customer.deactivated_date });
+    }
+
+  } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+  }
+
+});
+
+
+router.post('/activate', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { id } = req.body;
+
   if (id == null) {
     res.status(400).send("'id' is required.", )
     return;
@@ -134,12 +167,11 @@ router.delete('/', requireAccess(ViewType.CRM, true), async function(req, res, n
   try {
     const customer = await Customer.findByPk(id);
 
-    // If 'id' is not found return 400 Bad Request, if found then return the 'id'
     if (customer == null) {
       res.status(400).send(`Customer id ${id} not found.`)
 
     } else {
-      customer.deleted = true;
+      customer.deactivated_date = null;
       customer.save();
 
       // Record to admin logs
@@ -147,15 +179,54 @@ router.delete('/', requireAccess(ViewType.CRM, true), async function(req, res, n
       await Log.create({ 
         employee_id: user.id, 
         view_id: ViewType.CRM.id,
-        text: `${user.name} deleted ${customer.company_name}'s customer record`, 
+        text: `${user.name} activated ${customer.name}'s record`, 
       });
 
-      res.send({ id: customer.id });
+      res.send({ id: customer.id, deactivated_date: null });
     }
 
 
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+router.get('/menu', requireAccess(ViewType.CRM, false), async function(req, res, next) {
+  const predicate = parseRequest(req.query);
+
+  try {
+    const customerMenu = await CustomerMenu.findAll(predicate);
+    res.send(customerMenu);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+router.put('/menu', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { customer_id, customer_menus } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['customer_id', 'customer_menus']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    await CustomerMenu.destroy({ where: { customer_id }})
+    await CustomerMenu.bulkCreate(customer_menus);
+    
+    res.send({ id: customer_id });
+
+  } catch(err) {
     console.log(err);
     res.status(500).send(err);
   }

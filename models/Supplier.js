@@ -31,13 +31,10 @@ const Supplier = sequelize.define('supplier', {
   description: {
     type: DataTypes.STRING,
   },
-  deleted: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
   company_email: {
     type: DataTypes.STRING,
   },
+  deactivated_date: DataTypes.DATE,
   s2_name: DataTypes.STRING,
   s2_phone_number: DataTypes.STRING,
 }, {

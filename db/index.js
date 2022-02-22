@@ -12,6 +12,7 @@ const PaymentMethodType = require('../common/PaymentMethodType');
 const AccountingTypeEnum = require('../common/AccountingTypeEnum');
 const MovementTypeEnum = require('../common/MovementTypeEnum');
 const ExpensesTypeEnum = require('../common/ExpensesTypeEnum');
+const { insertDemoData } = require('../demo');
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
@@ -31,7 +32,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
     console.log("Connection to database established");
 
     // Load and initialize all tables/associations
-    await require('../models')();
+    const { syncAssociations } = require('../models');
+    await syncAssociations();
 
     // Data initiation
     const { Employee, Role } = require('../models/Employee');
@@ -42,7 +44,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       console.log("First run detected, running data init");
 
       const View = require('../models/View');
-      const { ChargedUnder } = require('../models/Customer');
+      const { ChargedUnder, Customer } = require('../models/Customer');
       const { LeaveType, LeaveAccount } = require('../models/LeaveAccount');
       const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
@@ -54,14 +56,12 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
      
-      await Employee.bulkCreate([
+      const employees = await Employee.bulkCreate([
         { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id },
         { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id },
       ])
 
-      const alice = await Employee.findOne({ where: { name: "Alice" } });
-      await AccessRight.create({ has_write_access: true, employee_id: alice.id, view_id: ViewType.HR.id })
-      await AccessRight.create({ has_write_access: false, employee_id: alice.id, view_id: ViewType.INVENTORY.id })
+      await AccessRight.bulkCreate(Object.keys(ViewType).map(key => ({ employee_id: employees[1].id, view_id: ViewType[key].id, has_write_access: false })))
 
       
       const { Supplier } = require('../models/Supplier');
@@ -118,7 +118,10 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       const {ExpensesType} = require('../models/Expenses');
       await ExpensesType.bulkCreate(Object.keys(ExpensesTypeEnum).map(key => ExpensesTypeEnum[key]));
-    } 
+      // Comment this out if u don't want large dataset to init
+      await insertDemoData();
+
+    }
   
   } catch (err) {
     console.log("Connection to database failed.");

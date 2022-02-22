@@ -5,7 +5,7 @@ const { hashPassword, compareHash } = require('../auth/bcrypt');
 const router = express.Router();
 const ViewType = require('../common/ViewType');
 const { Employee, Role } = require('../models/Employee');
-const { LeaveAccount } = require('../models/LeaveAccount');
+const { LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
 const View = require('../models/View');
 const Log = require('../models/Log');
 const { sendEmailTo } = require('../emailer/index');
@@ -28,7 +28,10 @@ router.get('/', requireAccess(ViewType.HR, false), async function(req, res, next
     const predicate = parseRequest(req.query);
     
     try {
+        predicate.order = predicate.order || [];
         predicate.include = [{ model: AccessRight, include: View }, Role]
+        predicate.order.push([AccessRight, 'has_write_access', 'DESC'])
+
         const employees = await Employee.findAll(predicate);
         res.send(employees);
       
@@ -49,18 +52,11 @@ router.get('/', requireAccess(ViewType.HR, false), async function(req, res, next
 router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, next) {
     const { name, username, email, role_id, contact_number, nok_name, nok_number, address, postal_code, send_email, access_rights } = req.body;
 
-    // Validation
-    if (name == null || username == null || email == null, role_id == null, send_email == null) {
-        res.status(400).send("'name', 'username', 'email', 'role_id', 'send_email are required.")
-        return;
-    }
-    
-    // Access Rights Validation
     try {
-        validateAccessRights(access_rights);
+      assertNotNull(req.body, ['name', 'username', 'email', 'role_id', 'send_email'])
     } catch(err) {
-        res.status(400).send(err);
-        return;
+      res.status(400).send(err);
+      return;
     }
 
     try {
@@ -76,18 +72,9 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
         const passwordPlaintext = crypto.createHash('sha1').update(Math.random().toString()).digest('hex').substring(0, 8);
         const password = await hashPassword(passwordPlaintext);
 
-        // Standard leave accounts
-        const leave_accounts = [
-            { entitled_days : 14, leave_type_id : 1 },
-            { entitled_days : 0, leave_type_id : 2 },
-            { entitled_days : 0, leave_type_id : 3 },
-            { entitled_days : 0, leave_type_id : 4 },
-            { entitled_days : 0, leave_type_id : 5 },
-        ];
-
         // Create new employee
         const newEmployee = await Employee.create(
-            { name, username, password, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights, leave_accounts }, 
+            { name, username, password, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights, leave_accounts: STANDARD_LEAVE_ACCOUNTS }, 
             { include: [AccessRight, LeaveAccount] }
         );
 
@@ -133,10 +120,10 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
  *  - requireAccess(ViewType.HR)
  * */ 
 router.put('/', requireAccess(ViewType.HR), async function(req, res, next) {
-    const { id, name, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights } = req.body;
+    const { id, name, email, role_id, contact_number, nok_name, nok_number, address, postal_code } = req.body;
     
     try {
-      assertNotNull(req.body, ['id', 'name', 'username', 'email', 'role_id', 'contact_number', 'nok_name', 'nok_number', 'address', 'postal_code'])
+      assertNotNull(req.body, ['id', 'name', 'email', 'role_id'])
     } catch(err) {
       res.status(400).send(err);
       return;
@@ -164,18 +151,6 @@ router.put('/', requireAccess(ViewType.HR), async function(req, res, next) {
             res.status(400).send(`Employee id ${id} not found.`);
             return;
         }
-
-        // Access Rights Validation
-        try {
-            validateAccessRights(access_rights);
-        } catch(err) {
-            res.status(400).send(err);
-            return;
-        }
-
-        const employee = await Employee.findByPk(id, { include: AccessRight });
-        await removeAccessRights(employee.toJSON().access_rights, employee, user, true);
-        await insertAccessRights(access_rights, employee, user, true);
 
         // Record to admin logs
         await Log.create({ 
@@ -221,7 +196,7 @@ router.post('/deactivate', requireAccess(ViewType.HR, true), async function(req,
             text: `${user.name} deactivated ${employee.name}'s record`, 
         });
 
-        res.send({ id: employee.id });
+        res.send({ id: employee.id, discharge_date: employee.discharge_date });
         }
 
 
@@ -260,7 +235,7 @@ router.post('/activate', requireAccess(ViewType.HR, true), async function(req, r
         text: `${user.name} activated ${employee.name}'s record`, 
       });
 
-      res.send({ id: employee.id });
+      res.send({ id: employee.id, discharge_date: null });
     }
 
 

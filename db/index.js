@@ -4,7 +4,7 @@ const ViewType = require('../common/ViewType');
 const RoleType = require('../common/RoleType');
 const ChargedUnderType = require('../common/ChargedUnderType');
 const PaymentTermType = require('../common/PaymentTermType');
-const POStatusType = require('../common/POStatusType');
+const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
 const LeaveStatusEnum = require('../common/LeaveStatusEnum');
 const ProductCategoryEnum = require('../common/ProductCategory');
@@ -44,8 +44,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       console.log("First run detected, running data init");
 
       const View = require('../models/View');
-      const { ChargedUnder, Customer } = require('../models/Customer');
-      const { LeaveType, LeaveAccount } = require('../models/LeaveAccount');
+      const { Customer, ChargedUnder } = require('../models/Customer');
+      const { LeaveType, LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
       const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
 
@@ -55,15 +55,9 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       await LeaveType.bulkCreate(Object.keys(LeaveTypeEnum).map(key => LeaveTypeEnum[key]));
       await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
-     
-      const employees = await Employee.bulkCreate([
-        { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id },
-        { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id },
-      ])
 
-      await AccessRight.bulkCreate(Object.keys(ViewType).map(key => ({ employee_id: employees[1].id, view_id: ViewType[key].id, has_write_access: false })))
 
-      
+
       const { Supplier } = require('../models/Supplier');
       await Supplier.bulkCreate([
         { company_name: "Heng Heng", s1_name: "Ah Heng", s1_phone_number: "82663467", address: "21 Heng St", postal_code: "745728" },
@@ -71,7 +65,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { company_name: "Fairprice", s1_name: "Laurie", s1_phone_number: "87476828", address: "2 Buona Vista Rd", postal_code: "845125" },
       ]);
 
-      
+
       const { Product } = require('../models/Product');
       await Product.bulkCreate([
         { name: "Ketchup", unit: "bottle", min_inventory_level: "100" },
@@ -80,8 +74,9 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       ]);
 
       const { PurchaseOrder, PaymentTerm, POStatus, PurchaseOrderItem } = require('../models/PurchaseOrder');
+
       await PaymentTerm.bulkCreate(Object.keys(PaymentTermType).map(key => PaymentTermType[key]));
-      await POStatus.bulkCreate(Object.keys(POStatusType).map(key => POStatusType[key]));
+      await POStatus.bulkCreate(Object.keys(PurchaseOrderStatusType).map(key => PurchaseOrderStatusType[key]));
 
       const heng = await Supplier.findOne({ where: { company_name: "Heng Heng" } });
       await PurchaseOrder.bulkCreate([
@@ -104,6 +99,13 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { amount: 100, purchase_order_id: 1, accounting_type_id: 1, movement_type_id:1 },
         { amount: -50, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 },
       ]); 
+     
+      const employees = await Employee.bulkCreate([
+        { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
+        { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
+      ], { include: LeaveAccount })
+
+      await AccessRight.bulkCreate(Object.keys(ViewType).map(key => ({ employee_id: employees[1].id, view_id: ViewType[key].id, has_write_access: false })))
 
       const { InventoryMovement } = require('../models/InventoryMovement');
       const lineItem = await PurchaseOrderItem.findOne({ where: { product_id: ikanBilis.id } });

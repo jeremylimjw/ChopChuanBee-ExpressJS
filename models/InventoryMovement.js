@@ -3,9 +3,9 @@ const { sequelize } = require('../db');
 
 const InventoryMovement = sequelize.define('inventory_movement', {
     id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4
     },
     unit_cost: DataTypes.DECIMAL,
     unit_price: DataTypes.DECIMAL,

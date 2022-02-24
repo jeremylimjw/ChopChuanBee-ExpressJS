@@ -68,6 +68,14 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
             return;
         }
 
+        // Enforce email unique constraint
+        const hasEmail = await Employee.findOne({ where: { email: email }});
+
+        if (hasEmail != null) {
+            res.status(400).send(`Email ${email} is already taken.`)
+            return;
+        }
+
         // Generate random password
         const passwordPlaintext = crypto.createHash('sha1').update(Math.random().toString()).digest('hex').substring(0, 8);
         const password = await hashPassword(passwordPlaintext);
@@ -192,7 +200,7 @@ router.post('/deactivate', requireAccess(ViewType.HR, true), async function(req,
         const user = res.locals.user;
         await Log.create({ 
             employee_id: user.id, 
-            view_id: ViewType.HR.id,
+            view_id: ViewType.ADMIN.id,
             text: `${user.name} deactivated ${employee.name}'s record`, 
         });
 
@@ -231,7 +239,7 @@ router.post('/activate', requireAccess(ViewType.HR, true), async function(req, r
       const user = res.locals.user;
       await Log.create({ 
         employee_id: user.id, 
-        view_id: ViewType.HR.id,
+        view_id: ViewType.ADMIN.id,
         text: `${user.name} activated ${employee.name}'s record`, 
       });
 

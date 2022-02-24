@@ -4,10 +4,11 @@ const { requireAccess } = require('../auth');
 const { Supplier, SupplierMenu } = require('../models/Supplier');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
+const { Sequelize } = require('sequelize');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const { Product } = require('../models/Product');
 
-
+//Read supplier (find 1 or find all depending if ID was given)
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
   const predicate = parseRequest(req.query);
   
@@ -168,7 +169,6 @@ router.post('/activate', requireAccess(ViewType.SCM, true), async function(req, 
       res.send({ id: supplier.id, deactivated_date: null });
     }
 
-
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
     console.log(err);
@@ -193,6 +193,7 @@ router.get('/menu', requireAccess(ViewType.SCM, false), async function(req, res,
   }
 
 });
+
 
 router.put('/menu', requireAccess(ViewType.SCM, true), async function(req, res, next) {
   const { supplier_id, supplier_menus } = req.body;

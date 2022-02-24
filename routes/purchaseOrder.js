@@ -6,47 +6,20 @@ const Log = require('../models/Log');
 const ViewType = require('../common/ViewType');
 const { Supplier } = require('../models/Supplier');
 const { Product } = require('../models/Product');
-const { Payment } = require('../models/Payment');
+const { Payment, PaymentMethod } = require('../models/Payment');
 const { InventoryMovement } = require('../models/InventoryMovement');
 const { parseRequest, assertNotNull } = require('../common/helpers');
-const { Sequelize } = require('sequelize');
+const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 
 
-router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
-  // This is a dynamic query where user can search using any column
+router.get('/', requireAccess(ViewType.GENERAL, false), async function(req, res, next) {
   const predicate = parseRequest(req.query);
 
   try {
-    predicate.include = [{ model: PurchaseOrderItem, include: [InventoryMovement, Product] }, Supplier, PaymentTerm, POStatus, Payment];
+    predicate.include = [{ model: PurchaseOrderItem, include: [InventoryMovement, Product] }, Supplier, PaymentTerm, POStatus, { model: Payment, include: [PaymentMethod] }];
+    predicate.order = [['created_at', 'DESC']]
     const purchaseOrders = await PurchaseOrder.findAll(predicate);
-    res.send(purchaseOrders);
 
-  } catch(err) {
-    console.log(err);
-    res.status(500).send(err);
-  }
-
-});
-
-
-router.get('/item', async function(req, res, next) {
-  // This is a dynamic query where user can search using any column
-  // const predicate = parseRequest(req.query, ['supplier_item_name']);
-
-  const { supplier_id, supplier_item_name } = req.query;
-
-  try {
-    // predicate.include = [{ model: PurchaseOrder, include: [Supplier] }];
-    const purchaseOrders = await PurchaseOrderItem.findAll({ 
-      where: {
-        supplier_item_name: { [Sequelize.Op.iLike] : `%${supplier_item_name}%` }
-      },
-      include: [
-        { model: PurchaseOrder, where: { supplier_id: supplier_id } },
-        Product
-      ] 
-    });
-    // const purchaseOrders = await PurchaseOrderItem.findAll({ where: { 'purchase_order.supplier_id': supplier_id }, include: [PurchaseOrder] });
     res.send(purchaseOrders);
 
   } catch(err) {
@@ -58,49 +31,26 @@ router.get('/item', async function(req, res, next) {
 
 
 router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
-  const { supplier_id, gst_rate, is_payment_made, payment_amount, offset, 
-    supplier_invoice_id, remarks, payment_term_id, payment_method_id, 
-    purchase_order_status_id, purchase_order_items } = req.body;
+  const { supplier_id, purchase_order_status_id, purchase_order_items } = req.body;
 
   // Validation here
   try {
-    assertNotNull(req.body, ['supplier_id', 'gst_rate', 'offset', 'remarks', 'payment_term_id', 'purchase_order_status_id', 'purchase_order_items'])
+    assertNotNull(req.body, ['supplier_id', 'purchase_order_status_id', 'purchase_order_items'])
   } catch(err) {
     res.status(400).send(err);
     return;
   }
 
   try {
-    const purchaseOrder = { supplier_id, gst_rate, offset, supplier_invoice_id, remarks, payment_term_id, purchase_order_status_id, purchase_order_items };
-    const total = (1 + (gst_rate/100)) * purchase_order_items.reduce((prev, current) => prev + current.subtotal, 0) - offset;
-
-    // Register payment
-    if (is_payment_made == true) {
-      purchaseOrder.payments = [
-        { amount: total, payment_method_id: payment_method_id, movement_type_id: 1 },
-      ]
-    } else {
-      if (payment_amount > 0) {
-        purchaseOrder.payments = [
-          { amount: total, accounting_type_id: 1, payment_method_id: payment_method_id, movement_type_id: 1 },
-          { amount: -payment_amount, accounting_type_id: 1, payment_method_id: payment_method_id, movement_type_id: 1 },
-        ]
-      }
-    }
-
-    // Register inventory movement
-    for (let item of purchase_order_items) {
-      const net_unit_cost = (1 + (gst_rate/100)) * item.unit_cost;
-      item.inventory_movements = [{ unit_cost: net_unit_cost, quantity: item.received_quantity, movement_type_id: 1 }];
-    }
-
-    const newPurchaseOrder = await PurchaseOrder.create(purchaseOrder, { include: [{ model: PurchaseOrderItem, include: InventoryMovement }, Payment] });
+    const newPurchaseOrder = await PurchaseOrder.create(
+      { supplier_id, purchase_order_status_id, purchase_order_items }, 
+      { include: [PurchaseOrderItem] });
 
     // Record to admin logs
     const user = res.locals.user;
-    Log.create({ 
+    await Log.create({ 
       employee_id: user.id, 
-      view_id: ViewType.CRM.id,
+      view_id: ViewType.SCM.id,
       text: `${user.name} created a purchase order with ID ${newPurchaseOrder.id}`, 
     });
 
@@ -114,89 +64,135 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
 });
 
 
-// router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
-//   const { id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description } = req.body;
+router.put('/', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { id, purchase_order_items, purchase_order_status_id } = req.body;
 
-//   // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-//   if (id == null || company_name == null 
-//       || p1_name == null || p1_phone_number == null 
-//       || address == null || postal_code == null 
-//       || charged_under_id == null || gst == null || gst_show == null) {
-//     res.status(400).send("'id', 'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'charged_under_id', 'gst', 'gst_show' are required.", )
-//     return;
-//   }
+  // Validation here
+  try {
+    assertNotNull(req.body, ['id'])
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
 
-//   try {
-//     const result = await Customer.update(
-//       { company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description },
-//       { where: { id: id } }
-//     );
+  try {
+    const result = await PurchaseOrder.update(req.body, { where: { id } });
 
-//     // If 'id' is not found return 400 Bad Request, if found then return the 'id'
-//     if (result[0] === 0) {
-//       res.status(400).send(`Customer id ${id} not found.`)
+    // If 'id' is not found return 400 Bad Request, if found then return the 'id'
+    if (result[0] === 0) {
+      res.status(400).send(`Purchase order ID ${id} not found.`)
 
-//     } else {
-//       // Record to admin logs
-//       const user = res.locals.user;
-//       await Log.create({ 
-//         employee_id: user.id, 
-//         view_id: ViewType.CRM.id,
-//         text: `${user.name} updated ${company_name}'s customer record`, 
-//       });
+    } else {
 
-//       res.send({ id: id });
-//     }
+      if (purchase_order_items != null) {
+        // Update order items
+        const purchaseOrder = await PurchaseOrder.findByPk(id, { include: [PurchaseOrderItem] });
+        for (let item of purchaseOrder.purchase_order_items) {
+          if (purchase_order_items.filter(x => x.id == item.id).length === 0) {
+            await PurchaseOrderItem.destroy({ where: { id: item.id }});
+          }
+        }
+        for (let item of purchase_order_items) {
+          await PurchaseOrderItem.upsert(item);
+        }
+      }
 
+      // Record to admin logs
+      const user = res.locals.user;
+      let text = `${user.name} updated purchase order ID ${id}.`
 
-//   } catch(err) {
-//     // Catch and return any uncaught exceptions while inserting into database
-//     console.log(err);
-//     res.status(500).send(err);
-//   }
+      if (purchase_order_status_id != null) {
+        const opKey = Object.keys(PurchaseOrderStatusType).filter(key => PurchaseOrderStatusType[key].id == purchase_order_status_id);
+        text = `${user.name} updated purchase order ID ${id} to ${opKey.length ? PurchaseOrderStatusType[opKey].name : 'Unknown' }.`
+      }
 
-// });
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.SCM.id,
+        text: text, 
+      });
 
-
-// router.delete('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
-//   const { id } = req.query;
-
-//   // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-//   if (id == null) {
-//     res.status(400).send("'id' is required.", )
-//     return;
-//   }
-
-//   try {
-//     const customer = await Customer.findByPk(id);
-
-//     // If 'id' is not found return 400 Bad Request, if found then return the 'id'
-//     if (customer == null) {
-//       res.status(400).send(`Customer id ${id} not found.`)
-
-//     } else {
-//       customer.deleted = true;
-//       customer.save();
-
-//       // Record to admin logs
-//       const user = res.locals.user;
-//       await Log.create({ 
-//         employee_id: user.id, 
-//         view_id: ViewType.CRM.id,
-//         text: `${user.name} deleted ${customer.company_name}'s customer record`, 
-//       });
-
-//       res.send({ id: customer.id });
-//     }
+      res.send({ id: id });
+    }
 
 
-//   } catch(err) {
-//     // Catch and return any uncaught exceptions while inserting into database
-//     console.log(err);
-//     res.status(500).send(err);
-//   }
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
 
-// });
+});
+
+
+router.post('/payment', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { purchase_order_id, amount, payment_method_id, accounting_type_id, movement_type_id } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['purchase_order_id', 'amount', 'movement_type_id']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const newPayment = await Payment.create({ purchase_order_id, amount, payment_method_id, accounting_type_id, movement_type_id });
+
+    // Record to admin logs
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.SCM.id,
+      text: `${user.name} made payment to purchase order ID ${purchase_order_id}`, 
+    });
+
+    res.send(newPayment.toJSON())
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+// Create inventory movements in bulk
+router.post('/inventory', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { inventory_movements } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['inventory_movements']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const newInventoryMovements = await InventoryMovement.bulkCreate(inventory_movements);
+
+    // Record to admin logs
+    const user = res.locals.user;
+    const logs = [];
+    for (let movement of inventory_movements) {
+      const purchaseOrderItem = await PurchaseOrderItem.findByPk(movement.purchase_order_item_id, { include: Product });
+      logs.push(({ 
+        employee_id: user.id, 
+        view_id: ViewType.SCM.id,
+        text: `${user.name} received delivery for ${purchaseOrderItem.product.name} with ${movement.quantity} quantity`, 
+      }))
+    }
+    await Log.bulkCreate(logs);
+
+    res.send(newInventoryMovements)
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
 
 
 module.exports = router;

@@ -16,8 +16,11 @@ router.get('/', requireAccess(ViewType.GENERAL, false), async function(req, res,
   const predicate = parseRequest(req.query);
 
   try {
-    predicate.include = [{ model: PurchaseOrderItem, include: [InventoryMovement, Product] }, Supplier, PaymentTerm, POStatus, { model: Payment, include: [PaymentMethod] }];
-    predicate.order = [['created_at', 'DESC']]
+    predicate.include = [
+      { model: PurchaseOrderItem, include: [InventoryMovement, Product] }, 
+      { model: Payment, include: [PaymentMethod] },
+      Supplier
+    ];
     const purchaseOrders = await PurchaseOrder.findAll(predicate);
 
     res.send(purchaseOrders);

@@ -116,6 +116,10 @@ async function syncAssociations() {
     Product.hasMany(PurchaseOrderItem, { foreignKey: { allowNull: false, name: 'product_id' }});
     PurchaseOrderItem.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
 
+    // 1-M association
+    ChargedUnder.hasMany(PurchaseOrder, { foreignKey: { name: 'charged_under_id' }});
+    PurchaseOrder.belongsTo(ChargedUnder, { foreignKey: { name: 'charged_under_id' }});
+
     const { InventoryMovement } = require('../models/InventoryMovement');
     const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
 

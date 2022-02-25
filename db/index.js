@@ -2,8 +2,6 @@ const { hashPassword } = require('../auth/bcrypt');
 const { Sequelize, DataTypes } = require('sequelize');
 const ViewType = require('../common/ViewType');
 const RoleType = require('../common/RoleType');
-<<<<<<< HEAD
-const ChargedUnderType = require('../common/ChargedUnderType');
 const PaymentTermType = require('../common/PaymentTermType');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
@@ -12,11 +10,6 @@ const ProductCategoryEnum = require('../common/ProductCategory');
 const PaymentMethodType = require('../common/PaymentMethodType');
 const AccountingTypeEnum = require('../common/AccountingTypeEnum');
 const MovementTypeEnum = require('../common/MovementTypeEnum');
-=======
-const LeaveTypeEnum = require('../common/LeaveTypeEnum');
-const LeaveStatusEnum = require('../common/LeaveStatusEnum');
-const ProductCategoryEnum = require('../common/ProductCategory');
->>>>>>> master
 const { insertDemoData } = require('../demo');
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {

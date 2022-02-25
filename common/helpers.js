@@ -1,30 +1,5 @@
-const { query } = require('express');
 const { Sequelize } = require('sequelize');
-const { AccessRight } = require('../models/AccessRight');
-const { Customer } = require('../models/Customer');
-const { Employee } = require('../models/Employee');
-const { LeaveAccount } = require('../models/LeaveAccount');
-const { LeaveApplication } = require('../models/LeaveApplication');
-const Log = require('../models/Log');
-const { Product } = require('../models/Product');
-const { Supplier } = require('../models/Supplier');
-const View = require('../models/View');
-
-function getModel(name) {
-    switch (name) {
-        case 'access_right': return AccessRight;
-        case 'customer': return Customer;
-        case 'employee': return Employee;
-        case 'leave_account': return LeaveAccount;
-        case 'leave_application': return LeaveApplication;
-        case 'log': return Log;
-        case 'product': return Product;
-        case 'supplier': return Supplier;
-        case 'view': return View;
-        default: return null;
-    }
-}
-
+const { getModel } = require('../models');
 
 const parseRequest = (queries) => {
     const predicate = {
@@ -81,6 +56,22 @@ const parseRequest = (queries) => {
         delete queries.order_by;
     }
 
+    // Transform between query Sequelize.Op.is or Sequelize.Op.not query
+    for (let key of Object.keys(queries)) {
+        if (key.endsWith('_is_null')) {
+            const newKey = key.replace('_is_null', '');
+            predicate.where[`${newKey}`] = { [Sequelize.Op.is]: null }
+
+            delete queries[key];
+        }
+        if (key.endsWith('_is_nn')) {
+            const newKey = key.replace('_is_nn', '');
+            predicate.where[`${newKey}`] = { [Sequelize.Op.not]: null }
+
+            delete queries[key];
+        }
+    }
+
     // Transform between query Sequelize.Op.between query
     for (let key of Object.keys(queries)) {
         if (key.endsWith('_from')) {
@@ -121,5 +112,14 @@ module.exports = {
                 throw `'${key}' is required.`;
             }
         }
+    },
+    compare(oldItems, newItems, key) {
+        const toRemove = [];
+        for (let item of oldItems) {
+            const index = newItems.findIndex(x => x[`${key}`] === item[`${key}`])
+            if (index === -1) 
+                toRemove.push(item)
+        }
+        return toRemove;
     }
 }

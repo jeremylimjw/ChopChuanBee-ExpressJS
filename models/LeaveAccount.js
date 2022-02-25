@@ -31,41 +31,12 @@ const LeaveType = sequelize.define('leave_type', {
   timestamps: false // Dont record 'updatedAt' and 'createdAt'
 });
 
-
-
-async function validateLeaveAccounts(leave_accounts) {
-  if (leave_accounts == null) {
-    throw ("'leave_accounts' is required.")
-  }
-
-  if (!Array.isArray(leave_accounts)) {
-      throw ("'leave_accounts' must be an array.")
-  }
-
-  for (let leave_account of leave_accounts) {
-      if (leave_account.id == null || leave_account.entitled_days == null) {
-          throw (`'leave_accounts' array must be in { id: number, entitled_days: number } format.`);
-      }
-  }
-}
-
-async function updateLeaveAccounts(leave_accounts, employee, user, avoidLogging) {
-    // Upsert the access right
-    for (let leave_account of leave_accounts) {
-        await LeaveAccount.update(
-          { entitled_days: leave_account.entitled_days },
-          { where: { id: leave_account.id } }
-        );
-
-        if (!avoidLogging) {
-            // Record in admin logs
-            await Log.create({ 
-                employee_id: user.id, 
-                view_id: ViewType.HR.id,
-                text: `${user.name} updated ${employee.name}'s Leave Account record`, 
-            });
-        }
-    }
-}
+const STANDARD_LEAVE_ACCOUNTS = [
+  { entitled_days : 14, leave_type_id : 1 },
+  { entitled_days : 0, leave_type_id : 2 },
+  { entitled_days : 0, leave_type_id : 3 },
+  { entitled_days : 0, leave_type_id : 4 },
+  { entitled_days : 0, leave_type_id : 5 },
+];
   
-module.exports = { LeaveAccount, LeaveType, validateLeaveAccounts, updateLeaveAccounts };
+module.exports = { LeaveAccount, LeaveType, STANDARD_LEAVE_ACCOUNTS };

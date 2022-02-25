@@ -27,18 +27,9 @@ const Customer = sequelize.define('customer', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  gst: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false
-  },
-  gst_show: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false
-  },
-  deleted: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
+  gst_show: DataTypes.BOOLEAN,
+  deactivated_date: DataTypes.DATE,
+  description: DataTypes.STRING,
   company_email: DataTypes.STRING,
   p2_name: DataTypes.STRING,
   p2_phone_number: DataTypes.STRING,
@@ -49,15 +40,39 @@ const Customer = sequelize.define('customer', {
 
 const ChargedUnder = sequelize.define('charged_under', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     primaryKey: true,
+    defaultValue: DataTypes.UUIDV4
   },
   name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-}, { 
-  timestamps: false // Dont record 'updatedAt' and 'createdAt'
+  address: DataTypes.STRING, 
+  shipping_address: DataTypes.STRING, 
+  contact_number: DataTypes.STRING, 
+  registration_number: DataTypes.STRING, 
+  gst_rate: {
+    type: DataTypes.DECIMAL,
+    defaultValue: 0,
+  },
+}, {
+  updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
+  createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
 });
 
-module.exports = { Customer, ChargedUnder };
+const CustomerMenu = sequelize.define('customer_menu', {
+  id: {
+    type: DataTypes.UUID,
+    primaryKey: true,
+    defaultValue: DataTypes.UUIDV4
+  },
+  product_alias: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+}, {
+  timestamps: false,
+});
+
+module.exports = { Customer, CustomerMenu, ChargedUnder };

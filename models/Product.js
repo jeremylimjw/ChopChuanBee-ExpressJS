@@ -11,21 +11,13 @@ const Product = sequelize.define('product', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  description: {
-    type: DataTypes.STRING,
-  },
-  unit: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
   min_inventory_level: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    defaultValue: 0
   },
-  deleted: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
+  deactivated_date: DataTypes.DATE,
+  description: DataTypes.STRING,
+  unit: DataTypes.STRING,
 },{
   updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
   createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'

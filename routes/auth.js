@@ -23,7 +23,7 @@ router.post('/', async function(req, res, next) {
             return;
         }
 
-        if (employee.dischargeDate != null) {
+        if (employee.discharge_date != null) {
             res.status(400).send("This account has been deactivated.");
             return;
         }

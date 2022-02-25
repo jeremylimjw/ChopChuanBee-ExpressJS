@@ -51,6 +51,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
       ], { include: LeaveAccount })
 
+      // Give view access to all views for Alice
       await AccessRight.bulkCreate(Object.keys(ViewType).map(key => ({ employee_id: employees[1].id, view_id: ViewType[key].id, has_write_access: false })))
 
       const { Supplier, GUEST_ID } = require('../models/Supplier');

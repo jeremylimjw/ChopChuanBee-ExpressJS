@@ -171,13 +171,13 @@ router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
       await leaveApplication.save();
 
       // Get leave status name for admin loggings
-      const leaveStatus = Object.keys(LeaveStatusEnum).filter(key => LeaveStatusEnum[key].id == leaveApplication.leave_status_id)[0];
+      const statusKey = Object.keys(LeaveStatusEnum).filter(key => LeaveStatusEnum[key].id == leaveApplication.leave_status_id)[0];
 
       const user = res.locals.user;
       await Log.create({ 
         employee_id: user.id, 
         view_id: ViewType.HR.id,
-        text: `${user.name} ${leaveStatus} ${leaveApplication.leave_account.employee.name}'s leave application`, 
+        text: `${user.name} ${LeaveStatusEnum[statusKey].name.toLowerCase()} ${leaveApplication.leave_account.employee.name}'s leave application`, 
       });
 
     }

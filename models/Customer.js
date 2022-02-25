@@ -56,8 +56,9 @@ const ChargedUnder = sequelize.define('charged_under', {
     type: DataTypes.DECIMAL,
     defaultValue: 0,
   },
-}, { 
-  timestamps: false // Dont record 'updatedAt' and 'createdAt'
+}, {
+  updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
+  createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
 });
 
 const CustomerMenu = sequelize.define('customer_menu', {

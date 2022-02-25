@@ -40,17 +40,17 @@ router.get('/', requireAccess(ViewType.CRM, false), async function(req, res, nex
  *  - requireAccess(ViewType.CRM, true) because this is writing data
  * */ 
 router.post('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
-  const { company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description } = req.body;
+  const { company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst_show, description } = req.body;
   
   try {
-    assertNotNull(req.body, ['company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'charged_under_id', 'gst', 'gst_show'])
+    assertNotNull(req.body, ['company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code'])
   } catch(err) {
     res.status(400).send(err);
     return;
   }
 
   try {
-    const newCustomer = await Customer.create({ company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description });
+    const newCustomer = await Customer.create({ company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst_show, description });
     
     // Record to admin logs
     const user = res.locals.user;
@@ -77,10 +77,10 @@ router.post('/', requireAccess(ViewType.CRM, true), async function(req, res, nex
  *  - requireAccess(ViewType.CRM, true) because this is writing data
  * */ 
 router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
-  const { id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description } = req.body;
+  const { id, company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst_show, description } = req.body;
 
   try {
-    assertNotNull(req.body, ['id', 'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'charged_under_id', 'gst', 'gst_show'])
+    assertNotNull(req.body, ['id', 'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code'])
   } catch(err) {
     res.status(400).send(err);
     return;
@@ -88,7 +88,7 @@ router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next
 
   try {
     const result = await Customer.update(
-      { company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst, gst_show, description },
+      { company_name, company_email, p1_name, p1_phone_number, p2_name, p2_phone_number, address, postal_code, charged_under_id, gst_show, description },
       { where: { id: id } }
     );
 

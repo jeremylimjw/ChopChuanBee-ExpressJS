@@ -94,8 +94,8 @@ async function syncAssociations() {
     LeaveStatus.hasMany(LeaveApplication, { foreignKey: { allowNull: false, name: 'leave_status_id' }});
     LeaveApplication.belongsTo(LeaveStatus,  { foreignKey: { allowNull: false, name: 'leave_status_id' }});
     
-    // await sequelize.sync(); // This will create tables if not exists
-    await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+    await sequelize.sync(); // This will create tables if not exists
+    // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
     
 }
 

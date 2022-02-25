@@ -18,8 +18,7 @@ describe('/customer', () => {
                 p1_name : "John Doe", p1_phone_number : "98727674", 
                 p2_name : null, p2_phone_number : null, 
                 address : "21 Jump Street", postal_code : "472648", 
-                charged_under_id: 1, gst : true, 
-                gst_show : true, description : "Software Application Platforms" 
+                description : "Software Application Platforms" 
             }
             const { data: postData } = await http.post(`/customer`, customer);
 

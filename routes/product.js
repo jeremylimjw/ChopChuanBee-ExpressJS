@@ -137,6 +137,44 @@ router.post('/deactivate', requireAccess(ViewType.INVENTORY, true), async functi
 });
 
 
+router.post('/deactivate', requireAccess(ViewType.INVENTORY, true), async function(req, res, next) {
+  const { id } = req.body;
+
+  if (id == null) {
+      res.status(400).send("'id' is required.", )
+      return;
+  }
+
+  try {
+    const product = await Product.findByPk(id);
+
+    if (product == null) {
+      res.status(400).send(`Product id ${id} not found.`)
+
+    } else {
+      product.deactivated_date = new Date();
+      product.save();
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+          employee_id: user.id, 
+          view_id: ViewType.CRM.id,
+          text: `${user.name} deactivated product ${product.name}`, 
+      });
+
+      res.send({ id: product.id, deactivated_date: product.deactivated_date });
+    }
+
+  } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+  }
+
+});
+
+
 router.post('/activate', requireAccess(ViewType.INVENTORY, true), async function(req, res, next) {
   const { id } = req.body;
 

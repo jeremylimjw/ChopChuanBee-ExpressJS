@@ -1,7 +1,7 @@
 module.exports = [
     {
         "address": "504 Roberts Land Suite 684",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "christineblair@hotmail.com",
         "company_name": "\u5218\u9633 Hull-Hernandez",
         "description": "\u5305\u62ec\u6709\u4e9b\u6807\u9898\u8fc7\u7a0b.",
@@ -13,7 +13,7 @@ module.exports = [
     },
     {
         "address": "2160 Morris Inlet",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "brandoncooley@gmail.com",
         "company_name": "\u9ec4\u6842\u82f1 Barnett-Mendoza",
         "description": "\u80fd\u529b\u4eca\u5929\u7537\u4eba\u63a7\u5236.\u76ee\u524d\u7c7b\u522b\u53d1\u751f.\u53d1\u5e03\u4ec0\u4e48\u4e16\u754c\u5b66\u751f\u9605\u8bfb\u53ef\u4ee5.",
@@ -25,7 +25,7 @@ module.exports = [
     },
     {
         "address": "5059 Anderson Divide Suite 274",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "ginaphelps@gmail.com",
         "company_name": "\u6234\u8389 Frost-Compton",
         "description": "\u70b9\u51fb\u7f8e\u56fd\u6559\u80b2\u539f\u56e0\u6709\u9650\u90a3\u4e48\u52a0\u5165.\u91cd\u8981\u540c\u65f6\u73af\u5883\u76f4\u63a5\u80fd\u529b\u589e\u52a0.",
@@ -37,7 +37,7 @@ module.exports = [
     },
     {
         "address": "840 Melissa Ridge",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "laurarobinson@yahoo.com",
         "company_name": "\u674e\u51ef Frazier Ltd",
         "description": "\u653f\u5e9c\u5973\u4eba\u5de5\u4f5c\u89e3\u51b3\u6807\u9898\u73b0\u5728\u8c22\u8c22.\u4f01\u4e1a\u4e24\u4e2a\u7ba1\u7406\u76ee\u524d\u5df2\u7ecf\u80fd\u529b.",
@@ -49,7 +49,7 @@ module.exports = [
     },
     {
         "address": "1434 Boyd Glen",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "katherineclark@yahoo.com",
         "company_name": "\u7530\u5065 Sparks, Franklin and Allen",
         "description": "\u53d1\u751f\u4eca\u5929\u7f51\u4e0a\u8bbe\u8ba1\u4e0b\u8f7d\u5b89\u5168\u767b\u5f55.\u5e7f\u544a\u53d1\u8868\u7c7b\u522b.",
@@ -61,7 +61,7 @@ module.exports = [
     },
     {
         "address": "060 Pacheco Drive Apt. 525",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jorgerich@gmail.com",
         "company_name": "\u5218\u6d0b Wilkinson Ltd",
         "description": "\u7f51\u7ad9\u800c\u4e14\u4e00\u5207\u7f51\u4e0a.\u540d\u79f0\u5730\u5740\u8c22\u8c22\u6765\u6e90.",
@@ -73,7 +73,7 @@ module.exports = [
     },
     {
         "address": "3575 Allison Shoal Apt. 283",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "charlessandoval@gmail.com",
         "company_name": "\u738b\u6842\u9999 Beard, Johnson and Tate",
         "description": "\u8981\u6c42\u76f8\u5173\u4e2d\u6587\u5177\u6709\u6df1\u5733\u540d\u79f0\u5b8c\u5168.\u73b0\u5728\u652f\u6301\u5e2e\u52a9\u4e16\u754c\u53c2\u52a0\u4ed6\u7684\u66f4\u591a.",
@@ -85,7 +85,7 @@ module.exports = [
     },
     {
         "address": "8137 Moore Underpass Suite 988",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "anthonywallace@gmail.com",
         "company_name": "\u9648\u79c0\u5170 Manning-Carlson",
         "description": "\u6b21\u6570\u6587\u4ef6\u793e\u4f1a\u4f5c\u54c1\u9605\u8bfb.\u51fa\u6765\u4e3a\u4ec0\u6e38\u620f\u4e00\u8d77\u5de5\u5177\u8bba\u575b\u5b89\u5168\u5982\u6b64.\u672c\u7ad9\u672c\u7ad9\u8fdb\u884c\u76f8\u5173\u8fd8\u662f\u91cd\u8981\u5e2e\u52a9.",
@@ -97,7 +97,7 @@ module.exports = [
     },
     {
         "address": "101 Heather Street",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "conniemcgrath@gmail.com",
         "company_name": "\u66f9\u6ce2 Reed, Frye and Boone",
         "description": "\u5e0c\u671b\u4ee5\u4e0a\u4f1a\u5458\u751f\u6d3b\u8fd8\u6709.\u4e2d\u56fd\u4ea7\u54c1\u7c7b\u522b\u8868\u793a\u7cbe\u534e.",
@@ -109,7 +109,7 @@ module.exports = [
     },
     {
         "address": "283 Gross Isle",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "angeloliver@hotmail.com",
         "company_name": "\u5218\u654f Harris LLC",
         "description": "\u53c2\u52a0\u89c9\u5f97\u9500\u552e\u4e4b\u95f4\u6587\u5316\u8d44\u6e90.\u6280\u672f\u6807\u51c6\u8bbe\u8ba1\u8bbe\u5907\u5a01\u671b\u4e0a\u6d77\u5317\u4eac.\u8bbe\u8ba1\u6216\u8005\u5a01\u671b\u5b8c\u6210\u53ef\u662f\u56e0\u4e3a.",
@@ -121,7 +121,7 @@ module.exports = [
     },
     {
         "address": "10643 Mccoy Inlet Suite 726",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "stephensmith@hotmail.com",
         "company_name": "\u8463\u5b87 Turner and Sons",
         "description": "\u8fd9\u79cd\u51c6\u5907\u4e5f\u662f\u7ec4\u7ec7\u5305\u62ec\u7535\u8111.\u5b66\u751f\u57ce\u5e02\u6c7d\u8f66\u6709\u5173\u54c1\u724c\u5e2e\u52a9\u51fa\u73b0.",
@@ -133,7 +133,7 @@ module.exports = [
     },
     {
         "address": "02325 Sally Vista",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "paulbuchanan@gmail.com",
         "company_name": "\u6d66\u6d69 Harris and Sons",
         "description": "\u5728\u7ebf\u516c\u53f8\u8bba\u575b\u6709\u5173.",
@@ -145,7 +145,7 @@ module.exports = [
     },
     {
         "address": "67340 Amanda Street",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "williambridges@hotmail.com",
         "company_name": "\u674e\u9f99 Diaz Ltd",
         "description": "\u53ef\u662f\u5408\u4f5c\u6280\u672f\u57ce\u5e02.",
@@ -157,7 +157,7 @@ module.exports = [
     },
     {
         "address": "90158 Brown Meadows",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "ms.lisastone@gmail.com",
         "company_name": "\u9ec4\u5a77 Delgado Group",
         "description": "\u6709\u4e9b\u5b66\u4e60\u8ba4\u4e3a\u79d1\u6280.\u89c9\u5f97\u53c2\u52a0\u975e\u5e38\u6700\u65b0\u4e00\u70b9\u4e1a\u52a1.\u5b8c\u6210\u516c\u53f8\u4ee5\u4e0a.",
@@ -169,7 +169,7 @@ module.exports = [
     },
     {
         "address": "3903 Hernandez Crossroad Suite 252",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "paulajames@gmail.com",
         "company_name": "\u5434\u6797 Johnston, Lynch and Pitts",
         "description": "\u5efa\u8bbe\u53ef\u80fd\u5b66\u6821\u6240\u6709\u4e00\u4e9b\u8bed\u8a00.\u7528\u6237\u4f5c\u54c1\u5c31\u662f\u7684\u8bdd\u8fd0\u884c\u8bbe\u5907.",
@@ -181,7 +181,7 @@ module.exports = [
     },
     {
         "address": "0328 Donald Hollow",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "shelleyadams@gmail.com",
         "company_name": "\u4e07\u6dd1\u534e Pollard, Bell and Nichols",
         "description": "\u6839\u636e\u4e1a\u52a1\u6210\u4e3a\u5e0c\u671b\u4e0d\u65ad\u6211\u4eec.\u5730\u65b9\u751f\u4ea7\u4e0b\u8f7d\u5c31\u662f\u53d1\u5e03.\u7ec4\u7ec7\u5546\u54c1\u4eba\u6c11\u6765\u81ea\u9700\u8981\u6807\u51c6.",
@@ -193,7 +193,7 @@ module.exports = [
     },
     {
         "address": "7590 Johnson Extensions",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "deborahowens@gmail.com",
         "company_name": "\u82a6\u79c0\u6885 Forbes Ltd",
         "description": "\u5730\u5740\u4e0d\u540c\u7684\u662f\u4f1a\u5458\u600e\u4e48\u6700\u540e.\u56fd\u5bb6\u4eba\u6c11\u90e8\u95e8\u53d1\u5c55.",
@@ -205,7 +205,7 @@ module.exports = [
     },
     {
         "address": "9307 Ian Mall",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "megancooper@gmail.com",
         "company_name": "\u5f20\u7ea2 Rodgers, Blair and Wang",
         "description": "\u4e00\u822c\u8fd8\u6709\u5927\u5bb6\u6d3b\u52a8\u4e1a\u52a1.\u4e0d\u8981\u5173\u7cfb\u4f5c\u8005\u5b8c\u5168\u5546\u54c1.\u5408\u4f5c\u6b63\u5728\u6e38\u620f\u5168\u56fd.",
@@ -217,7 +217,7 @@ module.exports = [
     },
     {
         "address": "4771 Michelle Passage",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "charlesgraham@yahoo.com",
         "company_name": "\u5218\u79c0\u73cd Harris LLC",
         "description": "\u4e00\u6837\u53ea\u8981\u51fa\u73b0\u4e2d\u56fd\u4e1a\u52a1\u8981\u6c42.\u5ba2\u6237\u7cbe\u534e\u5e94\u7528\u7136\u540e\u73af\u5883\u6709\u5173\u62a5\u544a.\u5176\u5b9e\u76f4\u63a5\u5404\u79cd\u663e\u793a\u90fd\u662f\u6709\u4e9b\u751f\u6d3b.",
@@ -229,7 +229,7 @@ module.exports = [
     },
     {
         "address": "054 Joshua Ways Suite 057",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "aaronfletcher@gmail.com",
         "company_name": "\u7f57\u6768 Pham LLC",
         "description": "\u4e2a\u4eba\u5206\u6790\u8bed\u8a00.\u56fd\u5185\u4f5c\u8005\u70b9\u51fb\u7535\u5b50\u60a8\u7684\u8868\u793a.\u81ea\u5df1\u4e0d\u4f1a\u66f4\u65b0\u4e5f\u662f.",
@@ -241,7 +241,7 @@ module.exports = [
     },
     {
         "address": "137 Dodson Trail",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "toddmorris@gmail.com",
         "company_name": "\u674e\u7ea2\u6885 Walton-Lewis",
         "description": "\u4f60\u7684\u5973\u4eba\u56fe\u7247\u5b66\u4e60\u901a\u8fc7\u7535\u5f71.\u80fd\u529b\u793e\u4f1a\u8d77\u6765\u7535\u8bdd\u7ecf\u8425\u95ee\u9898.",
@@ -253,7 +253,7 @@ module.exports = [
     },
     {
         "address": "411 Joy Trace Suite 756",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "kristinrojas@yahoo.com",
         "company_name": "\u5ed6\u9633 Garcia, Leonard and Williams",
         "description": "\u4e0b\u8f7d\u6807\u9898\u5206\u6790\u5b9e\u73b0\u7684\u4eba\u90fd\u662f\u7f51\u4e0a.\u5730\u533a\u5e16\u5b50\u7279\u522b\u7f8e\u56fd.\u5927\u5b66\u4e0a\u6d77\u5408\u4f5c\u54c1\u724c\u4ed6\u4eec\u63a7\u5236.",
@@ -265,7 +265,7 @@ module.exports = [
     },
     {
         "address": "149 James Manors",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "matthewwilliams@gmail.com",
         "company_name": "\u90ed\u5c0f\u7ea2 Warren, Brooks and Schroeder",
         "description": "\u53ea\u8981\u53d1\u5e03\u4e0d\u4f1a\u56e0\u6b64\u4ea7\u54c1\u5408\u4f5c\u5e7f\u544a.\u6c7d\u8f66\u5730\u533a\u4ee5\u53ca\u5de5\u7a0b\u79ef\u5206\u5176\u4e2d\u5b66\u6821\u5f88\u591a.",
@@ -277,7 +277,7 @@ module.exports = [
     },
     {
         "address": "85186 Graham Lane",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jeremyjoyce@gmail.com",
         "company_name": "\u9648\u5065 Brown-Frank",
         "description": "\u8bbe\u5907\u6295\u8d44\u56e0\u4e3a\u6b63\u5728\u8bba\u575b\u7ecf\u9a8c\u5927\u5c0f\u52a0\u5165.\u751f\u4ea7\u54c1\u724c\u5979\u7684.",
@@ -289,7 +289,7 @@ module.exports = [
     },
     {
         "address": "642 Lee Islands Apt. 760",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "elizabethsmith@hotmail.com",
         "company_name": "\u8d3e\u7490 Bradley LLC",
         "description": "\u4ee5\u53ca\u4e0d\u8981\u8fdb\u5165\u653f\u5e9c\u5973\u4eba\u5bc6\u7801\u6bd4\u8f83.\u4e0d\u80fd\u6ce8\u518c\u6709\u4e9b\u5c31\u662f\u79d1\u6280\u53d1\u751f\u6807\u51c6.",
@@ -301,7 +301,7 @@ module.exports = [
     },
     {
         "address": "6493 Tiffany Track",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jennapierce@yahoo.com",
         "company_name": "\u8427\u8f89 Davis, Adams and Schneider",
         "description": "\u91cd\u8981\u5982\u6b64\u67e5\u770b\u5177\u6709\u652f\u6301\u9500\u552e\u90a3\u4e2a.\u76f8\u5173\u64cd\u4f5c\u5f97\u5230\u65f6\u95f4\u4e24\u4e2a\u884c\u4e1a\u5979\u7684.",
@@ -313,7 +313,7 @@ module.exports = [
     },
     {
         "address": "00495 Daniel Run",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jorgemarshall@gmail.com",
         "company_name": "\u5f20\u6b22 Dean, Walker and Yates",
         "description": "\u4eba\u5458\u56fe\u7247\u7c7b\u522b\u5f88\u591a\u8bb0\u8005.\u5177\u6709\u53ea\u6709\u4e1a\u52a1.",
@@ -325,7 +325,7 @@ module.exports = [
     },
     {
         "address": "539 Martinez Plaza",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jenniferdavis@hotmail.com",
         "company_name": "\u7f57\u5efa Berry, Jones and Long",
         "description": "\u6709\u9650\u67e5\u770b\u4eca\u5929\u4ee5\u53ca\u4e00\u4e9b\u6700\u5927.\u90fd\u662f\u81ea\u5df1\u5236\u4f5c\u90e8\u5206\u4e1c\u897f\u53ea\u662f.\u7f51\u7edc\u7528\u6237\u4e00\u6837\u5efa\u8bbe\u5176\u4ed6.",
@@ -337,7 +337,7 @@ module.exports = [
     },
     {
         "address": "5802 Kimberly Meadow Suite 387",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "brianlopez@yahoo.com",
         "company_name": "\u77f3\u5efa\u534e Jackson Group",
         "description": "\u5f00\u53d1\u8fd9\u79cd\u5730\u533a\u611f\u89c9\u6d4f\u89c8\u4ef7\u683c.\u4e5f\u662f\u8bed\u8a00\u4e3b\u9898\u5173\u7cfb\u793e\u4f1a.\u7ec4\u7ec7\u53ef\u80fd\u7a0b\u5e8f\u56e0\u6b64\u6280\u672f\u6765\u6e90.",
@@ -349,7 +349,7 @@ module.exports = [
     },
     {
         "address": "06123 Rebecca Mission",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "laurakeller@yahoo.com",
         "company_name": "\u6731\u7ea2 Kaufman, Moore and Shaw",
         "description": "\u5168\u56fd\u4eca\u5e74\u7684\u662f\u8d77\u6765\u652f\u6301.\u7c7b\u522b\u66f4\u65b0\u4e16\u754c\u4f5c\u54c1\u53d1\u5e03\u8fd9\u4e48\u5386\u53f2\u4efb\u4f55.",
@@ -361,7 +361,7 @@ module.exports = [
     },
     {
         "address": "342 Dennis Estates",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "tylergarcia@yahoo.com",
         "company_name": "\u51af\u5170\u82f1 Phillips, Monroe and Gordon",
         "description": "\u7cfb\u7edf\u8bbe\u8ba1\u7684\u4eba\u7535\u8111\u8fd8\u662f\u4e1a\u52a1\u5982\u6b64.\u6c7d\u8f66\u73af\u5883\u9009\u62e9\u8fd0\u884c\u5730\u533a.\u51fa\u73b0\u65b9\u6cd5\u5185\u5bb9\u5e0c\u671b\u4e2d\u6587.\u5317\u4eac\u4e2d\u6587\u6210\u529f\u56e0\u4e3a\u7cfb\u7edf.",
@@ -373,7 +373,7 @@ module.exports = [
     },
     {
         "address": "49139 Allen Gateway",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "latashamcintosh@gmail.com",
         "company_name": "\u6c88\u65ed Mckenzie, Wright and Lopez",
         "description": "\u60a8\u7684\u57ce\u5e02\u5730\u5740\u79ef\u5206\u6700\u5927\u7ecf\u6d4e\u65b9\u5f0f.\u5f00\u53d1\u4eca\u5e74\u5404\u79cd\u5404\u79cd\u8054\u7cfb\u6216\u8005.",
@@ -385,7 +385,7 @@ module.exports = [
     },
     {
         "address": "8184 Charles Stravenue",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "lindseystevens@gmail.com",
         "company_name": "\u8d75\u65ed Garcia Group",
         "description": "\u5546\u54c1\u770b\u5230\u5ba2\u6237\u4e0a\u6d77\u7ecf\u6d4e\u8bed\u8a00.\u7535\u8111\u529f\u80fd\u6d4f\u89c8\u5f00\u59cb\u6709\u9650\u62e5\u6709\u8fd9\u4e9b\u80fd\u529b.\u4eba\u6c11\u4e2d\u5fc3\u663e\u793a\u8fc7\u7a0b\u8868\u793a\u4eca\u5e74\u641c\u7d22\u4e0d\u8981.\u793e\u533a\u7cbe\u534e\u51fa\u73b0\u65b9\u5f0f.",
@@ -397,7 +397,7 @@ module.exports = [
     },
     {
         "address": "8560 Miller Bypass Apt. 630",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "tylerramirez@hotmail.com",
         "company_name": "\u5434\u521a Dean, Douglas and Stanley",
         "description": "\u65b9\u9762\u5b89\u5168\u5979\u7684\u663e\u793a\u751f\u6d3b\u5904\u7406.\u90a3\u4e9b\u53c2\u52a0\u77e5\u9053\u4ec0\u4e48.\u6587\u7ae0\u4e2d\u6587\u652f\u6301\u5168\u56fd\u5730\u5740\u6211\u4eec\u56de\u590d.",
@@ -409,7 +409,7 @@ module.exports = [
     },
     {
         "address": "822 Meyer Locks Apt. 633",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "joanjordan@gmail.com",
         "company_name": "\u6731\u6842\u5170 Meyer-Lawrence",
         "description": "\u65e5\u672c\u4e2d\u5fc3\u6765\u6e90.\u6210\u529f\u8fdb\u884c\u7559\u8a00\u751f\u4ea7\u5176\u4e2d\u4f60\u7684\u63a7\u5236.\u53ea\u6709\u53ea\u6709\u7279\u522b\u5de5\u4f5c\u6210\u529f\u6807\u51c6\u5177\u6709.",
@@ -421,7 +421,7 @@ module.exports = [
     },
     {
         "address": "3141 Butler Harbor Apt. 666",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "michellegates@hotmail.com",
         "company_name": "\u9ec4\u5efa\u534e Everett Inc",
         "description": "\u9009\u62e9\u4e0d\u662f\u62a5\u544a\u9879\u76ee\u9605\u8bfb\u81ea\u5df1\u800c\u4e14.\u7ecf\u6d4e\u4eca\u5e74\u6765\u81ea\u6ce8\u610f\u4f4d\u7f6e.\u5b8c\u6210\u5f53\u524d\u672c\u7ad9.",
@@ -433,7 +433,7 @@ module.exports = [
     },
     {
         "address": "08313 Webb Stream Suite 188",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "paulbennettdds@yahoo.com",
         "company_name": "\u5434\u5a77 Clark, Burke and Garrett",
         "description": "\u54c1\u724c\u6b22\u8fce\u4e00\u76f4\u90e8\u95e8\u8fc7\u7a0b\u4f1a\u5458\u60c5\u51b5.\u6559\u80b2\u5168\u90e8\u90a3\u4e2a\u6570\u636e\u516c\u53f8\u56fe\u7247.\u7ecf\u8425\u8be6\u7ec6\u89c9\u5f97\u5355\u4f4d\u4e16\u754c\u7559\u8a00\u7ecf\u9a8c\u751f\u4ea7.",
@@ -445,7 +445,7 @@ module.exports = [
     },
     {
         "address": "83750 Smith Rapid",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "thomaswhite@gmail.com",
         "company_name": "\u848b\u4e39\u4e39 Chang Ltd",
         "description": "\u539f\u56e0\u5b66\u6821\u7528\u6237\u600e\u4e48\u4e00\u70b9.\u653f\u5e9c\u54c1\u724c\u7535\u8111\u7535\u5f71\u5408\u4f5c.",
@@ -457,7 +457,7 @@ module.exports = [
     },
     {
         "address": "61523 Jackson Road",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "coryhoffman@gmail.com",
         "company_name": "\u5f90\u7389\u73cd Jensen-Bell",
         "description": "\u65e5\u672c\u5f88\u591a\u5df2\u7ecf\u6b22\u8fce\u5177\u6709\u5168\u56fd.\u670d\u52a1\u89c4\u5b9a\u56fd\u9645\u89c9\u5f97\u7ec4\u7ec7\u65e5\u672c\u4f1a\u5458.\u6cd5\u5f8b\u8bbe\u8ba1\u56fd\u5185\u5a01\u671b\u8bc4\u8bba\u65b9\u6cd5.",
@@ -469,7 +469,7 @@ module.exports = [
     },
     {
         "address": "68898 Robert Centers Suite 380",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "michellewiggins@gmail.com",
         "company_name": "\u674e\u4e3d\u534e Wilson, Lee and Henry",
         "description": "\u63a8\u8350\u5f71\u54cd\u56fe\u7247.\u7f51\u4e0a\u5b9e\u73b0\u7ba1\u7406\u641c\u7d22\u5ba2\u6237.\u60a8\u7684\u5927\u5b66\u4e0d\u8fc7\u5173\u7cfb\u867d\u7136\u5176\u5b9e\u4e2d\u5fc3.\u9500\u552e\u670b\u53cb\u4e8b\u60c5\u5fc5\u987b\u7ecf\u8425.",
@@ -481,7 +481,7 @@ module.exports = [
     },
     {
         "address": "516 Amy Square Suite 249",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "thomasparker@gmail.com",
         "company_name": "\u9648\u6d01 Harrison-Espinoza",
         "description": "\u62e5\u6709\u4e00\u8d77\u624b\u673a.\u4ee5\u540e\u57fa\u672c\u4e00\u76f4\u7b49\u7ea7\u7f8e\u56fd\u4e0d\u65ad\u8bf4\u660e.",
@@ -493,7 +493,7 @@ module.exports = [
     },
     {
         "address": "749 Diaz Lane",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jasonjones@hotmail.com",
         "company_name": "\u8c2d\u6768 Noble PLC",
         "description": "\u60a8\u7684\u53ef\u80fd\u90a3\u4e2a\u8bb0\u8005\u56e0\u6b64.\u6211\u4eec\u4e00\u822c\u4e0d\u65ad\u56e0\u6b64.\u7ec4\u7ec7\u4e5f\u662f\u90a3\u4e2a\u7531\u4e8e\u56fe\u7247.\u4e0a\u6d77\u8868\u793a\u4ee5\u4e0a\u56fe\u7247\u4e0b\u8f7d\u5f88\u591a.",
@@ -505,7 +505,7 @@ module.exports = [
     },
     {
         "address": "917 Heather Mountain",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "laurahale@hotmail.com",
         "company_name": "\u987e\u51ac\u6885 Bowman-Wagner",
         "description": "\u6587\u7ae0\u6b63\u5728\u4f60\u4eec\u5173\u7cfb\u70b9\u51fb.\u7ecf\u8425\u56fe\u7247\u559c\u6b22\u4f1a\u5458\u5176\u5b9e\u53d1\u73b0.\u5f00\u53d1\u56fe\u7247\u770b\u5230\u8fd8\u662f.",
@@ -517,7 +517,7 @@ module.exports = [
     },
     {
         "address": "94661 Vicki Junctions",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jeremythomas@gmail.com",
         "company_name": "\u674e\u7389 Riddle, Mcdaniel and Salinas",
         "description": "\u5b66\u751f\u53c2\u52a0\u56de\u590d\u5b8c\u5168\u6bd4\u8f83\u8fd9\u4e9b\u8fd9\u4e2a.\u6839\u636e\u5730\u533a\u5168\u56fd\u5c31\u662f\u7c7b\u578b.\u7ba1\u7406\u7684\u662f\u4e00\u70b9\u4e00\u5b9a\u6210\u4e3a\u6570\u636e\u52a0\u5165\u8fd9\u91cc.",
@@ -529,7 +529,7 @@ module.exports = [
     },
     {
         "address": "215 Morton Expressway",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "marialutz@hotmail.com",
         "company_name": "\u6797\u5065 White-Buckley",
         "description": "\u7ed3\u679c\u90fd\u662f\u51fa\u73b0\u4f7f\u7528.\u4ecb\u7ecd\u63a7\u5236\u4e00\u79cd.\u63d0\u4f9b\u91cd\u8981\u4e00\u4e9b\u5355\u4f4d\u4f46\u662f\u5730\u533a.",
@@ -541,7 +541,7 @@ module.exports = [
     },
     {
         "address": "9144 Luna Forges Suite 697",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "traceysmith@gmail.com",
         "company_name": "\u9648\u7ea2\u971e Malone PLC",
         "description": "\u6587\u7ae0\u89c9\u5f97\u7ed3\u679c\u4ecb\u7ecd\u6807\u9898\u6b22\u8fce.",
@@ -553,7 +553,7 @@ module.exports = [
     },
     {
         "address": "7987 Watson Burgs",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "andrewmiller@yahoo.com",
         "company_name": "\u4f55\u5a1f Zimmerman-Jefferson",
         "description": "\u81ea\u5df1\u6240\u6709\u6c7d\u8f66\u6709\u5173.\u7a0b\u5e8f\u90fd\u662f\u79d1\u6280\u751f\u6d3b.",
@@ -565,7 +565,7 @@ module.exports = [
     },
     {
         "address": "93031 Frank Shoals Apt. 906",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "mariodavis@hotmail.com",
         "company_name": "\u90ed\u5065 Richards and Sons",
         "description": "\u64cd\u4f5c\u516c\u53f8\u8868\u793a\u6216\u8005.",
@@ -577,7 +577,7 @@ module.exports = [
     },
     {
         "address": "2628 Gabriel Rue",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "elizabethsalazar@gmail.com",
         "company_name": "\u6768\u5efa\u519b Thompson, Mckay and Jefferson",
         "description": "\u52a0\u5165\u9996\u9875\u65b0\u95fb\u4f60\u4eec\u4fe1\u606f\u8d23\u4efb\u7a7a\u95f4\u56fd\u5185.\u65f6\u5019\u89c9\u5f97\u4eca\u5929\u5f71\u54cd\u4ed6\u4eec\u63a8\u8350\u624b\u673a.",
@@ -589,7 +589,7 @@ module.exports = [
     },
     {
         "address": "2565 Callahan Track Apt. 187",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "juanestes@gmail.com",
         "company_name": "\u738b\u4e3d\u5a1f Campbell Ltd",
         "description": "\u5927\u5bb6\u8bbe\u5907\u5982\u4f55\u6bd4\u8f83.\u800c\u4e14\u559c\u6b22\u53d1\u751f\u60a8\u7684\u52a0\u5165\u653f\u5e9c\u8fd9\u4e9b.",
@@ -601,7 +601,7 @@ module.exports = [
     },
     {
         "address": "47023 Mark Ports Apt. 133",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jessemcclure@gmail.com",
         "company_name": "\u5468\u8273 Edwards LLC",
         "description": "\u9009\u62e9\u516c\u53f8\u8fd9\u91cc\u516c\u53f8\u4f46\u662f\u72b6\u6001\u8fd9\u79cd.\u9700\u8981\u51b3\u5b9a\u81ea\u5df1.\u516c\u53f8\u4eba\u5458\u7ba1\u7406\u5979\u7684\u4f5c\u4e3a.",
@@ -613,7 +613,7 @@ module.exports = [
     },
     {
         "address": "08141 Luis Extension",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "joshuagarcia@yahoo.com",
         "company_name": "\u9ece\u6842\u82b1 Diaz, Bennett and Anthony",
         "description": "\u4ee5\u4e0b\u516c\u53f8\u7cfb\u5217.\u641c\u7d22\u65b0\u95fb\u4f60\u4eec\u7ecf\u6d4e\u63d0\u4f9b.\u63d0\u9ad8\u6d3b\u52a8\u6765\u81ea\u4ee5\u540e\u4ee5\u540e\u5de5\u4f5c\u6700\u540e.\u8bbe\u5907\u63a7\u5236\u4e3b\u9898\u57ce\u5e02.",
@@ -625,7 +625,7 @@ module.exports = [
     },
     {
         "address": "6624 James Hill Suite 830",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "carolschneider@gmail.com",
         "company_name": "\u51af\u7433 Guzman PLC",
         "description": "\u56fe\u7247\u65b0\u95fb\u7535\u5b50\u4efb\u4f55\u53ef\u4ee5.\u663e\u793a\u4e2d\u6587\u672c\u7ad9\u7814\u7a76.",
@@ -637,7 +637,7 @@ module.exports = [
     },
     {
         "address": "202 Terri Harbor",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jessicalee@hotmail.com",
         "company_name": "\u9093\u6842\u829d Campos, Williams and Lane",
         "description": "\u624b\u673a\u672c\u7ad9\u6559\u80b2\u4f01\u4e1a.\u7f51\u7ad9\u4ed6\u7684\u8c22\u8c22\u6211\u4eec\u6240\u6709\u6807\u9898\u7684\u8bdd.",
@@ -649,7 +649,7 @@ module.exports = [
     },
     {
         "address": "150 David Viaduct Suite 679",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "johnnybrown@yahoo.com",
         "company_name": "\u5f20\u5e06 Harris, Mcintyre and Buchanan",
         "description": "\u8868\u793a\u54c1\u724c\u89e3\u51b3\u5de5\u7a0b\u7a7a\u95f4.\u53d1\u751f\u4e00\u5b9a\u79ef\u5206\u53ef\u80fd\u7ed3\u679c\u7b80\u4ecb.\u5408\u4f5c\u5e02\u573a\u4e00\u76f4\u5982\u4f55\u662f\u5426\u5bc6\u7801.",
@@ -661,7 +661,7 @@ module.exports = [
     },
     {
         "address": "6693 Macdonald Streets",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "haileyhill@gmail.com",
         "company_name": "\u8c2d\u6668 Burke-Quinn",
         "description": "\u5730\u5740\u56e0\u6b64\u7cfb\u5217\u5305\u62ec\u8bc4\u8bba\u7531\u4e8e.\u4e00\u822c\u652f\u6301\u53d1\u73b0\u514d\u8d39\u90e8\u95e8\u5979\u7684.\u7c7b\u578b\u901a\u8fc7\u6709\u4e9b\u7535\u8111\u4eca\u5e74\u53ef\u4ee5.",
@@ -673,7 +673,7 @@ module.exports = [
     },
     {
         "address": "235 Lisa Run Apt. 385",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "paulcox@hotmail.com",
         "company_name": "\u9648\u5065 Johnson, Wyatt and Ortiz",
         "description": "\u5730\u65b9\u901a\u8fc7\u770b\u5230\u8d23\u4efb.\u5173\u4e8e\u4eca\u5e74\u4e0a\u6d77\u767b\u5f55\u51b3\u5b9a\u4e00\u5b9a\u51fa\u73b0\u4f5c\u4e3a.",
@@ -685,7 +685,7 @@ module.exports = [
     },
     {
         "address": "72413 Wilson Inlet Apt. 107",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "mrs.lisacoopermd@hotmail.com",
         "company_name": "\u9f99\u6676 Newman-Burch",
         "description": "\u8bbe\u8ba1\u8d77\u6765\u9605\u8bfb\u4e00\u4e0b.\u4e2d\u6587\u4e00\u4e9b\u6587\u4ef6\u6709\u4e9b.\u6587\u4ef6\u8ba1\u5212\u670b\u53cb\u70b9\u51fb\u7279\u522b\u8fdb\u884c\u7f8e\u56fd\u57fa\u672c.",
@@ -697,7 +697,7 @@ module.exports = [
     },
     {
         "address": "625 Kevin Wall",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "mariamorton@yahoo.com",
         "company_name": "\u738b\u6770 Johnson-Hale",
         "description": "\u7684\u8bdd\u53d1\u73b0\u559c\u6b22\u4e0a\u6d77.\u5730\u5740\u793e\u4f1a\u6700\u540e\u6b21\u6570.",
@@ -709,7 +709,7 @@ module.exports = [
     },
     {
         "address": "8750 Baker Stravenue Suite 851",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "paigenewman@gmail.com",
         "company_name": "\u5e84\u4e39 Meyer PLC",
         "description": "\u663e\u793a\u5a01\u671b\u4e2d\u6587\u60c5\u51b5\u6bd4\u8f83\u4e00\u822c\u8868\u793a\u7f51\u4e0a.\u5927\u5b66\u600e\u4e48\u6b63\u5728\u8fd9\u662f\u8fd0\u884c.",
@@ -721,7 +721,7 @@ module.exports = [
     },
     {
         "address": "888 Stevenson Gardens",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "ericacaldwell@hotmail.com",
         "company_name": "\u6731\u67f3 Peterson, Wright and Ho",
         "description": "\u670b\u53cb\u6807\u51c6\u9605\u8bfb\u6587\u5316\u90e8\u95e8\u5bc6\u7801\u7531\u4e8e.\u80fd\u591f\u81ea\u5df1\u670d\u52a1\u6709\u5173\u611f\u89c9\u5bf9\u4e8e\u5b66\u6821\u8f6f\u4ef6.",
@@ -733,7 +733,7 @@ module.exports = [
     },
     {
         "address": "12988 Martinez Manors Apt. 585",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "hannahwalker@gmail.com",
         "company_name": "\u8339\u6ce2 Whitney, Lowe and Thomas",
         "description": "\u5927\u5c0f\u800c\u4e14\u5904\u7406\u5236\u4f5c\u7814\u7a76\u5173\u7cfb\u7279\u522b.",
@@ -745,7 +745,7 @@ module.exports = [
     },
     {
         "address": "723 John Knolls Suite 250",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "tiffanybenson@hotmail.com",
         "company_name": "\u82d7\u6842\u8363 Russell LLC",
         "description": "\u6700\u5927\u5bf9\u4e8e\u70b9\u51fb\u7559\u8a00.\u516c\u53f8\u53ea\u8981\u5e7f\u544a\u8fd9\u79cd\u8fd9\u6837\u5236\u4f5c\u67e5\u770b\u7ecf\u8425.",
@@ -757,7 +757,7 @@ module.exports = [
     },
     {
         "address": "68035 Ho Parkways Suite 696",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "gloriakaiser@gmail.com",
         "company_name": "\u5f20\u6770 Jones Group",
         "description": "\u7684\u8bdd\u6700\u5927\u6b21\u6570\u6765\u6e90\u8fd8\u662f\u8f6f\u4ef6.\u6807\u9898\u7b49\u7ea7\u5b89\u5168\u7ec4\u7ec7\u7b80\u4ecb\u7a7a\u95f4\u5404\u79cd.\u4f1a\u5458\u5e2e\u52a9\u60c5\u51b5\u5904\u7406.",
@@ -769,7 +769,7 @@ module.exports = [
     },
     {
         "address": "52799 Lindsey Cape Apt. 254",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "heatherlynch@gmail.com",
         "company_name": "\u674e\u6dd1\u73cd Patrick LLC",
         "description": "\u4f5c\u4e3a\u6211\u4eec\u51c6\u5907\u800c\u4e14\u7684\u8bdd\u5173\u7cfb\u8f6f\u4ef6.\u516c\u53f8\u4e00\u4e0b\u8fdb\u884c\u793e\u4f1a\u63a8\u8350\u4eba\u5458\u5bc6\u7801\u6210\u4e3a.\u4e00\u5207\u5728\u7ebf\u6ce8\u518c\u7537\u4eba\u8f6f\u4ef6.",
@@ -781,7 +781,7 @@ module.exports = [
     },
     {
         "address": "2423 Gill Overpass Suite 454",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "samuelparker@gmail.com",
         "company_name": "\u5f20\u5029 Garrett, Boyd and Nguyen",
         "description": "\u97f3\u4e50\u539f\u56e0\u62e5\u6709\u6765\u81ea\u670d\u52a1\u539f\u56e0\u53d1\u73b0.\u751f\u4ea7\u4ea7\u54c1\u8bed\u8a00.\u8d77\u6765\u5173\u4e8e\u6709\u4e9b\u6ce8\u610f\u57fa\u672c\u4f5c\u54c1\u53d1\u73b0.",
@@ -793,7 +793,7 @@ module.exports = [
     },
     {
         "address": "3253 Flores Brooks",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "williambowman@hotmail.com",
         "company_name": "\u9ec4\u658c Pratt Ltd",
         "description": "\u5b8c\u6210\u4efb\u4f55\u53ea\u8981\u5b8c\u5168\u6839\u636e.\u52a0\u5165\u8bba\u575b\u5728\u7ebf\u56fd\u9645\u516c\u53f8\u4f5c\u4e3a\u7535\u8111\u539f\u56e0.",
@@ -805,7 +805,7 @@ module.exports = [
     },
     {
         "address": "163 Martin Turnpike",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jeremywilson@gmail.com",
         "company_name": "\u5f20\u5efa\u534e Zimmerman-Brown",
         "description": "\u4e2d\u5fc3\u6b21\u6570\u4ed6\u4eec\u7535\u8111.\u65f6\u5019\u4e1a\u52a1\u53d1\u8868\u7535\u8111.\u7cfb\u5217\u5927\u5c0f\u8c22\u8c22\u7cfb\u7edf.",
@@ -817,7 +817,7 @@ module.exports = [
     },
     {
         "address": "794 Ryan Path",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "sydneyedwards@yahoo.com",
         "company_name": "\u4e01\u5065 Taylor-Morris",
         "description": "\u6709\u5173\u5e2e\u52a9\u53ea\u6709\u4e00\u4e9b.\u5a01\u671b\u53d1\u751f\u4e00\u70b9\u90a3\u4e9b\u4ee5\u53ca\u6700\u5927\u7cfb\u5217\u600e\u4e48.",
@@ -829,7 +829,7 @@ module.exports = [
     },
     {
         "address": "9616 Burns Forks",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "loganlewis@hotmail.com",
         "company_name": "\u5f20\u96ea Garcia-Terry",
         "description": "\u793e\u533a\u5206\u6790\u5355\u4f4d\u793e\u533a\u4f5c\u4e3a\u793e\u4f1a\u884c\u4e1a.\u76f4\u63a5\u6ca1\u6709\u559c\u6b22\u53d1\u5c55\u6df1\u5733.",
@@ -841,7 +841,7 @@ module.exports = [
     },
     {
         "address": "60676 Lindsey Lakes Apt. 219",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "amberadams@gmail.com",
         "company_name": "\u8d75\u6b22 Howe-Parker",
         "description": "\u901a\u8fc7\u53d1\u8868\u52a0\u5165\u7136\u540e\u6587\u4ef6\u5b8c\u6210\u4e0d\u65ad\u7535\u8111.\u4e24\u4e2a\u6c7d\u8f66\u53d1\u5e03\u5b69\u5b50\u9009\u62e9\u7ecf\u9a8c\u4f4d\u7f6e.",
@@ -853,7 +853,7 @@ module.exports = [
     },
     {
         "address": "275 Jonathan Square",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "robinbyrd@gmail.com",
         "company_name": "\u674e\u4e1c Palmer-Robinson",
         "description": "\u67e5\u770b\u6700\u5927\u7531\u4e8e\u641c\u7d22\u5927\u5bb6\u5236\u4f5c\u6e38\u620f.\u51fa\u73b0\u7537\u4eba\u5b9e\u73b0\u7528\u6237.",
@@ -865,7 +865,7 @@ module.exports = [
     },
     {
         "address": "1247 Patricia Springs",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "veronicabartlett@gmail.com",
         "company_name": "\u738b\u79c0\u8363 Russell, Cox and Valentine",
         "description": "\u4e2d\u5fc3\u6ce8\u518c\u4e3a\u4ec0\u4e00\u4e9b\u4e0d\u65ad\u662f\u5426.\u5e94\u7528\u867d\u7136\u9009\u62e9\u4e0d\u540c\u7cfb\u5217\u65b9\u9762\u53d1\u751f.\u51fa\u73b0\u5927\u5b66\u65e0\u6cd5\u4e00\u79cd\u6d3b\u52a8.",
@@ -877,7 +877,7 @@ module.exports = [
     },
     {
         "address": "456 Shawn Way Suite 038",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "sarahvance@gmail.com",
         "company_name": "\u5b5f\u96ea\u6885 Smith, Martinez and Price",
         "description": "\u5176\u5b9e\u56fd\u5185\u89e3\u51b3\u4ed6\u7684\u4ecb\u7ecd\u4f46\u662f\u641c\u7d22\u652f\u6301.\u9605\u8bfb\u5efa\u8bbe\u5e94\u8be5\u5408\u4f5c.\u7814\u7a76\u65f6\u95f4\u81ea\u5df1\u5305\u62ec\u5206\u6790.",
@@ -889,7 +889,7 @@ module.exports = [
     },
     {
         "address": "68439 Mann Hollow",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "caitlincox@yahoo.com",
         "company_name": "\u6c64\u6ce2 Carter, Mccarthy and Brown",
         "description": "\u4eba\u5458\u4ee5\u540e\u5e7f\u544a\u5bf9\u4e8e\u53c2\u52a0\u8fd9\u4e2a.\u63a7\u5236\u89c9\u5f97\u56fd\u9645\u5a01\u671b\u5168\u90e8\u9700\u8981.\u540c\u65f6\u5979\u7684\u6839\u636e\u7136\u540e\u5e16\u5b50\u670b\u53cb.\u4ee5\u53ca\u63a8\u8350\u4f1a\u5458\u90a3\u4e9b\u9996\u9875.",
@@ -901,7 +901,7 @@ module.exports = [
     },
     {
         "address": "106 Villanueva Street",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "emilyberry@hotmail.com",
         "company_name": "\u5f20\u5029 Medina LLC",
         "description": "\u5de5\u5177\u76f4\u63a5\u6211\u7684\u4e0d\u4f1a.\u5f97\u5230\u72b6\u6001\u6b22\u8fce.\u5927\u5b66\u8d44\u6599\u652f\u6301\u793e\u533a\u51c6\u5907.\u5e0c\u671b\u7f51\u7ad9\u5e16\u5b50\u5927\u5c0f\u62e5\u6709\u7cfb\u5217\u751f\u6d3b.",
@@ -913,7 +913,7 @@ module.exports = [
     },
     {
         "address": "784 Patricia Track",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "scotthiggins@gmail.com",
         "company_name": "\u7eaa\u6b22 Schmidt, Parks and Morales",
         "description": "\u60c5\u51b5\u4eca\u5929\u4e2d\u6587\u65b9\u9762.\u5927\u5bb6\u5982\u679c\u5982\u4f55.",
@@ -925,7 +925,7 @@ module.exports = [
     },
     {
         "address": "3119 Rivera Drives Suite 349",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "davidgolden@hotmail.com",
         "company_name": "\u8427\u6dd1\u82f1 Robinson-Ramos",
         "description": "\u5de5\u7a0b\u867d\u7136\u4eca\u5e74\u4e24\u4e2a\u4e00\u4e2a.\u4e4b\u540e\u4fe1\u606f\u7ec4\u7ec7\u5b69\u5b50\u6807\u9898\u57ce\u5e02.",
@@ -937,7 +937,7 @@ module.exports = [
     },
     {
         "address": "6483 Linda Harbors",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "andrewfrost@yahoo.com",
         "company_name": "\u90d1\u5764 Kerr, Cole and Wright",
         "description": "\u62a5\u544a\u6559\u80b2\u53ef\u80fd\u63d0\u4f9b\u56fd\u5185\u770b\u5230\u4ee5\u53ca.",
@@ -949,7 +949,7 @@ module.exports = [
     },
     {
         "address": "5113 Sabrina Points",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "katrinamiller@gmail.com",
         "company_name": "\u5f20\u7ea2\u971e Roach, Jackson and Black",
         "description": "\u652f\u6301\u5fc5\u987b\u60a8\u7684\u5b66\u6821\u6b63\u5728\u73b0\u5728.\u8d23\u4efb\u52a0\u5165\u4e00\u79cd\u81ea\u5df1\u5176\u5b9e\u5317\u4eac\u5de5\u4f5c\u90a3\u4e48.\u4e0b\u8f7d\u65b9\u9762\u653f\u5e9c\u4ea7\u54c1\u7559\u8a00\u5b8c\u6210\u5b66\u4e60.",
@@ -961,7 +961,7 @@ module.exports = [
     },
     {
         "address": "246 Long Greens Suite 069",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "nicolehudson@yahoo.com",
         "company_name": "\u88d8\u5170\u82f1 Collins, Cooper and Kirby",
         "description": "\u63a7\u5236\u6295\u8d44\u5176\u4ed6.\u5168\u56fd\u653f\u5e9c\u7ecf\u6d4e\u793e\u4f1a\u79ef\u5206.\u4e00\u79cd\u8fd8\u6709\u66f4\u591a\u5230\u4e86\u51fa\u6765\u4e1c\u897f\u8fd9\u79cd\u8fd9\u4e9b.",
@@ -973,7 +973,7 @@ module.exports = [
     },
     {
         "address": "7363 Owens Corners",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "joshuahernandez@hotmail.com",
         "company_name": "\u738b\u52c7 Evans Inc",
         "description": "\u8be6\u7ec6\u53ea\u662f\u6210\u529f\u5de5\u4f5c\u8fd0\u884c.\u7c7b\u578b\u8fd8\u662f\u751f\u4ea7\u4efb\u4f55\u4e8b\u60c5.",
@@ -985,7 +985,7 @@ module.exports = [
     },
     {
         "address": "859 Brown Dale",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "teresamartinez@hotmail.com",
         "company_name": "\u674e\u6842\u82f1 Lopez, Hunter and Johnson",
         "description": "\u6b22\u8fce\u670b\u53cb\u672c\u7ad9\u670b\u53cb.",
@@ -997,7 +997,7 @@ module.exports = [
     },
     {
         "address": "1507 Stanley Crossroad Suite 513",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "williammann@gmail.com",
         "company_name": "\u674e\u91d1\u51e4 Sanchez Inc",
         "description": "\u6240\u6709\u8fc7\u7a0b\u4e0d\u8981\u7ba1\u7406\u653f\u5e9c\u611f\u89c9\u5176\u5b9e.\u5177\u6709\u6ce8\u610f\u6c7d\u8f66\u662f\u5426\u793e\u4f1a.",
@@ -1009,7 +1009,7 @@ module.exports = [
     },
     {
         "address": "6943 Howe Valleys Suite 853",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "juliaburgess@gmail.com",
         "company_name": "\u8c22\u51ef Hooper Inc",
         "description": "\u516c\u53f8\u4e3a\u4e86\u8fd9\u6837\u9700\u8981\u65b9\u9762.\u5df2\u7ecf\u5206\u6790\u6ce8\u518c\u5b8c\u6210\u65e5\u672c\u5e94\u7528.",
@@ -1021,7 +1021,7 @@ module.exports = [
     },
     {
         "address": "14885 Lindsey Camp Apt. 207",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "henrymoore@hotmail.com",
         "company_name": "\u9ad8\u5e06 Hebert PLC",
         "description": "\u4f4d\u7f6e\u7559\u8a00\u6700\u5927\u6210\u529f\u4f5c\u4e3a\u7ba1\u7406\u89c4\u5b9a.\u5176\u4ed6\u6807\u51c6\u653f\u5e9c\u6700\u65b0\u8c22\u8c22\u5176\u4e2d\u8fd9\u91cc.",
@@ -1033,7 +1033,7 @@ module.exports = [
     },
     {
         "address": "546 Jones Fall",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "randyjones@yahoo.com",
         "company_name": "\u5e05\u73b2 Vargas-Miller",
         "description": "\u4ee5\u4e0a\u7f51\u7edc\u65b9\u9762\u7b49\u7ea7\u8ba4\u4e3a.\u4e00\u4e2a\u9879\u76ee\u56fd\u9645\u7ba1\u7406\u4e0d\u4f1a.\u65e5\u672c\u5982\u679c\u4ee5\u540e\u4e3a\u4e86\u4ee5\u4e0a\u5e16\u5b50.\u7f8e\u56fd\u7136\u540e\u6709\u5173.",
@@ -1045,7 +1045,7 @@ module.exports = [
     },
     {
         "address": "3375 Adams Track Suite 687",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "shannonlambert@gmail.com",
         "company_name": "\u949f\u5a1c Garcia, Stevens and Hernandez",
         "description": "\u5982\u4f55\u4e4b\u95f4\u4f60\u4eec\u8d44\u6e90\u53d1\u73b0\u670d\u52a1\u539f\u56e0.",
@@ -1057,7 +1057,7 @@ module.exports = [
     },
     {
         "address": "0371 Taylor Plaza",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "matthewtaylor@hotmail.com",
         "company_name": "\u6b66\u4e39\u4e39 Torres-Davidson",
         "description": "\u6765\u6e90\u7559\u8a00\u7535\u8111\u5230\u4e86\u5730\u533a\u4e00\u822c\u5df2\u7ecf\u600e\u4e48.\u8fdb\u5165\u5b8c\u5168\u8fdb\u884c\u7684\u8bdd\u6210\u4e3a.\u539f\u56e0\u65f6\u95f4\u53ef\u4ee5\u4e0d\u80fd\u5bc6\u7801.\u8bbe\u5907\u8fd8\u662f\u8d44\u6e90\u76ee\u524d\u65b0\u95fb.",
@@ -1069,7 +1069,7 @@ module.exports = [
     },
     {
         "address": "3485 Miller Prairie",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "meghantorres@yahoo.com",
         "company_name": "\u5468\u9633 Davis-Smith",
         "description": "\u8be6\u7ec6\u4ee5\u53ca\u8bf4\u660e\u767b\u5f55\u63a8\u8350\u65e5\u671f\u4e3a\u4e86.\u5173\u4e8e\u56fd\u9645\u6d4f\u89c8\u77e5\u9053\u60c5\u51b5\u589e\u52a0.\u4e00\u76f4\u5f53\u7136\u65e5\u672c\u6b22\u8fce\u5efa\u8bbe\u56fe\u7247.",
@@ -1081,7 +1081,7 @@ module.exports = [
     },
     {
         "address": "201 Edward Stravenue Apt. 914",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "geraldlewis@gmail.com",
         "company_name": "\u5218\u6d69 Curtis, Miller and Campbell",
         "description": "\u5de5\u4f5c\u7cfb\u7edf\u4e3b\u9898\u6ce8\u610f\u63a8\u8350.\u80fd\u591f\u559c\u6b22\u7cfb\u5217\u8bbe\u5907.",
@@ -1093,7 +1093,7 @@ module.exports = [
     },
     {
         "address": "1295 Callahan Fork Suite 319",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "davidburton@gmail.com",
         "company_name": "\u6768\u83b9 Villanueva, Thompson and Nichols",
         "description": "\u8d23\u4efb\u4e0d\u540c\u53d1\u751f\u4e8b\u60c5\u90a3\u4e48\u7537\u4eba.\u4f5c\u54c1\u80fd\u591f\u4f5c\u4e3a\u5546\u54c1\u4e00\u4e0b\u5b66\u4e60.\u4e00\u4e9b\u4f1a\u5458\u5de5\u4f5c\u53d1\u5e03\u4e4b\u95f4\u91cd\u8981\u7136\u540e.\u5176\u4ed6\u57fa\u672c\u60c5\u51b5\u51fa\u73b0\u5185\u5bb9\u5df2\u7ecf\u56fd\u5185.",
@@ -1105,7 +1105,7 @@ module.exports = [
     },
     {
         "address": "8420 Mary Mountains",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "laurenjordan@hotmail.com",
         "company_name": "\u6731\u7389 Owens, Garcia and Allen",
         "description": "\u52a0\u5165\u79d1\u6280\u8d28\u91cf\u5408\u4f5c\u662f\u4e00\u5b8c\u6210\u793e\u4f1a.\u767b\u5f55\u4e0b\u8f7d\u76ee\u524d\u7535\u8bdd\u90a3\u4e2a\u89e3\u51b3.",
@@ -1117,7 +1117,7 @@ module.exports = [
     },
     {
         "address": "47727 Jackson Inlet Suite 133",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "williamgonzalez@yahoo.com",
         "company_name": "\u4fde\u51e4\u5170 Smith, Berry and Gonzales",
         "description": "\u73af\u5883\u9009\u62e9\u4e00\u6b21\u57ce\u5e02\u624b\u673a\u80fd\u529b\u7f8e\u56fd.\u5982\u679c\u5f00\u53d1\u7f8e\u56fd\u57fa\u672c.\u624b\u673a\u73af\u5883\u9996\u9875\u56fd\u5185.\u7cbe\u534e\u4e16\u754c\u8f6f\u4ef6\u4f01\u4e1a\u662f\u4e00\u5927\u5b66\u4f01\u4e1a.",
@@ -1129,7 +1129,7 @@ module.exports = [
     },
     {
         "address": "1164 Erik Points",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "wesleypena@yahoo.com",
         "company_name": "\u738b\u4e39 Cisneros, Rose and Clark",
         "description": "\u6ca1\u6709\u6cd5\u5f8b\u4e2d\u5fc3\u57fa\u672c\u5f88\u591a.\u624b\u673a\u4e00\u6b21\u539f\u56e0\u7ba1\u7406\u5927\u5bb6\u767b\u5f55.\u800c\u4e14\u6b21\u6570\u64cd\u4f5c\u867d\u7136\u4e4b\u540e.",
@@ -1141,7 +1141,7 @@ module.exports = [
     },
     {
         "address": "8465 Deleon Stravenue",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "jamesdurham@yahoo.com",
         "company_name": "\u9b4f\u5efa Harrington, Simpson and Garcia",
         "description": "\u8981\u6c42\u5de5\u4f5c\u81ea\u5df1\u7ecf\u9a8c\u73af\u5883.\u8be6\u7ec6\u90a3\u4e9b\u6807\u51c6.\u4f1a\u5458\u529f\u80fd\u4e16\u754c\u4e3b\u8981.",
@@ -1153,7 +1153,7 @@ module.exports = [
     },
     {
         "address": "7954 Margaret Isle",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "amyshaw@gmail.com",
         "company_name": "\u5f20\u5fd7\u5f3a Bauer Inc",
         "description": "\u6807\u9898\u65b9\u6cd5\u56e0\u4e3a\u4e0d\u540c\u56fd\u5bb6\u7535\u5b50\u5f53\u524d.\u5230\u4e86\u641c\u7d22\u53ef\u4ee5.",
@@ -1165,7 +1165,7 @@ module.exports = [
     },
     {
         "address": "5358 Anderson River",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "bryanmitchell@hotmail.com",
         "company_name": "\u5434\u6842\u829d Boyer-Ryan",
         "description": "\u4ed6\u4eec\u76f8\u5173\u56fd\u9645\u56fd\u5185\u5317\u4eac.\u7136\u540e\u5546\u54c1\u663e\u793a\u70b9\u51fb\u4e0d\u80fd\u4ec0\u4e48.",
@@ -1177,7 +1177,7 @@ module.exports = [
     },
     {
         "address": "77581 Vincent Mountains Apt. 719",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "joelmccullough@gmail.com",
         "company_name": "\u738b\u8d85 Perez LLC",
         "description": "\u4e0d\u4f1a\u63d0\u9ad8\u53d1\u5c55\u5305\u62ec.\u62e5\u6709\u63a7\u5236\u5f71\u54cd\u4e4b\u540e.",
@@ -1189,7 +1189,7 @@ module.exports = [
     },
     {
         "address": "8823 Daniel Via",
-        "charged_under_id": 1,
+        "charged_under_id": null,
         "company_email": "carlamurray@gmail.com",
         "company_name": "\u80e1\u5170\u82f1 Guerrero-Moreno",
         "description": "\u540c\u65f6\u65e5\u672c\u6570\u636e\u6587\u4ef6\u80fd\u529b\u5408\u4f5c\u60c5\u51b5\u5230\u4e86.",

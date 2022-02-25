@@ -2,7 +2,6 @@ const { hashPassword } = require('../auth/bcrypt');
 const { Sequelize, DataTypes } = require('sequelize');
 const ViewType = require('../common/ViewType');
 const RoleType = require('../common/RoleType');
-const ChargedUnderType = require('../common/ChargedUnderType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
 const LeaveStatusEnum = require('../common/LeaveStatusEnum');
 const ProductCategoryEnum = require('../common/ProductCategory');
@@ -41,10 +40,28 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
       await Role.bulkCreate(Object.keys(RoleType).map(key => RoleType[key]));
-      await ChargedUnder.bulkCreate(Object.keys(ChargedUnderType).map(key => ChargedUnderType[key]));
       await LeaveType.bulkCreate(Object.keys(LeaveTypeEnum).map(key => LeaveTypeEnum[key]));
       await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
+
+      await ChargedUnder.bulkCreate([
+        { 
+          name: "CCB", 
+          address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
+          shipping_address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
+          contact_number: "6779 0003 / 6776 6505 / 9776 3737 / 9826 1304 (Whatsapp)", 
+          registration_number: "53138053W", 
+          gst_rate: 7 
+        },
+        { 
+          name: "CBFS", 
+          address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
+          shipping_address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
+          contact_number: "6779 0003 / 6776 6505 / 9776 3737 / 9826 1304 (Whatsapp)", 
+          registration_number: "", 
+          gst_rate: 0 
+        },
+      ]);
      
       const employees = await Employee.bulkCreate([
         { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },

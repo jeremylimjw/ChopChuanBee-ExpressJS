@@ -61,8 +61,8 @@ async function syncAssociations() {
     Log.belongsTo(View, { foreignKey: { allowNull: false, name: 'view_id' }});
 
     // 1-M association
-    ChargedUnder.hasMany(Customer, { foreignKey: { allowNull: false, name: 'charged_under_id' }}); // Foreign key defaults to chargedUnderId, change to standardize
-    Customer.belongsTo(ChargedUnder, { foreignKey: { allowNull: false, name: 'charged_under_id' }});
+    ChargedUnder.hasMany(Customer, { foreignKey: { name: 'charged_under_id' }}); // Foreign key defaults to chargedUnderId, change to standardize
+    Customer.belongsTo(ChargedUnder, { foreignKey: { name: 'charged_under_id' }});
 
     // M-M association
     Customer.hasMany(CustomerMenu, { foreignKey: { allowNull: false, name: 'customer_id' }});
@@ -94,8 +94,8 @@ async function syncAssociations() {
     LeaveStatus.hasMany(LeaveApplication, { foreignKey: { allowNull: false, name: 'leave_status_id' }});
     LeaveApplication.belongsTo(LeaveStatus,  { foreignKey: { allowNull: false, name: 'leave_status_id' }});
     
-    await sequelize.sync(); // This will create tables if not exists
-    // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+    // await sequelize.sync(); // This will create tables if not exists
+    await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
     
 }
 

@@ -229,7 +229,6 @@ router.get('/latestPrice', requireAccess(ViewType.GENERAL), async function(req, 
   }
   
   try {
-    // TODO filter where PO status is ACCEPTED/CLOSED/SENT
     const results = await sequelize.query(
       `
         SELECT DISTINCT ON (poi.product_id) 
@@ -239,6 +238,39 @@ router.get('/latestPrice', requireAccess(ViewType.GENERAL), async function(req, 
           WHERE po.purchase_order_status_id IN (2,3,5)
           AND po.supplier_id = '${supplier_id}'
           ORDER BY poi.product_id, poi.created_at DESC
+      `,
+      { 
+        bind: [],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+
+    res.send(results);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+router.get('/ap', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { supplier_id } = req.query;
+
+  if (supplier_id == null) {
+    res.status(400).send("'supplier_id' is required.");
+    return;
+  }
+  
+  try {
+    const results = await sequelize.query(
+      `
+        SELECT SUM(amount) total FROM payments p
+          LEFT JOIN purchase_orders po ON po.id = p.purchase_order_id
+          WHERE po.supplier_id = '${supplier_id}'
+          AND po.payment_term_id = 2
+          AND po.purchase_order_status_id IN (2,3,5)
       `,
       { 
         bind: [],

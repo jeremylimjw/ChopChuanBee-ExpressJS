@@ -10,11 +10,36 @@ const { sequelize } = require('../db');
 
 
 router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, res, next) {
-  const predicate = parseRequest(req.query);
-  
+  const { id, name, status } = req.query;
+
   try {
-    const products = await Product.findAll(predicate);
-    res.send(products);
+    const results = await sequelize.query(
+      `
+        SELECT 
+          p.id, p.name, p.min_inventory_level, p.deactivated_date, p.description, p.unit, p.created_at, 
+          COALESCE(poi.total_quantity, 0) total_quantity
+        FROM products p
+          LEFT OUTER JOIN 
+            (
+              SELECT product_id, SUM(quantity) total_quantity FROM purchase_order_items 
+                LEFT JOIN purchase_orders po ON po.id = purchase_order_id
+                WHERE purchase_order_status_id IN (2,3,5)
+                GROUP BY product_id
+            ) poi ON p.id = poi.product_id
+          WHERE TRUE
+          ${ id != null ? `AND p.id = '${id}'` : ''}
+          ${ name != null ? `AND LOWER(p.name) LIKE '%${name.toLowerCase()}%'` : ''}
+          ${ status === 'true' ? `AND p.deactivated_date IS NULL` : '' }
+          ${ status === 'false' ? `AND p.deactivated_date IS NOT NULL` : '' }
+          ORDER BY p.created_at DESC
+      `,
+      { 
+        bind: [],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+
+    res.send(results);
     
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database

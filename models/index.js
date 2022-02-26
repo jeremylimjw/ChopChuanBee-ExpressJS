@@ -148,6 +148,43 @@ async function syncAssociations() {
     // 1-M association
     MovementType.hasMany(InventoryMovement, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
     InventoryMovement.belongsTo(MovementType, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+
+    const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
+
+    // 1-M association
+    PaymentTerm.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
+    SalesOrder.belongsTo(PaymentTerm, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
+
+    // 1-M association
+    SalesOrder.hasMany(SalesOrderItem, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+    SalesOrderItem.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+
+    // 1-M association
+    Product.hasMany(SalesOrderItem, { foreignKey: { allowNull: false, name: 'product_id' }});
+    SalesOrderItem.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
+
+    // 1-M association
+    SalesOrderItem.hasMany(InventoryMovement, { foreignKey: { name: 'sales_order_item_id' }});
+    InventoryMovement.belongsTo(SalesOrderItem, { foreignKey: { name: 'sales_order_item_id' }});
+
+    // 1-M association
+    Customer.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'customer_id' }});
+    SalesOrder.belongsTo(Customer, { foreignKey: { allowNull: false, name: 'customer_id' }});
+
+    // 1-M association
+    SalesOrder.hasMany(Payment, { foreignKey: { name: 'sales_order_id' }});
+    Payment.belongsTo(SalesOrder, { foreignKey: { name: 'sales_order_id' }});
+
+    const { DeliveryOrder } = require('../models/DeliveryOrder');
+
+    // 1-M association
+    //Rename employee id to driver id to be more clear.
+    Employee.hasMany(DeliveryOrder, { foreignKey: { allowNull: false, name: 'driver_id' }});
+    DeliveryOrder.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
+
+    // 1-1 association
+    DeliveryOrder.hasOne(SalesOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
+    SalesOrder.belongsTo(DeliveryOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
  
     
     await sequelize.sync(); // This will create tables if not exists

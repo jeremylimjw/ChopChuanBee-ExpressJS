@@ -152,8 +152,8 @@ async function syncAssociations() {
     const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
 
     // 1-M association
-    PaymentTerm.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
-    SalesOrder.belongsTo(PaymentTerm, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
+    PaymentTerm.hasMany(SalesOrder, { foreignKey: { name: 'payment_term_id' }});
+    SalesOrder.belongsTo(PaymentTerm, { foreignKey: { name: 'payment_term_id' }});
 
     // 1-M association
     SalesOrder.hasMany(SalesOrderItem, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
@@ -175,6 +175,14 @@ async function syncAssociations() {
     SalesOrder.hasMany(Payment, { foreignKey: { name: 'sales_order_id' }});
     Payment.belongsTo(SalesOrder, { foreignKey: { name: 'sales_order_id' }});
 
+    // 1-M association
+    ChargedUnder.hasMany(SalesOrder, { foreignKey: { name: 'charged_under_id' }});
+    SalesOrder.belongsTo(ChargedUnder, { foreignKey: { name: 'charged_under_id' }});
+
+    // 1-M association
+    POStatus.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_status_id' }});
+    SalesOrder.belongsTo(POStatus, { foreignKey: { allowNull: false, name: 'sales_order_status_id' }});
+
     const { DeliveryOrder } = require('../models/DeliveryOrder');
 
     // 1-M association
@@ -183,8 +191,8 @@ async function syncAssociations() {
     DeliveryOrder.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
 
     // 1-1 association
-    DeliveryOrder.hasOne(SalesOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
-    SalesOrder.belongsTo(DeliveryOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
+    SalesOrder.hasOne(DeliveryOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+    DeliveryOrder.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
  
     
     await sequelize.sync(); // This will create tables if not exists

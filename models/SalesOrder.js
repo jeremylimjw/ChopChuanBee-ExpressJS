@@ -16,6 +16,7 @@ const SalesOrder = sequelize.define('sales_order', {
         defaultValue: 0,
     },
     has_gst: DataTypes.INTEGER,
+    show_gst: DataTypes.BOOLEAN,
     remarks: DataTypes.STRING,
     closed_on: DataTypes.DATE,
 }, {

@@ -7,14 +7,40 @@ const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const { SupplierMenu, GUEST_ID } = require('../models/Supplier');
 const { sequelize } = require('../db');
+const { InventoryMovement } = require('../models/InventoryMovement');
+const { PurchaseOrderItem, PurchaseOrder } = require('../models/PurchaseOrder');
 
 
 router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, res, next) {
-  const predicate = parseRequest(req.query);
-  
+  const { id, name, status } = req.query;
+
   try {
-    const products = await Product.findAll(predicate);
-    res.send(products);
+    const results = await sequelize.query(
+      `
+        SELECT 
+          p.id, p.name, p.min_inventory_level, p.deactivated_date, p.description, p.unit, p.created_at, 
+          COALESCE(poi.total_quantity, 0) total_quantity
+        FROM products p
+          LEFT OUTER JOIN 
+            (
+              SELECT poi.product_id, SUM(im.quantity) total_quantity FROM inventory_movements im
+                LEFT JOIN purchase_order_items poi ON im.purchase_order_item_id = poi.id
+                GROUP BY poi.product_id
+            ) poi ON p.id = poi.product_id
+            WHERE TRUE
+            ${ id != null ? `AND p.id = '${id}'` : ''}
+            ${ name != null ? `AND LOWER(p.name) LIKE '%${name.toLowerCase()}%'` : ''}
+            ${ status === 'true' ? `AND p.deactivated_date IS NULL` : '' }
+            ${ status === 'false' ? `AND p.deactivated_date IS NOT NULL` : '' }
+          ORDER BY p.created_at DESC
+      `,
+      { 
+        bind: [],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+
+    res.send(results);
     
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
@@ -251,6 +277,32 @@ router.get('/latestPrice', requireAccess(ViewType.GENERAL), async function(req, 
     const transformed = Object.keys(supplierMap).map(key => supplierMap[key]);
 
     res.send(transformed);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+router.get('/inventoryMovement', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { product_id } = req.query;
+  
+  if (product_id == null) {
+    res.status(400).send("'product_id' is required.", )
+    return;
+  }
+  
+  try {
+    const results = await InventoryMovement.findAll({ include: [
+        { model: PurchaseOrderItem, where: { product_id: product_id }, include: [{ model: PurchaseOrder, attributes: ['id'] }] }
+        // TODO: Add sales order item
+      ],
+      order: [['created_at', 'DESC']]
+    });
+    res.send(results);
     
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database

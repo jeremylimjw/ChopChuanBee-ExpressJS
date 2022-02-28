@@ -5,11 +5,12 @@ const { Product } = require('../models/Product');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');
-const { SupplierMenu, GUEST_ID } = require('../models/Supplier');
+const { SupplierMenu, GUEST_ID, Supplier } = require('../models/Supplier');
 const { sequelize } = require('../db');
 const { InventoryMovement } = require('../models/InventoryMovement');
 const { PurchaseOrderItem, PurchaseOrder } = require('../models/PurchaseOrder');
-const { SalesOrderItem } = require('../models/SalesOrder');
+const { SalesOrderItem, SalesOrder } = require('../models/SalesOrder');
+const { Customer } = require('../models/Customer');
 
 
 router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, res, next) {
@@ -297,7 +298,10 @@ router.get('/inventoryMovement', requireAccess(ViewType.GENERAL), async function
   
   try {
     const results = await InventoryMovement.findAll({ where: { product_id: product_id },
-      include: [PurchaseOrderItem, SalesOrderItem],
+      include: [
+        { model: PurchaseOrderItem, include: [{ model: PurchaseOrder, include: [Supplier]}] }, 
+        { model: SalesOrderItem, include: [{ model: SalesOrder, include: [Customer]}] }
+      ],
       order: [['created_at', 'DESC']]
     });
     res.send(results);

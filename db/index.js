@@ -60,25 +60,6 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const { MovementType } = require('../models/MovementType');
       await MovementType.bulkCreate(Object.keys(MovementTypeEnum).map(key => MovementTypeEnum[key]));
       
-      await ChargedUnder.bulkCreate([
-        { 
-          name: "CCB", 
-          address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
-          shipping_address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
-          contact_number: "6779 0003 / 6776 6505 / 9776 3737 / 9826 1304 (Whatsapp)", 
-          registration_number: "53138053W", 
-          gst_rate: 7 
-        },
-        { 
-          name: "CBFS", 
-          address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
-          shipping_address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
-          contact_number: "6779 0003 / 6776 6505 / 9776 3737 / 9826 1304 (Whatsapp)", 
-          registration_number: "", 
-          gst_rate: 0 
-        },
-      ]);
-     
       const employees = await Employee.bulkCreate([
         { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
         { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },

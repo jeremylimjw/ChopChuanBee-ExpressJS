@@ -123,7 +123,7 @@ router.post('/deactivate', requireAccess(ViewType.SCM, true), async function(req
     await Log.create({ 
         employee_id: user.id, 
         view_id: ViewType.SCM.id,
-        text: `${user.name} deactivated ${supplier.name}'s record`, 
+        text: `${user.name} deactivated ${supplier.company_name}'s record`, 
     });
 
     res.send({ id: supplier.id, deactivated_date: supplier.deactivated_date });
@@ -162,7 +162,7 @@ router.post('/activate', requireAccess(ViewType.SCM, true), async function(req, 
       await Log.create({ 
         employee_id: user.id, 
         view_id: ViewType.SCM.id,
-        text: `${user.name} activated ${supplier.name}'s record`, 
+        text: `${user.name} activated ${supplier.company_name}'s record`, 
       });
 
       res.send({ id: supplier.id, deactivated_date: null });

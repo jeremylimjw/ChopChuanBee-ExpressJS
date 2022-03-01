@@ -10,14 +10,19 @@ const { Payment, PaymentMethod } = require('../models/Payment');
 const { InventoryMovement } = require('../models/InventoryMovement');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
+const { ChargedUnder } = require('../models/Customer');
 
 
 router.get('/', requireAccess(ViewType.GENERAL, false), async function(req, res, next) {
   const predicate = parseRequest(req.query);
 
   try {
-    predicate.include = [{ model: PurchaseOrderItem, include: [InventoryMovement, Product] }, Supplier, PaymentTerm, POStatus, { model: Payment, include: [PaymentMethod] }];
-    predicate.order = [['created_at', 'DESC']]
+    predicate.include = [
+      { model: PurchaseOrderItem, include: [InventoryMovement, Product] }, 
+      { model: Payment, include: [PaymentMethod] },
+      Supplier,
+      ChargedUnder
+    ];
     const purchaseOrders = await PurchaseOrder.findAll(predicate);
 
     res.send(purchaseOrders);
@@ -43,7 +48,7 @@ router.post('/', requireAccess(ViewType.SCM, true), async function(req, res, nex
 
   try {
     const newPurchaseOrder = await PurchaseOrder.create(
-      { supplier_id, purchase_order_status_id, purchase_order_items }, 
+      req.body, 
       { include: [PurchaseOrderItem] });
 
     // Record to admin logs

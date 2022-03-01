@@ -14,5 +14,6 @@ router.use("/employee/leave/application", require("./leaveApplication"));
 router.use("/log", require("./log"));
 router.use("/accounting", require("./accounting"));
 router.use("/external", require("./external"));
+router.use("/chargedUnder", require("./chargedUnder"));
 
 module.exports = router;

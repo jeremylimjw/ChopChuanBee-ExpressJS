@@ -2,7 +2,6 @@ const { hashPassword } = require('../auth/bcrypt');
 const { Sequelize, DataTypes } = require('sequelize');
 const ViewType = require('../common/ViewType');
 const RoleType = require('../common/RoleType');
-const ChargedUnderType = require('../common/ChargedUnderType');
 const PaymentTermType = require('../common/PaymentTermType');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
@@ -51,7 +50,6 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
       await Role.bulkCreate(Object.keys(RoleType).map(key => RoleType[key]));
-      await ChargedUnder.bulkCreate(Object.keys(ChargedUnderType).map(key => ChargedUnderType[key]));
       await LeaveType.bulkCreate(Object.keys(LeaveTypeEnum).map(key => LeaveTypeEnum[key]));
       await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
@@ -99,12 +97,31 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { amount: 100, purchase_order_id: 1, accounting_type_id: 1, movement_type_id:1 },
         { amount: -50, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 },
       ]); 
+      await ChargedUnder.bulkCreate([
+        { 
+          name: "CCB", 
+          address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
+          shipping_address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
+          contact_number: "6779 0003 / 6776 6505 / 9776 3737 / 9826 1304 (Whatsapp)", 
+          registration_number: "53138053W", 
+          gst_rate: 7 
+        },
+        { 
+          name: "CBFS", 
+          address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
+          shipping_address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
+          contact_number: "6779 0003 / 6776 6505 / 9776 3737 / 9826 1304 (Whatsapp)", 
+          registration_number: "", 
+          gst_rate: 0 
+        },
+      ]);
      
       const employees = await Employee.bulkCreate([
         { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
         { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
       ], { include: LeaveAccount })
 
+      // Give view access to all views for Alice
       await AccessRight.bulkCreate(Object.keys(ViewType).map(key => ({ employee_id: employees[1].id, view_id: ViewType[key].id, has_write_access: false })))
 
       const { InventoryMovement } = require('../models/InventoryMovement');
@@ -164,27 +181,30 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       
 
     //For analytics - Customer ['id', 'company_name', 'p1_name', 'p1_phone_number', 'address', 'postal_code', 'charged_under_id', 'gst', 'gst_show']  
+   
+    const ccb = await ChargedUnder.findOne({ where: { name : 'CCB'} });
+    const cbfs = await ChargedUnder.findOne({ where: { name : 'CBFS'} });
     await Customer.bulkCreate([
-      { company_name : 'customer1', p1_name: 'customer1', p1_phone_number: 'NA' ,address: 'NA', postal_code: 'NA', 'charged_under_id': 1, gst: true, gst_show: true },
-      { company_name : 'customer2', p1_name: 'customer2', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 1, gst: true, gst_show: true },
-      { company_name : 'customer3', p1_name: 'customer3', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 1, gst: true, gst_show: false },
-      { company_name : 'customer4', p1_name: 'customer4', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 1, gst: true, gst_show: false },
-      { company_name : 'customer5', p1_name: 'customer5', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 1, gst: false, gst_show: true },
-      { company_name : 'customer6', p1_name: 'customer6', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 1, gst: false, gst_show: true },
-      { company_name : 'customer7', p1_name: 'customer7', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 1, gst: false, gst_show: true },
-      { company_name : 'customer8', p1_name: 'customer8', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 1, gst: false, gst_show: false },
-      { company_name : 'customer9', p1_name: 'customer9', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 1, gst: false, gst_show: false },
-      { company_name : 'customer10', p1_name: 'customer10', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: true, gst_show: true },
-      { company_name : 'customer11', p1_name: 'customer11', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: true, gst_show: true },
-      { company_name : 'customer12', p1_name: 'customer12', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: true, gst_show: false },
-      { company_name : 'customer13', p1_name: 'customer13', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: true, gst_show: false },
-      { company_name : 'customer14', p1_name: 'customer14', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: true, gst_show: false },
-      { company_name : 'customer15', p1_name: 'customer15', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: false, gst_show: true },
-      { company_name : 'customer16', p1_name: 'customer16', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: false, gst_show: true },
-      { company_name : 'customer17', p1_name: 'customer17', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: false, gst_show: true },
-      { company_name : 'customer18', p1_name: 'customer18', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: false, gst_show: false },
-      { company_name : 'customer19', p1_name: 'customer19', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: false, gst_show: false },
-      { company_name : 'customer20', p1_name: 'customer20', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': 2, gst: false, gst_show: false }
+      { company_name : 'customer1', p1_name: 'customer1', p1_phone_number: 'NA' ,address: 'NA', postal_code: 'NA', 'charged_under_id': ccb.id, gst: true, gst_show: true },
+      { company_name : 'customer2', p1_name: 'customer2', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': ccb.id, gst: true, gst_show: true },
+      { company_name : 'customer3', p1_name: 'customer3', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': ccb.id, gst: true, gst_show: false },
+      { company_name : 'customer4', p1_name: 'customer4', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': ccb.id, gst: true, gst_show: false },
+      { company_name : 'customer5', p1_name: 'customer5', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': ccb.id, gst: false, gst_show: true },
+      { company_name : 'customer6', p1_name: 'customer6', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': ccb.id, gst: false, gst_show: true },
+      { company_name : 'customer7', p1_name: 'customer7', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': ccb.id, gst: false, gst_show: true },
+      { company_name : 'customer8', p1_name: 'customer8', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': ccb.id, gst: false, gst_show: false },
+      { company_name : 'customer9', p1_name: 'customer9', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': ccb.id, gst: false, gst_show: false },
+      { company_name : 'customer10', p1_name: 'customer10', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: true, gst_show: true },
+      { company_name : 'customer11', p1_name: 'customer11', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: true, gst_show: true },
+      { company_name : 'customer12', p1_name: 'customer12', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: true, gst_show: false },
+      { company_name : 'customer13', p1_name: 'customer13', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: true, gst_show: false },
+      { company_name : 'customer14', p1_name: 'customer14', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: true, gst_show: false },
+      { company_name : 'customer15', p1_name: 'customer15', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: false, gst_show: true },
+      { company_name : 'customer16', p1_name: 'customer16', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: false, gst_show: true },
+      { company_name : 'customer17', p1_name: 'customer17', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: false, gst_show: true },
+      { company_name : 'customer18', p1_name: 'customer18', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: false, gst_show: false },
+      { company_name : 'customer19', p1_name: 'customer19', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: false, gst_show: false },
+      { company_name : 'customer20', p1_name: 'customer20', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: false, gst_show: false }
     ]);
       
       //Analytics - Products

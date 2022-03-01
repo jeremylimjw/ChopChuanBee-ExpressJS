@@ -61,8 +61,8 @@ async function syncAssociations() {
     Log.belongsTo(View, { foreignKey: { allowNull: false, name: 'view_id' }});
 
     // 1-M association
-    ChargedUnder.hasMany(Customer, { foreignKey: { allowNull: false, name: 'charged_under_id' }}); // Foreign key defaults to chargedUnderId, change to standardize
-    Customer.belongsTo(ChargedUnder, { foreignKey: { allowNull: false, name: 'charged_under_id' }});
+    ChargedUnder.hasMany(Customer, { foreignKey: { name: 'charged_under_id' }}); // Foreign key defaults to chargedUnderId, change to standardize
+    Customer.belongsTo(ChargedUnder, { foreignKey: { name: 'charged_under_id' }});
 
     // M-M association
     Customer.hasMany(CustomerMenu, { foreignKey: { allowNull: false, name: 'customer_id' }});
@@ -115,6 +115,10 @@ async function syncAssociations() {
     // 1-M association
     Product.hasMany(PurchaseOrderItem, { foreignKey: { allowNull: false, name: 'product_id' }});
     PurchaseOrderItem.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
+
+    // 1-M association
+    ChargedUnder.hasMany(PurchaseOrder, { foreignKey: { name: 'charged_under_id' }});
+    PurchaseOrder.belongsTo(ChargedUnder, { foreignKey: { name: 'charged_under_id' }});
 
     const { InventoryMovement } = require('../models/InventoryMovement');
     const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');

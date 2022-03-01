@@ -48,14 +48,15 @@ const ChargedUnder = sequelize.define('charged_under', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  address: DataTypes.STRING, 
-  shipping_address: DataTypes.STRING, 
-  contact_number: DataTypes.STRING, 
-  registration_number: DataTypes.STRING, 
   gst_rate: {
     type: DataTypes.DECIMAL,
     defaultValue: 0,
   },
+  address: DataTypes.STRING, 
+  shipping_address: DataTypes.STRING, 
+  contact_number: DataTypes.STRING, 
+  registration_number: DataTypes.STRING, 
+  deactivated_date: DataTypes.DATE,
 }, {
   updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
   createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'

@@ -2,9 +2,14 @@ const { hashPassword } = require('../auth/bcrypt');
 const { Sequelize, DataTypes } = require('sequelize');
 const ViewType = require('../common/ViewType');
 const RoleType = require('../common/RoleType');
+const PaymentTermType = require('../common/PaymentTermType');
+const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
 const LeaveStatusEnum = require('../common/LeaveStatusEnum');
 const ProductCategoryEnum = require('../common/ProductCategory');
+const PaymentMethodType = require('../common/PaymentMethodType');
+const AccountingTypeEnum = require('../common/AccountingTypeEnum');
+const MovementTypeEnum = require('../common/MovementTypeEnum');
 const { insertDemoData } = require('../demo');
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
@@ -33,7 +38,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       console.log("First run detected, running data init");
 
       const View = require('../models/View');
-      const { ChargedUnder, Customer } = require('../models/Customer');
+      const { ChargedUnder } = require('../models/Customer');
       const { LeaveType, LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
       const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
@@ -44,25 +49,17 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
 
-      await ChargedUnder.bulkCreate([
-        { 
-          name: "CCB", 
-          address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
-          shipping_address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
-          contact_number: "6779 0003 / 6776 6505 / 9776 3737 / 9826 1304 (Whatsapp)", 
-          registration_number: "53138053W", 
-          gst_rate: 7 
-        },
-        { 
-          name: "CBFS", 
-          address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
-          shipping_address: "Blk 14 Pasir Panjang Wholesale Centre #01-37, Singapore 110014 ", 
-          contact_number: "6779 0003 / 6776 6505 / 9776 3737 / 9826 1304 (Whatsapp)", 
-          registration_number: "", 
-          gst_rate: 0 
-        },
-      ]);
-     
+      const { PaymentTerm, POStatus } = require('../models/PurchaseOrder');
+      await PaymentTerm.bulkCreate(Object.keys(PaymentTermType).map(key => PaymentTermType[key]));
+      await POStatus.bulkCreate(Object.keys(PurchaseOrderStatusType).map(key => PurchaseOrderStatusType[key]));
+
+      const { PaymentMethod, AccountingType } = require('../models/Payment');
+      await PaymentMethod.bulkCreate(Object.keys(PaymentMethodType).map(key => PaymentMethodType[key]));
+      await AccountingType.bulkCreate(Object.keys(AccountingTypeEnum).map(key => AccountingTypeEnum[key]));
+
+      const { MovementType } = require('../models/MovementType');
+      await MovementType.bulkCreate(Object.keys(MovementTypeEnum).map(key => MovementTypeEnum[key]));
+      
       const employees = await Employee.bulkCreate([
         { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
         { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },

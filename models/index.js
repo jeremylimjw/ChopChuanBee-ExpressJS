@@ -93,6 +93,115 @@ async function syncAssociations() {
     // 1 - M association
     LeaveStatus.hasMany(LeaveApplication, { foreignKey: { allowNull: false, name: 'leave_status_id' }});
     LeaveApplication.belongsTo(LeaveStatus,  { foreignKey: { allowNull: false, name: 'leave_status_id' }});
+
+    const { PurchaseOrder, PurchaseOrderItem, PaymentTerm, POStatus } = require('../models/PurchaseOrder');
+
+    // 1-M association
+    PaymentTerm.hasMany(PurchaseOrder, { foreignKey: { name: 'payment_term_id' }});
+    PurchaseOrder.belongsTo(PaymentTerm, { foreignKey: { name: 'payment_term_id' }});
+
+    // 1-M association
+    POStatus.hasMany(PurchaseOrder, { foreignKey: { allowNull: false, name: 'purchase_order_status_id' }});
+    PurchaseOrder.belongsTo(POStatus, { foreignKey: { allowNull: false, name: 'purchase_order_status_id' }});
+
+    // 1-M association
+    Supplier.hasMany(PurchaseOrder, { foreignKey: { allowNull: false, name: 'supplier_id' }});
+    PurchaseOrder.belongsTo(Supplier, { foreignKey: { allowNull: false, name: 'supplier_id' }});
+
+    // 1-M association
+    PurchaseOrder.hasMany(PurchaseOrderItem, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
+    PurchaseOrderItem.belongsTo(PurchaseOrder, { foreignKey: { allowNull: false, name: 'purchase_order_id' }});
+
+    // 1-M association
+    Product.hasMany(PurchaseOrderItem, { foreignKey: { allowNull: false, name: 'product_id' }});
+    PurchaseOrderItem.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
+
+    // 1-M association
+    ChargedUnder.hasMany(PurchaseOrder, { foreignKey: { name: 'charged_under_id' }});
+    PurchaseOrder.belongsTo(ChargedUnder, { foreignKey: { name: 'charged_under_id' }});
+
+    const { InventoryMovement } = require('../models/InventoryMovement');
+    const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
+
+    // 1-M association
+    Product.hasMany(InventoryMovement, { foreignKey: { allowNull: false, name: 'product_id' }});
+    InventoryMovement.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
+
+    // 1-M association
+    PurchaseOrderItem.hasMany(InventoryMovement, { foreignKey: { name: 'purchase_order_item_id' }});
+    InventoryMovement.belongsTo(PurchaseOrderItem, { foreignKey: { name: 'purchase_order_item_id' }});
+
+    // 1-M association
+    PurchaseOrder.hasMany(Payment, { foreignKey: { name: 'purchase_order_id' }});
+    Payment.belongsTo(PurchaseOrder, { foreignKey: { name: 'purchase_order_id' }});
+
+    // 1-M association
+    PaymentMethod.hasMany(Payment, { foreignKey: { name: 'payment_method_id' }});
+    Payment.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
+
+    // 1-M association
+    AccountingType.hasMany(Payment, { foreignKey: { name: 'accounting_type_id' }});
+    Payment.belongsTo(AccountingType, { foreignKey: { name: 'accounting_type_id' }});
+    
+    const { MovementType } = require('../models/MovementType');
+
+    // 1-M association
+    MovementType.hasMany(Payment, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+    Payment.belongsTo(MovementType, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+
+    // 1-M association
+    MovementType.hasMany(InventoryMovement, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+    InventoryMovement.belongsTo(MovementType, { foreignKey: { allowNull: false, name: 'movement_type_id' }});
+
+    const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
+
+    // 1-M association
+    SalesOrder.hasMany(Payment, { foreignKey: { name: 'sales_order_id' }});
+    Payment.belongsTo(SalesOrder, { foreignKey: { name: 'sales_order_id' }});
+
+    // 1-M association
+    PaymentTerm.hasMany(SalesOrder, { foreignKey: { name: 'payment_term_id' }});
+    SalesOrder.belongsTo(PaymentTerm, { foreignKey: { name: 'payment_term_id' }});
+
+    // 1-M association
+    SalesOrder.hasMany(SalesOrderItem, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+    SalesOrderItem.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+
+    // 1-M association
+    Product.hasMany(SalesOrderItem, { foreignKey: { allowNull: false, name: 'product_id' }});
+    SalesOrderItem.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
+
+    // 1-M association
+    SalesOrderItem.hasMany(InventoryMovement, { foreignKey: { name: 'sales_order_item_id' }});
+    InventoryMovement.belongsTo(SalesOrderItem, { foreignKey: { name: 'sales_order_item_id' }});
+
+    // 1-M association
+    Customer.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'customer_id' }});
+    SalesOrder.belongsTo(Customer, { foreignKey: { allowNull: false, name: 'customer_id' }});
+
+    // 1-M association
+    SalesOrder.hasMany(Payment, { foreignKey: { name: 'sales_order_id' }});
+    Payment.belongsTo(SalesOrder, { foreignKey: { name: 'sales_order_id' }});
+
+    // 1-M association
+    ChargedUnder.hasMany(SalesOrder, { foreignKey: { name: 'charged_under_id' }});
+    SalesOrder.belongsTo(ChargedUnder, { foreignKey: { name: 'charged_under_id' }});
+
+    // 1-M association
+    POStatus.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_status_id' }});
+    SalesOrder.belongsTo(POStatus, { foreignKey: { allowNull: false, name: 'sales_order_status_id' }});
+
+    const { DeliveryOrder } = require('../models/DeliveryOrder');
+
+    // 1-M association
+    //Rename employee id to driver id to be more clear.
+    Employee.hasMany(DeliveryOrder, { foreignKey: { allowNull: false, name: 'driver_id' }});
+    DeliveryOrder.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
+
+    // 1-1 association
+    SalesOrder.hasOne(DeliveryOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+    DeliveryOrder.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+ 
     
     await sequelize.sync(); // This will create tables if not exists
     // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create

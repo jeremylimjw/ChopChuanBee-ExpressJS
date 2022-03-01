@@ -4,10 +4,12 @@ const { requireAccess } = require('../auth');
 const { Supplier, SupplierMenu } = require('../models/Supplier');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
+const { Sequelize } = require('sequelize');
+const { sequelize } = require('../db');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const { Product } = require('../models/Product');
 
-
+//Read supplier (find 1 or find all depending if ID was given)
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
   const predicate = parseRequest(req.query);
   
@@ -168,7 +170,6 @@ router.post('/activate', requireAccess(ViewType.SCM, true), async function(req, 
       res.send({ id: supplier.id, deactivated_date: null });
     }
 
-
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
     console.log(err);
@@ -194,6 +195,7 @@ router.get('/menu', requireAccess(ViewType.SCM, false), async function(req, res,
 
 });
 
+
 router.put('/menu', requireAccess(ViewType.SCM, true), async function(req, res, next) {
   const { supplier_id, supplier_menus } = req.body;
 
@@ -212,6 +214,74 @@ router.put('/menu', requireAccess(ViewType.SCM, true), async function(req, res, 
     res.send({ id: supplier_id });
 
   } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+router.get('/latestPrice', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { supplier_id } = req.query;
+
+  if (supplier_id == null) {
+    res.status(400).send("'supplier_id' is required.");
+    return;
+  }
+  
+  try {
+    const results = await sequelize.query(
+      `
+        SELECT DISTINCT ON (poi.product_id) 
+        poi.product_id, poi.unit_cost
+          FROM purchase_order_items poi
+          LEFT JOIN purchase_orders po ON po.id = poi.purchase_order_id
+          WHERE po.purchase_order_status_id IN (2,3,5)
+          AND po.supplier_id = '${supplier_id}'
+          ORDER BY poi.product_id, poi.created_at DESC
+      `,
+      { 
+        bind: [],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+
+    res.send(results);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+router.get('/ap', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { supplier_id } = req.query;
+
+  if (supplier_id == null) {
+    res.status(400).send("'supplier_id' is required.");
+    return;
+  }
+  
+  try {
+    const results = await sequelize.query(
+      `
+        SELECT SUM(amount) total FROM payments p
+          LEFT JOIN purchase_orders po ON po.id = p.purchase_order_id
+          WHERE po.supplier_id = '${supplier_id}'
+          AND po.payment_term_id = 2
+          AND po.purchase_order_status_id IN (2,3,5)
+      `,
+      { 
+        bind: [],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+
+    res.send(results);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
     console.log(err);
     res.status(500).send(err);
   }

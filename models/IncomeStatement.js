@@ -22,12 +22,7 @@ const IncomeStatement = sequelize.define('income_statement', {
       defaultValue: 0,
       allowNull: false,
     },
-    less_customer_sales: {
-      type: DataTypes.DECIMAL,
-      defaultValue: 0,
-      allowNull: false,
-    },
-    retun: {
+    less_customer_sales_return: {
       type: DataTypes.DECIMAL,
       defaultValue: 0,
       allowNull: false,
@@ -110,9 +105,9 @@ const IncomeStatement = sequelize.define('income_statement', {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    deleted: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    }
-});
+    deleted_date: DataTypes.DATE
+  }, {
+      updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
+      createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
+    });
 module.exports =  IncomeStatement;

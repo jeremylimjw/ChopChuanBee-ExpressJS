@@ -162,7 +162,7 @@ router.post('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async
         const COGS_converted = parseFloat(COGS[0].cost_of_goods_sold)|| 0;
         const customer_sales_return_converted = parseFloat(customer_sales_return[0].sales) || 0;
         
-        const newIncomeStatement = await IncomeStatement.create({name,revenue:revenue_converted, less_cost_of_goods_sold:COGS_converted, retun:customer_sales_return_converted,  start_date, end_date });
+        const newIncomeStatement = await IncomeStatement.create({name,revenue:revenue_converted, less_cost_of_goods_sold:COGS_converted, less_customer_sales_return:customer_sales_return_converted,  start_date, end_date });
         // Record to admin logs
         const user = res.locals.user;
         await Log.create({ 
@@ -239,10 +239,10 @@ router.put('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(req
 
 //income statement PUT
 router.put('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
-    const { id, name, revenue, less_cost_of_goods_sold, less_customer_sales, retun, gain_on_sale_of_asset, other_income_1, other_income_2, damaged_inventory,salary_expense, interest_expense, tax_expense, warranty_expense, rental_expense, advertising_expense, commissions_expense, other_expense_1, other_expense_2, loss_on_sale_of_asset} = req.body;
+    const { id, name, revenue, less_cost_of_goods_sold, less_customer_sales_return, gain_on_sale_of_asset, other_income_1, other_income_2, damaged_inventory,salary_expense, interest_expense, tax_expense, warranty_expense, rental_expense, advertising_expense, commissions_expense, other_expense_1, other_expense_2, loss_on_sale_of_asset, start_date, end_date} = req.body;
     try {
       assertNotNull(req.body, ['name', 'revenue', 'less_cost_of_goods_sold', 
-                                'less_customer_sales', 'retun', 'gain_on_sale_of_asset', 
+                                'less_customer_sales_return', 'gain_on_sale_of_asset', 
                                 'other_income_1', 'other_income_2', 'damaged_inventory', 
                                 'salary_expense', 'interest_expense', 'tax_expense', 'warranty_expense', 
                                 'rental_expense', 'advertising_expense', 'commissions_expense', 'other_expense_1', 
@@ -255,7 +255,7 @@ router.put('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async 
   
     try {
       const result = await IncomeStatement.update(
-        { name,revenue, less_cost_of_goods_sold, less_customer_sales, retun, gain_on_sale_of_asset, other_income_1, other_income_2, damaged_inventory,salary_expense, interest_expense, tax_expense, warranty_expense, rental_expense, advertising_expense, commissions_expense, other_expense_1, other_expense_2, loss_on_sale_of_asset, start_date, end_date},
+        { name,revenue, less_cost_of_goods_sold, less_customer_sales_return, gain_on_sale_of_asset, other_income_1, other_income_2, damaged_inventory,salary_expense, interest_expense, tax_expense, warranty_expense, rental_expense, advertising_expense, commissions_expense, other_expense_1, other_expense_2, loss_on_sale_of_asset, start_date, end_date},
         { where: { id : id } }
       );
   
@@ -364,48 +364,84 @@ router.post('/SOFP/deactivate', requireAccess(ViewType.ACCOUNTING, true), async 
 
 
 
-//delete income_statement 
-router.delete('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
-    const { id } = req.query;
-  
-    // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
-    if (id == null) {
-      res.status(400).send("'id' is required.", )
-      return;
+//deactivate income statement 
+router.post('/income_statement/deactivate', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+  const { id } = req.body;
+
+  // Attribute validation here. You can go as deep as type validation but this here is the minimal validation
+  if (id == null) {
+    res.status(400).send("'id' is required.", )
+    return;
+  }
+
+  try {
+    const income_statement = await IncomeStatement.findByPk(id);
+
+    // If 'id' is not found return 400 Bad Request, if found then return the 'id'
+    if (income_statement == null) {
+      res.status(400).send(`Income Statement id ${id} not found.`)
+
+    } else {
+      income_statement.deleted_date = new Date();
+      income_statement.save();
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ACCOUNTING.id,
+        text: `${user.name} deleted ${income_statement.name}`, 
+      });
+
+      res.send({ id: income_statement.id, deleted_date: income_statement.deleted_date});
     }
-  
-    try {
-      const incomeStatement = await IncomeStatement.findByPk(id);
-  
-      // If 'id' is not found return 400 Bad Request, if found then return the 'id'
-      if (incomeStatement == null) {
-        res.status(400).send(`income statement id ${id} not found.`)
-  
-      } else {
-        incomeStatement.deleted = true;
-        incomeStatement.save();
-  
-        // Record to admin logs
-        const user = res.locals.user;
-        await Log.create({ 
-          employee_id: user.id, 
-          view_id: ViewType.ACCOUNTING.id,
-          text: `${user.name} deleted ${incomeStatement.name}`, 
-        });
-  
-        res.send({ id: incomeStatement.id });
-      }
-  
-  
-    } catch(err) {
-      // Catch and return any uncaught exceptions while inserting into database
-      console.log(err);
-      res.status(500).send(err);
-    }
-  
-  });
 
 
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+//activate income statement
+router.post('/income_statement/activate', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+  const { id } = req.body;
+
+  if (id == null) {
+    res.status(400).send("'id' is required.", )
+    return;
+  }
+
+  try {
+    const income_statement = await IncomeStatement.findByPk(id);
+
+    if (income_statement == null) {
+      res.status(400).send(`income statement id ${id} not found.`)
+
+    } else {
+      income_statement.deleted_date = null;
+      income_statement.save();
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.CRM.id,
+        text: `$${user.name} reactivated  ${income_statement.name}`, 
+      });
+
+      res.send({ id: income_statement.id, deleted_date: null });
+    }
+
+
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
 
 module.exports = router; 
 

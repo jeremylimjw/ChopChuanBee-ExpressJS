@@ -179,7 +179,7 @@ router.post('/activate', requireAccess(ViewType.CRM, true), async function(req, 
       await Log.create({ 
         employee_id: user.id, 
         view_id: ViewType.CRM.id,
-        text: `${user.name} activated ${customer.name}'s record`, 
+        text: `${user.name} activated ${customer.company_name}'s record`, 
       });
 
       res.send({ id: customer.id, deactivated_date: null });

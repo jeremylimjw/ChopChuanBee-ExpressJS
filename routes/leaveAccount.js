@@ -15,13 +15,6 @@ const { assertNotNull } = require('../common/helpers');
 router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
   const { employee_id, leave_account_id } = req.query;
   
-  // If user is not the employee OR user doesnt have HR access role OR user is not Admin
-  const user = res.locals.user;
-  if (user.id != employee_id && user.access_rights[ViewType.HR] == null && user.role.name !== 'Admin') {
-    res.status(401).send("You do not have access to this method.");
-    return;
-  }
-  
   try {
     const currentBalances = await sequelize.query(
       `SELECT leave_accounts.id, leave_accounts.entitled_days, entitled_days - COALESCE(SUM(num_days), 0) AS balance, employee_id, leave_types.name leave_type_name, leave_types.id leave_type_id

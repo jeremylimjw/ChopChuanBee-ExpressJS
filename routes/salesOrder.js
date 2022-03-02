@@ -11,6 +11,7 @@ const { parseRequest, assertNotNull } = require('../common/helpers');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const { ChargedUnder, Customer } = require('../models/Customer');
 const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
+const { sequelize } = require('../db');
 
 
 router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
@@ -172,7 +173,65 @@ router.post('/inventory', requireAccess(ViewType.GENERAL), async function(req, r
   }
 
   try {
-    const newInventoryMovements = await InventoryMovement.bulkCreate(inventory_movements);
+    // Reduce duplicated product's quantity
+    const reducedMovements = [];
+    inventory_movements.forEach(movement => {
+      const index = reducedMovements.findIndex(x => x.product_id === movement.product_id);
+      if (index > -1) {
+        reducedMovements.quantity += +movement.quantity;
+      } else {
+        reducedMovements.push(movement)
+      }
+    });
+
+    for (let movement of reducedMovements) {
+      const stocks = await sequelize.query(
+        `
+        WITH o AS (SELECT COALESCE(-1*SUM(quantity),0) AS outflow FROM inventory_movements im WHERE quantity < 0 AND product_id = $1)
+        SELECT *, CASE WHEN (sum_over-(SELECT outflow FROM o)) > quantity THEN quantity ELSE (sum_over-(SELECT outflow FROM o)) END remaining
+          FROM  
+            (
+              SELECT 
+                created_at, product_Id, unit_cost, unit_price, quantity, movement_type_id, SUM(quantity) OVER(ORDER BY created_at) AS sum_over 
+              FROM inventory_movements im WHERE product_id = $1 AND quantity > 0
+            ) i  
+            WHERE i.sum_over-(SELECT outflow FROM o) >= 0 AND (sum_over-(SELECT outflow FROM o)) > 0;
+        `,
+        { 
+          bind: [movement.product_id],
+          type: sequelize.QueryTypes.SELECT 
+        }
+      );
+      
+      const stockBalance = stocks.reduce((prev, current) => prev += +current.remaining, 0);
+
+      if (stockBalance < Math.abs(movement.quantity)) {
+        const product = await Product.findByPk(movement.product_id);
+        res.status(400).send(`${product.name} does not have enough stock (left ${stockBalance}) for order quantity ${Math.abs(movement.quantity)}`);
+        return;
+      }
+
+      let target = Math.abs(movement.quantity); // quantity in request will be negative
+      let sum = 0;
+      let count = 0;
+      
+      for (let stock of stocks) {
+        let toAdd = target - count;
+        if (toAdd < stock.remaining) { // If got leftover
+          sum += toAdd * stock.unit_cost;
+          count += toAdd;
+        } else {
+          sum += stock.quantity * stock.unit_cost;
+          count += stock.quantity;
+        }
+        if (count >= target) break;
+      }
+
+      movement.unit_cost = sum/count;
+      
+    }
+
+    const newInventoryMovements = await InventoryMovement.bulkCreate(reducedMovements);
 
     // Record to admin logs
     const user = res.locals.user;
@@ -182,7 +241,7 @@ router.post('/inventory', requireAccess(ViewType.GENERAL), async function(req, r
       logs.push(({ 
         employee_id: user.id, 
         view_id: ViewType.CRM.id,
-        text: `${user.name} made a sale for ${salesOrderItem.product.name} with ${movement.quantity} quantity`, 
+        text: `${user.name} made a sale for ${salesOrderItem.product.name} with ${Math.abs(movement.quantity)} quantity`, 
       }))
     }
     await Log.bulkCreate(logs);

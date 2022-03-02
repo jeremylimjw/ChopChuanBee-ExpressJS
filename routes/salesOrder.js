@@ -160,7 +160,7 @@ router.post('/payment', requireAccess(ViewType.GENERAL), async function(req, res
 });
 
 
-// Create inventory movements in bulk
+// For new sales order
 router.post('/inventory', requireAccess(ViewType.GENERAL), async function(req, res, next) {
   const { inventory_movements } = req.body;
 
@@ -242,6 +242,46 @@ router.post('/inventory', requireAccess(ViewType.GENERAL), async function(req, r
         employee_id: user.id, 
         view_id: ViewType.CRM.id,
         text: `${user.name} made a sale for ${salesOrderItem.product.name} with ${Math.abs(movement.quantity)} quantity`, 
+      }))
+    }
+    await Log.bulkCreate(logs);
+
+    res.send(newInventoryMovements)
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+
+
+// For sales refund
+router.post('/inventory/refund', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { inventory_movements } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['inventory_movements']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const newInventoryMovements = await InventoryMovement.bulkCreate(inventory_movements);
+
+    // Record to admin logs
+    const user = res.locals.user;
+    const logs = [];
+    for (let movement of inventory_movements) {
+      const product = await Product.findByPk(movement.product_id);
+      logs.push(({ 
+        employee_id: user.id, 
+        view_id: ViewType.CRM.id,
+        text: `${user.name} refunded ${product.name} with ${Math.abs(movement.quantity)} quantity`, 
       }))
     }
     await Log.bulkCreate(logs);

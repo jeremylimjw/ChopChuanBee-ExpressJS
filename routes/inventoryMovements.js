@@ -31,7 +31,7 @@ router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
     }
     
     try {
-        const results = await InventoryMovement.findAll({ where: queries, include: [purchaseOrderItem, salesOrderItem, product]});
+        const results = await InventoryMovement.findAll({ where: queries, include: [purchaseOrderItem, salesOrderItem, product], order: [['created_at', 'DESC']]});
         res.send(results);
       
     } catch(err) {

@@ -29,11 +29,35 @@ router.get('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(req
 //incomeStatement  
 router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
 
-    const predicate = parseRequest(req.query);
+    //const predicate = parseRequest(req.query);
+    
+    const {name,start_date,end_date } = req.query;
+    let queryString = '';
+    if(name != null && start_date != null && end_date != null){
+      queryString = `SELECT * FROM income_statements WHERE name like '%${name}%' and (end_date >= '${start_date}' and end_date <= '${end_date}') or (start_date >= '${start_date}' and start_date <= '${end_date}')`
+    }                                                   
+    else if (name != null ){
+      queryString = `SELECT * FROM income_statements WHERE name like '%${name}%'`
+    }
+    else if (start_date != null && end_date != null ){
+      queryString = `SELECT * FROM income_statements WHERE (end_date >= '${start_date}' and end_date <= '${end_date}') or (start_date >= '${start_date}' and start_date <= '${end_date}')`
+    }
+    else 
+    {
+      queryString = `SELECT * FROM income_statements`
+    }
+    console.log (queryString);
+    const income_statement = await sequelize.query(
+      queryString,
+      { 
+        raw: true, 
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
   
     try {
-      const sofp = await IncomeStatement.findAll(predicate);
-      res.send(sofp);
+      
+      res.send(income_statement);
       
     } catch(err) {
       // Catch and return any uncaught exceptions while inserting into database

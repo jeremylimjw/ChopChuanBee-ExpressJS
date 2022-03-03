@@ -124,6 +124,10 @@ async function syncAssociations() {
     const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
 
     // 1-M association
+    PaymentMethod.hasMany(PurchaseOrder, { foreignKey: { name: 'payment_method_id' }});
+    PurchaseOrder.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
+
+    // 1-M association
     Product.hasMany(InventoryMovement, { foreignKey: { allowNull: false, name: 'product_id' }});
     InventoryMovement.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
 
@@ -162,6 +166,10 @@ async function syncAssociations() {
     // 1-M association
     PaymentTerm.hasMany(SalesOrder, { foreignKey: { name: 'payment_term_id' }});
     SalesOrder.belongsTo(PaymentTerm, { foreignKey: { name: 'payment_term_id' }});
+
+    // 1-M association
+    PaymentMethod.hasMany(SalesOrder, { foreignKey: { name: 'payment_method_id' }});
+    SalesOrder.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
 
     // 1-M association
     SalesOrder.hasMany(SalesOrderItem, { foreignKey: { allowNull: false, name: 'sales_order_id' }});

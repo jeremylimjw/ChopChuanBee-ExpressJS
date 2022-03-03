@@ -7,9 +7,6 @@ const DeliveryOrder = sequelize.define('delivery_order', {
         primaryKey: true,
         autoIncrement: true,
     },
-    deliver_by: {
-        type: DataTypes.DATE,
-    },
     address: {
         type: DataTypes.STRING,
         allowNull: false
@@ -20,11 +17,14 @@ const DeliveryOrder = sequelize.define('delivery_order', {
     },
     longitude: {
         type: DataTypes.DECIMAL,
-        defaultValue: 0,
+        allowNull: false
     },
     latitude: {
         type: DataTypes.DECIMAL,
-        defaultValue: 0,
+        allowNull: false
+    },
+    deliver_by: {
+        type: DataTypes.DATE,
     },
     deliver_at: {
         type: DataTypes.DATE,

@@ -12,6 +12,11 @@ const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const { ChargedUnder, Customer } = require('../models/Customer');
 const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
 const { sequelize } = require('../db');
+const MovementType = require('../common/MovementTypeEnum');
+const PaymentTermType = require('../common/PaymentTermType');
+const AccountingTypeEnum = require('../common/AccountingTypeEnum');
+const axios = require('axios');
+const { DeliveryOrder } = require('../models/DeliveryOrder');
 
 
 router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
@@ -128,6 +133,112 @@ router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
 });
 
 
+router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { id } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['id'])
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const salesOrder = await SalesOrder.findByPk(id, { include: [{ model: SalesOrderItem, include: [Product] }] });
+
+    // Calculate payment(s) to add
+    const payment = {
+      sales_order_id: salesOrder.id, 
+      movement_type_id: MovementType.SALE.id,
+    }
+
+    let total = salesOrder.sales_order_items.reduce((prev, current) => prev + current.quantity * (current.unit_price || 0), 0) || 0;
+    total = total * (1+salesOrder.gst_rate/100) + (+salesOrder.offset);
+    total = Math.floor(total*100)/100; // Truncate trailing decimals 
+
+    if (salesOrder.payment_term_id === PaymentTermType.CASH.id) {
+      payment.amount = total;
+      payment.payment_method_id = salesOrder.payment_method_id;
+
+    } else if (salesOrder.payment_term_id === PaymentTermType.CREDIT.id) {
+      payment.amount = -total;
+      payment.accounting_type_id = AccountingTypeEnum.RECEIVABLE.id;
+
+    }
+    
+    // Calculate inventory movements to add
+    const inventoryMovements = salesOrder.sales_order_items.map(x => ({
+      product_id: x.product_id,
+      sales_order_item_id: x.id,
+      quantity: -x.quantity,
+      unit_price: x.unit_price*(1+salesOrder.gst_rate/100),
+      movement_type_id: MovementType.SALE.id,
+    }))
+    
+    // Validate Inventory Movements if have enough quantity
+    let reducedMovements = [];
+    try {
+      reducedMovements = await reduceInventoryMovements(inventoryMovements);
+    } catch(err) {
+      res.status(400).send(err);
+      return;
+    }
+    
+    // Add delivery order if needed
+    if (salesOrder.has_delivery) {
+      // Validate valid postal code location
+      let coords = {};
+      try {
+        coords = await getGeoCoords(salesOrder.delivery_postal_code)
+      } catch(err) {
+        res.status(400).send(err);
+        return;
+      }
+
+      const deliveryOrder = {
+        sales_order_id: salesOrder.id,
+        address: salesOrder.delivery_address,
+        postal_code: salesOrder.delivery_postal_code,
+        remarks: salesOrder.delivery_remarks,
+        ...coords,
+      }
+
+      await DeliveryOrder.create(deliveryOrder);
+    }
+
+
+    await InventoryMovement.bulkCreate(reducedMovements);
+    await Payment.create(payment);
+    salesOrder.sales_order_status_id = PurchaseOrderStatusType.ACCEPTED.id;
+    salesOrder.save();
+
+    // Record to admin logs
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.SCM.id,
+      text: `${user.name} updated completed sales order ID ${id}`
+    });
+    
+    const includes = [
+      { model: SalesOrderItem, include: [InventoryMovement, Product] }, 
+      { model: Payment, include: [PaymentMethod] },
+      Customer,
+      ChargedUnder
+    ];
+    const newSalesOrder = await SalesOrder.findByPk(id, { include: includes });
+    res.send(newSalesOrder); // return entire sales order
+
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
 router.post('/payment', requireAccess(ViewType.GENERAL), async function(req, res, next) {
   const { sales_order_id, amount, payment_method_id, accounting_type_id, movement_type_id } = req.body;
 
@@ -172,65 +283,16 @@ router.post('/inventory', requireAccess(ViewType.GENERAL), async function(req, r
     return;
   }
 
+  // Validate Inventory Movements if have enough quantity
+  let reducedMovements = [];
   try {
-    // Reduce duplicated product's quantity
-    const reducedMovements = [];
-    inventory_movements.forEach(movement => {
-      const index = reducedMovements.findIndex(x => x.product_id === movement.product_id);
-      if (index > -1) {
-        reducedMovements.quantity += +movement.quantity;
-      } else {
-        reducedMovements.push(movement)
-      }
-    });
+    reducedMovements = await reduceInventoryMovements(inventory_movements);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
 
-    for (let movement of reducedMovements) {
-      const stocks = await sequelize.query(
-        `
-        WITH o AS (SELECT COALESCE(-1*SUM(quantity),0) AS outflow FROM inventory_movements im WHERE quantity < 0 AND product_id = $1)
-        SELECT *, CASE WHEN (sum_over-(SELECT outflow FROM o)) > quantity THEN quantity ELSE (sum_over-(SELECT outflow FROM o)) END remaining
-          FROM  
-            (
-              SELECT 
-                created_at, product_Id, unit_cost, unit_price, quantity, movement_type_id, SUM(quantity) OVER(ORDER BY created_at) AS sum_over 
-              FROM inventory_movements im WHERE product_id = $1 AND quantity > 0
-            ) i  
-            WHERE i.sum_over-(SELECT outflow FROM o) >= 0 AND (sum_over-(SELECT outflow FROM o)) > 0;
-        `,
-        { 
-          bind: [movement.product_id],
-          type: sequelize.QueryTypes.SELECT 
-        }
-      );
-      
-      const stockBalance = stocks.reduce((prev, current) => prev += +current.remaining, 0);
-
-      if (stockBalance < Math.abs(movement.quantity)) {
-        const product = await Product.findByPk(movement.product_id);
-        res.status(400).send(`${product.name} does not have enough stock (left ${stockBalance}) for order quantity ${Math.abs(movement.quantity)}`);
-        return;
-      }
-
-      let target = Math.abs(movement.quantity); // quantity in request will be negative
-      let sum = 0;
-      let count = 0;
-      
-      for (let stock of stocks) {
-        let toAdd = target - count;
-        if (toAdd < stock.remaining) { // If got leftover
-          sum += toAdd * stock.unit_cost;
-          count += toAdd;
-        } else {
-          sum += stock.quantity * stock.unit_cost;
-          count += stock.quantity;
-        }
-        if (count >= target) break;
-      }
-
-      movement.unit_cost = sum/count;
-      
-    }
-
+  try {
     const newInventoryMovements = await InventoryMovement.bulkCreate(reducedMovements);
 
     // Record to admin logs
@@ -294,6 +356,90 @@ router.post('/inventory/refund', requireAccess(ViewType.GENERAL), async function
   }
 
 });
+
+
+async function reduceInventoryMovements(inventory_movements) {
+  // Reduce duplicated product's quantity
+  const reducedMovements = [];
+  inventory_movements.forEach(movement => {
+    const index = reducedMovements.findIndex(x => x.product_id === movement.product_id);
+    if (index > -1) {
+      reducedMovements.quantity += +movement.quantity;
+    } else {
+      reducedMovements.push(movement)
+    }
+  });
+
+  for (let movement of reducedMovements) {
+    const stocks = await sequelize.query(
+      `
+      WITH o AS (SELECT COALESCE(-1*SUM(quantity),0) AS outflow FROM inventory_movements im WHERE quantity < 0 AND product_id = $1)
+      SELECT *, CASE WHEN (sum_over-(SELECT outflow FROM o)) > quantity THEN quantity ELSE (sum_over-(SELECT outflow FROM o)) END remaining
+        FROM  
+          (
+            SELECT 
+              created_at, product_Id, unit_cost, unit_price, quantity, movement_type_id, SUM(quantity) OVER(ORDER BY created_at) AS sum_over 
+            FROM inventory_movements im WHERE product_id = $1 AND quantity > 0
+          ) i  
+          WHERE i.sum_over-(SELECT outflow FROM o) >= 0 AND (sum_over-(SELECT outflow FROM o)) > 0;
+      `,
+      { 
+        bind: [movement.product_id],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+    
+    const stockBalance = stocks.reduce((prev, current) => prev += +current.remaining, 0);
+
+    if (stockBalance < Math.abs(movement.quantity)) {
+      const product = await Product.findByPk(movement.product_id);
+      throw `${product.name} does not have enough stock (left ${stockBalance}) for order quantity ${Math.abs(movement.quantity)}`;
+    }
+
+    let target = Math.abs(movement.quantity); // quantity in request will be negative
+    let sum = 0;
+    let count = 0;
+    
+    for (let stock of stocks) {
+      let toAdd = target - count;
+      if (toAdd < stock.remaining) { // If got leftover
+        sum += toAdd * stock.unit_cost;
+        count += toAdd;
+      } else {
+        sum += stock.quantity * stock.unit_cost;
+        count += stock.quantity;
+      }
+      if (count >= target) break;
+    }
+
+    movement.unit_cost = sum/count;
+  }
+    
+  return reducedMovements;
+}
+
+async function getGeoCoords(postal_code) {
+  // Retrieve geocoordinates of the delivery destination
+  const { data: geocode } = await axios.get(`https://developers.onemap.sg/commonapi/search`, {
+    params: {
+      searchVal: postal_code,     // Keywords entered by user that is used to filter out the results.
+      returnGeom: 'Y',            // Checks if user wants to return the geometry.
+      getAddrDetails: 'Y',        // Checks if user wants to return address details for a point.
+      pageNum: 1,                 // Specifies the page to retrieve your search results from.
+    }
+  })
+  
+  if (geocode.results.length === 0) {
+    throw `Could not find any location with the postal code ${postal_code}`;
+  }
+
+  const coords = {
+    longitude: geocode.results[0].LONGITUDE,
+    latitude: geocode.results[0].LATITUDE,
+  }
+
+  return coords;
+}
 
 
 module.exports = router;

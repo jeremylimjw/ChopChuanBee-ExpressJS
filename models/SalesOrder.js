@@ -18,6 +18,10 @@ const SalesOrder = sequelize.define('sales_order', {
     has_gst: DataTypes.INTEGER,
     show_gst: DataTypes.BOOLEAN,
     remarks: DataTypes.STRING,
+    has_delivery: DataTypes.BOOLEAN,
+    delivery_address: DataTypes.STRING,
+    delivery_postal_code: DataTypes.STRING,
+    delivery_remarks: DataTypes.STRING,
     closed_on: DataTypes.DATE,
 }, {
     updatedAt: 'updated_at',

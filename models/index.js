@@ -195,8 +195,8 @@ async function syncAssociations() {
 
     // 1-M association
     //Rename employee id to driver id to be more clear.
-    Employee.hasMany(DeliveryOrder, { foreignKey: { allowNull: false, name: 'driver_id' }});
-    DeliveryOrder.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
+    Employee.hasMany(DeliveryOrder, { foreignKey: { name: 'driver_id' }});
+    DeliveryOrder.belongsTo(Employee, { foreignKey: { name: 'driver_id' }});
 
     // 1-1 association
     SalesOrder.hasOne(DeliveryOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});

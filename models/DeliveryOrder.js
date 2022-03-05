@@ -3,9 +3,9 @@ const { sequelize } = require('../db');
 
 const DeliveryOrder = sequelize.define('delivery_order', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUIDV4
     },
     address: {
         type: DataTypes.STRING,

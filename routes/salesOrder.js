@@ -17,6 +17,7 @@ const PaymentTermType = require('../common/PaymentTermType');
 const AccountingTypeEnum = require('../common/AccountingTypeEnum');
 const axios = require('axios');
 const { DeliveryOrder } = require('../models/DeliveryOrder');
+const PaymentMethodType = require('../common/PaymentMethodType');
 
 
 router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
@@ -217,8 +218,87 @@ router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res
     const user = res.locals.user;
     await Log.create({ 
       employee_id: user.id, 
-      view_id: ViewType.SCM.id,
+      view_id: ViewType.CRM.id,
       text: `${user.name} updated completed sales order ID ${id}`
+    });
+    
+    const includes = [
+      { model: SalesOrderItem, include: [InventoryMovement, Product] }, 
+      { model: Payment, include: [PaymentMethod] },
+      Customer,
+      ChargedUnder
+    ];
+    const newSalesOrder = await SalesOrder.findByPk(id, { include: includes });
+    res.send(newSalesOrder); // return entire sales order
+
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+// cancel sales order
+router.post('/cancel', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { id } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['id'])
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const salesOrder = await SalesOrder.findByPk(id, { 
+      include: [
+        { model: SalesOrderItem, include: [InventoryMovement, Product] }, 
+        { model: Payment, include: [PaymentMethod] },
+      ] 
+    });
+
+    // Calculate payment(s) to add
+    const payment = {
+      sales_order_id: salesOrder.id,
+      movement_type_id: MovementType.REFUND.id,
+      amount: -(salesOrder.payments.filter(x => x.payment_method_id != null).reduce((prev, current) => prev += +current.amount, 0)), // flip to negative sign since its refund
+      accounting_type_id: salesOrder.payment_term_id === PaymentTermType.CREDIT.id ? 1 : null,
+      payment_method_id: PaymentMethodType.CASH.id,
+    }
+
+    // Calculate inventory movements to add
+    const inventoryMovements = salesOrder.sales_order_items.map(x => {
+      let unitCost = 0;
+      for (var i = x.inventory_movements.length - 1; i >= 0; i--) { // iterate backwards
+        if (x.inventory_movements[i].quantity < 0) {
+          unitCost = x.inventory_movements[i].unit_cost; // if first inventory movement from the bottom of the array has negative quantity, it is the latest
+          break;
+        }
+      }
+
+      return {
+        product_id: x.product_id,
+        sales_order_item_id: x.id,
+        quantity: -(x.inventory_movements.reduce((prev, current) => prev + current.quantity, 0)), // flip negative sign to positive
+        unit_cost: unitCost,
+        movement_type_id: MovementType.REFUND.id,
+      }
+    })
+
+    await InventoryMovement.bulkCreate(inventoryMovements);
+    await Payment.create(payment);
+    salesOrder.sales_order_status_id = PurchaseOrderStatusType.CANCELLED.id;
+    salesOrder.save();
+
+    // Record to admin logs
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.CRM.id,
+      text: `${user.name} cancelled sales order ID ${id}`
     });
     
     const includes = [

@@ -16,17 +16,24 @@ module.exports.insertDemoData = async () => {
     const suppliers = await Supplier.bulkCreate(suppliersData);
 
     let customerMenus = [];
-    for (let customer of customers) {
-        const newItems = products.filter(() => Math.random() < 0.1).map(product => ({ customer_id: customer.id, product_id: product.id, product_alias: product.name.split(' ')[1] }))
-        customerMenus = customerMenus.concat(newItems)
-    }
-    await CustomerMenu.bulkCreate(customerMenus);
-
     let supplierMenus = [];
-    for (let supplier of suppliers) {
-        const newItems = products.filter(() => Math.random() < 0.1).map(product => ({ supplier_id: supplier.id, product_id: product.id }))
-        supplierMenus = supplierMenus.concat(newItems)
+
+    for (let i = 0; i < products.length; i++) {
+
+        for (let customer of customers) {
+            if (i === 0 || Math.random() < 0.1) {
+                customerMenus.push({ customer_id: customer.id, product_id: products[i].id, product_alias: products[i].name.split(' ')[1] });
+            }
+        }
+        
+        for (let supplier of suppliers) {
+            if (i === 0 || Math.random() < 0.1) {
+                supplierMenus.push({ supplier_id: supplier.id, product_id: products[i].id });
+            }
+        }
     }
+
+    await CustomerMenu.bulkCreate(customerMenus);
     await SupplierMenu.bulkCreate(supplierMenus);
 
     await Employee.bulkCreate(employeesData.map(x => ({...x, leave_accounts: STANDARD_LEAVE_ACCOUNTS })), { include: [AccessRight, LeaveAccount] })

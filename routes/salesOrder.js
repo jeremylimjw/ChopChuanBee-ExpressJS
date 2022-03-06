@@ -23,7 +23,11 @@ router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
       Customer,
       ChargedUnder
     ];
-    predicate.order = [[Payment, 'created_at', 'ASC'], [SalesOrderItem, InventoryMovement, 'created_at', 'ASC']];
+    predicate.order = [
+      ['created_at', 'DESC'],
+      [Payment, 'created_at', 'ASC'], 
+      [SalesOrderItem, InventoryMovement, 'created_at', 'ASC']
+    ];
     const results = await SalesOrder.findAll(predicate);
 
     res.send(results);
@@ -121,13 +125,13 @@ router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res
     const payment = buildNewPayment(salesOrder.id, total, salesOrder.payment_term_id, salesOrder.payment_method_id);
 
     // Calculate inventory movements to add
-    let reducedOrderItems;
     let inventoryMovements;
     let deliveryOrder;
     try {
-      // Validate order items and reduce duplicate products
-      reducedOrderItems = validateOrderItems(salesOrder.toJSON().sales_order_items);
-      inventoryMovements = await validateAndBuildNewInventories(salesOrder, reducedOrderItems);
+      // Validate order items does not exceed stock count
+      await validateOrderItems(salesOrder.toJSON().sales_order_items);
+      // Build the inventory movements to create
+      inventoryMovements = await validateAndBuildNewInventories(salesOrder, salesOrder.toJSON().sales_order_items);
       
       if (salesOrder.has_delivery) {
         deliveryOrder = await buildDeliveryOrder(salesOrder);
@@ -138,8 +142,9 @@ router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res
       return;
     }
 
-    // Update reduced order items
-    await updateSalesOrder({...salesOrder.toJSON(), sales_order_items: reducedOrderItems, sales_order_status_id: PurchaseOrderStatusType.ACCEPTED.id });
+    // Update sales order status
+    salesOrder.sales_order_status_id = PurchaseOrderStatusType.ACCEPTED.id;
+    await salesOrder.save();
     // Create payment
     await Payment.create(payment);
     // Create inventory Movements
@@ -213,7 +218,7 @@ router.post('/cancel', requireAccess(ViewType.GENERAL), async function(req, res,
     await InventoryMovement.bulkCreate(inventoryMovements);
     // Update sales order status
     salesOrder.sales_order_status_id = PurchaseOrderStatusType.CANCELLED.id;
-    salesOrder.save();
+    await salesOrder.save();
 
     // Record to admin logs
     const user = res.locals.user;

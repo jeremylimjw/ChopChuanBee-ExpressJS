@@ -66,28 +66,6 @@ async function updateSalesOrder(newSalesOrder) {
 }
 
 
-// Validate sales order items and reduce duplicates
-function validateOrderItems(orderItems) {
-    // Reduce duplicated products
-    const reduced = [];
-    for (let item of orderItems) {
-        // Validation
-        if (!item.unit_price) throw 'Each order item must have a unit price.';
-        if (item.quantity <= 0) throw 'Each order item must have a valid quantity.';
-
-        const foundIndex = reduced.findIndex(x => x.product_id === item.product_id);
-        if (foundIndex >= 0) {
-            reduced[foundIndex].sum += item.quantity*item.unit_price;
-            reduced[foundIndex].count += item.quantity;
-        } else {
-            reduced.push({...item, sum: item.quantity*item.unit_price, count: item.quantity });
-        }
-    }
-
-    return reduced.map(x => ({...x, quantity: x.count, unit_price: x.sum/x.count }));
-}
-
-
 function buildNewPayment(salesOrderId, amount, paymentTermId, paymentMethodId) {
     const payment = {
         sales_order_id: salesOrderId, 
@@ -122,9 +100,58 @@ function buildRefundPayment(salesOrderId, amount, paymentTermId, paymentMethodId
 }
 
 
-async function validateAndBuildNewInventories(salesOrder, orderItems) {
-    // Ensure validateOrderItems() is executed before this to make sure no duplicated product_ids
+// Validate sales order items and reduce duplicates
+async function validateOrderItems(orderItems) {
+    // Reduce duplicated products
+    const temp = [];
     for (let item of orderItems) {
+        // Validation
+        if (!item.unit_price) throw 'Each order item must have a unit price.';
+        if (item.quantity <= 0) throw 'Each order item must have a valid quantity.';
+
+        const foundIndex = temp.findIndex(x => x.product_id === item.product_id);
+        if (foundIndex >= 0) {
+            temp[foundIndex].sum += item.quantity*item.unit_price;
+            temp[foundIndex].count += item.quantity;
+        } else {
+            temp.push({...item, sum: item.quantity*item.unit_price, count: item.quantity });
+        }
+    }
+
+    const reduced = temp.map(x => ({...x, quantity: x.count, unit_price: x.sum/x.count }));
+
+    for (let item of reduced) {
+      const results = await sequelize.query(
+        `
+          SELECT COALESCE(im.total_quantity, 0) total_quantity
+          FROM products p
+            LEFT OUTER JOIN 
+              (
+                SELECT product_id, SUM(quantity) total_quantity FROM inventory_movements im
+                  GROUP BY product_id
+              ) im ON p.id = im.product_id
+              WHERE p.id = $1
+            ORDER BY p.created_at DESC
+        `,
+        { 
+          bind: [item.product_id],
+          type: sequelize.QueryTypes.SELECT 
+        }
+      );
+
+      if (results.length && results[0].total_quantity && results[0].total_quantity < item.quantity) {
+        const product = await Product.findByPk(item.product_id);
+        throw `${product.name} does not have enough stock (left ${results[0].total_quantity}) for order quantity ${item.quantity}`;
+      }
+    }
+
+    return reduced;
+}
+
+
+async function validateAndBuildNewInventories(salesOrder, orderItems) {
+    for (let item of orderItems) {
+
       const stocks = await sequelize.query(
         `
         WITH o AS (SELECT COALESCE(-1*SUM(quantity),0) AS outflow FROM inventory_movements im WHERE quantity < 0 AND product_id = $1)
@@ -142,13 +169,6 @@ async function validateAndBuildNewInventories(salesOrder, orderItems) {
           type: sequelize.QueryTypes.SELECT 
         }
       );
-      
-      const stockBalance = stocks.reduce((prev, current) => prev += +current.remaining, 0);
-  
-      if (stockBalance < item.quantity) {
-        const product = await Product.findByPk(item.product_id);
-        throw `${product.name} does not have enough stock (left ${stockBalance}) for order quantity ${item.quantity}`;
-      }
   
       let target = item.quantity;
       let sum = 0;

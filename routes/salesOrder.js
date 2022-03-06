@@ -1,7 +1,6 @@
 var express = require('express');
 const { requireAccess } = require('../auth');
 var router = express.Router();
-const { POStatus } = require('../models/PurchaseOrder');
 const Log = require('../models/Log');
 const ViewType = require('../common/ViewType');
 const { Product } = require('../models/Product');
@@ -11,13 +10,7 @@ const { parseRequest, assertNotNull } = require('../common/helpers');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const { ChargedUnder, Customer } = require('../models/Customer');
 const { SalesOrder, SalesOrderItem, updateSalesOrder, buildNewPayment, buildRefundPayment, validateOrderItems, validateAndBuildNewInventories, buildDeliveryOrder, buildRefundInventories } = require('../models/SalesOrder');
-const { sequelize } = require('../db');
-const MovementType = require('../common/MovementTypeEnum');
-const PaymentTermType = require('../common/PaymentTermType');
-const AccountingTypeEnum = require('../common/AccountingTypeEnum');
-const axios = require('axios');
 const { DeliveryOrder } = require('../models/DeliveryOrder');
-const PaymentMethodType = require('../common/PaymentMethodType');
 
 
 router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
@@ -30,6 +23,7 @@ router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
       Customer,
       ChargedUnder
     ];
+    predicate.order = [[Payment, 'created_at', 'ASC'], [SalesOrderItem, InventoryMovement, 'created_at', 'ASC']];
     const results = await SalesOrder.findAll(predicate);
 
     res.send(results);
@@ -169,7 +163,8 @@ router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res
       Customer,
       ChargedUnder
     ];
-    const newSalesOrder = await SalesOrder.findByPk(id, { include: includes });
+    const order = [[Payment, 'created_at', 'ASC'], [SalesOrderItem, InventoryMovement, 'created_at', 'ASC']];
+    const newSalesOrder = await SalesOrder.findByPk(id, { include: includes, order: order });
     res.send(newSalesOrder); // return entire sales order
 
   } catch(err) {
@@ -234,7 +229,8 @@ router.post('/cancel', requireAccess(ViewType.GENERAL), async function(req, res,
       Customer,
       ChargedUnder
     ];
-    const newSalesOrder = await SalesOrder.findByPk(id, { include: includes });
+    const order = [[Payment, 'created_at', 'ASC'], [SalesOrderItem, InventoryMovement, 'created_at', 'ASC']];
+    const newSalesOrder = await SalesOrder.findByPk(id, { include: includes, order: order });
     res.send(newSalesOrder); // return entire sales order
 
   } catch(err) {

@@ -16,6 +16,5 @@ router.use("/log", require("./log"));
 router.use("/external", require("./external"));
 router.use("/chargedUnder", require("./chargedUnder"));
 router.use("/inventoryMovements", require("./inventoryMovements"));
-router.use("/deliveryOrder", require("./deliveryOrder"));
 
 module.exports = router;

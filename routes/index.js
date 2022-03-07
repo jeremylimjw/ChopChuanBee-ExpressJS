@@ -15,5 +15,5 @@ router.use("/log", require("./log"));
 router.use("/accounting", require("./accounting"));
 router.use("/external", require("./external"));
 router.use("/chargedUnder", require("./chargedUnder"));
-
+router.use("/analytics", require("./analytics"));
 module.exports = router;

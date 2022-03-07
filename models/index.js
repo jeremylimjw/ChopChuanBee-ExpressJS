@@ -177,8 +177,8 @@ async function syncAssociations() {
     Employee.hasMany(DeliveryOrder, { foreignKey: { allowNull: false, name: 'driver_id' }});
     DeliveryOrder.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
 
-    DeliveryOrder.hasOne(SalesOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
-    SalesOrder.belongsTo(DeliveryOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
+    //DeliveryOrder.hasOne(SalesOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
+    //SalesOrder.belongsTo(DeliveryOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
   
     const SOFP = require('../models/SOFP');
     const IncomeStatement = require('../models/IncomeStatement');

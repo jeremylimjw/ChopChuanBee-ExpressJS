@@ -72,6 +72,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       ]);
 
       const { PurchaseOrder, PaymentTerm, POStatus, PurchaseOrderItem } = require('../models/PurchaseOrder');
+      const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
 
       await PaymentTerm.bulkCreate(Object.keys(PaymentTermType).map(key => PaymentTermType[key]));
       await POStatus.bulkCreate(Object.keys(PurchaseOrderStatusType).map(key => PurchaseOrderStatusType[key]));
@@ -207,6 +208,28 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       { company_name : 'customer20', p1_name: 'customer20', p1_phone_number: 'NA', address: 'NA', postal_code: 'NA', 'charged_under_id': cbfs.id, gst: false, gst_show: false, created_at: '2021-01-01' }
     ]);
       
+
+    const customer1 = await Customer.findOne({ where: { company_name: "customer1" } });
+    const customer2 = await Customer.findOne({ where: { company_name: "customer2" } });
+    const customer3 = await Customer.findOne({ where: { company_name: "customer3" } });
+    const customer4 = await Customer.findOne({ where: { company_name: "customer4" } });
+    const customer5 = await Customer.findOne({ where: { company_name: "customer5" } });
+    const customer6 = await Customer.findOne({ where: { company_name: "customer6" } });
+    const customer7 = await Customer.findOne({ where: { company_name: "customer7" } });
+    const customer8 = await Customer.findOne({ where: { company_name: "customer8" } });
+    const customer9 = await Customer.findOne({ where: { company_name: "customer9" } });
+    const customer10 = await Customer.findOne({ where: { company_name: "customer10" } });
+    const customer11 = await Customer.findOne({ where: { company_name: "customer11" } });
+    const customer12 = await Customer.findOne({ where: { company_name: "customer12" } });
+    const customer13 = await Customer.findOne({ where: { company_name: "customer13" } });
+    const customer14 = await Customer.findOne({ where: { company_name: "customer14" } });
+    const customer15 = await Customer.findOne({ where: { company_name: "customer15" } });
+    const customer16 = await Customer.findOne({ where: { company_name: "customer16" } });
+    const customer17 = await Customer.findOne({ where: { company_name: "customer17" } });
+    const customer18 = await Customer.findOne({ where: { company_name: "customer18" } });
+    const customer19 = await Customer.findOne({ where: { company_name: "customer19" } });
+    const customer20 = await Customer.findOne({ where: { company_name: "customer20" } });
+
       //Analytics - Products
       await Product.bulkCreate([
         { name: "product1", min_inventory_level: 1000, unit: "litres", created_at: '2021-01-01' },
@@ -235,46 +258,46 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       // Analytics - Purchase Order
       await PurchaseOrder.bulkCreate([
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier1.id }, // credit payment term
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier1.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier2.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier2.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier3.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier3.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier4.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier4.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier5.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier5.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier6.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier6.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier7.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier7.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier8.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier8.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier9.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier9.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier10.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier10.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier11.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier11.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier12.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier12.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier13.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier13.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier14.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier14.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier15.id },
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier15.id },
-        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier16.id }, //cash payment term for supplier 16 to 20, PO no 16 to 20  
-        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier16.id },
-        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier17.id },
-        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier17.id },
-        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier18.id },
-        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier18.id },
-        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier19.id },
-        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier19.id },
-        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id },
-        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id }
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier1.id, created_at: '2021-01-01' , gst_rate: 7, offset: 2 }, // credit payment term
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier1.id, created_at: '2021-01-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier2.id, created_at: '2021-02-01', gst_rate: 0, offset: 2  },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier2.id, created_at: '2021-02-01', gst_rate: 7, offset: 0  },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier3.id, created_at: '2021-03-01', gst_rate: 7, offset: 2  },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier3.id, created_at: '2021-03-01', gst_rate: 0, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier4.id, created_at: '2021-04-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier4.id, created_at: '2021-04-01', gst_rate: 7, offset: 0  },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier5.id, created_at: '2021-05-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier5.id, created_at: '2021-05-01', gst_rate: 0, offset: 2  },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier6.id, created_at: '2021-06-01', gst_rate: 7, offset: 2  },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier6.id, created_at: '2021-06-01', gst_rate: 0, offset: 0  },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier7.id, created_at: '2021-07-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier7.id, created_at: '2021-07-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier8.id, created_at: '2021-08-01' , gst_rate: 11, offset: 0 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier8.id, created_at: '2021-08-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier9.id, created_at: '2021-09-01' , gst_rate: 7, offset: 0 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier9.id, created_at: '2021-09-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier10.id, created_at: '2021-10-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier10.id, created_at: '2021-10-01' , gst_rate: 7, offset: 0 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier11.id, created_at: '2021-11-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier11.id, created_at: '2021-11-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier12.id, created_at: '2021-12-01', gst_rate: 7, offset: 2  },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier12.id, created_at: '2021-12-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier13.id, created_at: '2021-01-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier13.id, created_at: '2021-01-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier14.id, created_at: '2021-02-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier14.id, created_at: '2021-02-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier15.id, created_at: '2021-03-01', gst_rate: 7, offset: 2  },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier15.id, created_at: '2021-03-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier16.id, created_at: '2021-04-01' , gst_rate: 7, offset: 2 }, //cash payment term for supplier 16 to 20, PO no 16 to 20  
+        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier16.id, created_at: '2021-04-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier17.id, created_at: '2021-05-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier17.id, created_at: '2021-05-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier18.id, created_at: '2021-06-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier18.id, created_at: '2021-06-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier19.id, created_at: '2021-07-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier19.id, created_at: '2021-07-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id, created_at: '2021-08-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id, created_at: '2021-08-01' , gst_rate: 11, offset: 0 }
       ]); 
 
       await PurchaseOrderItem.bulkCreate([
@@ -517,6 +540,136 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { unit_cost: 2.1,  quantity: -60 , purchase_order_item_id: po16a.id, movement_type_id: 3 , created_at: '2021-04-03' },
         { unit_cost: 3.5,  quantity: -60 , purchase_order_item_id: po16b.id, movement_type_id: 3  , created_at: '2021-04-03'},
       ]); 
+
+
+      // Analytics - Sales Order
+      await SalesOrder.bulkCreate([
+        { payment_term_id: 1, customer_id: customer1.id, created_at: '2021-01-10', gst_rate : 7, offset: 1 }, //cash
+        { payment_term_id: 1, customer_id: customer1.id, created_at: '2021-01-10', gst_rate : 7 , offset: 1 },
+        { payment_term_id: 1, customer_id: customer2.id, created_at: '2021-02-10', gst_rate : 7 , offset: 1 }, 
+        { payment_term_id: 1, customer_id: customer2.id, created_at: '2021-02-10', gst_rate : 9, offset: 1  },
+        { payment_term_id: 1, customer_id: customer3.id, created_at: '2021-03-10', gst_rate: 9, offset: 1  }, 
+        { payment_term_id: 1, customer_id: customer3.id, created_at: '2021-03-10' , gst_rate : 9, offset: 1 },
+        { payment_term_id: 1, customer_id: customer4.id, created_at:'2021-04-10' , gst_rate : 9, offset: 1 }, 
+        { payment_term_id: 1, customer_id: customer4.id, created_at: '2021-04-10' , gst_rate : 9, offset: 1 },
+        { payment_term_id: 1, customer_id: customer5.id, created_at: '2021-05-10' , gst_rate : 9, offset: 1 }, 
+        { payment_term_id: 1, customer_id: customer5.id, created_at:'2021-05-10', gst_rate : 7, offset: 1  },
+        { payment_term_id: 1, customer_id: customer6.id, created_at: '2021-06-10' , gst_rate : 7 , offset: 1}, 
+        { payment_term_id: 1, customer_id: customer6.id, created_at: '2021-06-10' , gst_rate :7 , offset: 1},
+        { payment_term_id: 2, customer_id: customer7.id, created_at: '2021-07-10' , gst_rate : 7 , offset: 1}, // credit
+        { payment_term_id: 2, customer_id: customer7.id, created_at:'2021-07-10' , gst_rate : 7 , offset: 1},
+        { payment_term_id: 2, customer_id: customer8.id, created_at: '2021-08-10' , gst_rate : 7 , offset: 1}, 
+        { payment_term_id: 2, customer_id: customer8.id, created_at: '2021-08-10' , gst_rate :0 , offset: 1},
+        { payment_term_id: 2, customer_id: customer9.id, created_at: '2021-09-10' , gst_rate: 11, offset: 1 }, 
+        { payment_term_id: 2, customer_id: customer9.id, created_at: '2021-09-10'  , gst_rate : 7, offset: 1},
+        { payment_term_id: 2, customer_id: customer10.id, created_at: '2021-10-10' , gst_rate : 7 , offset: 1}, 
+        { payment_term_id: 2, customer_id: customer10.id, created_at: '2021-10-10' , gst_rate : 7 , offset: 1}, 
+        { payment_term_id: 2, customer_id: customer11.id, created_at: '2021-11-10' , gst_rate : 7 , offset: 1},
+        { payment_term_id: 2, customer_id: customer11.id, created_at: '2021-11-10' , gst_rate :0 , offset: 1}, 
+        { payment_term_id: 2, customer_id: customer12.id, created_at: '2021-12-10' , gst_rate : 7 , offset: 1},
+        { payment_term_id: 2, customer_id: customer12.id, created_at: '2021-12-10' , gst_rate : 7, offset: 1 }, //new pattern
+        { payment_term_id: 2, customer_id: customer13.id, created_at: '2021-02-10' , gst_rate: 7, offset: 1 },
+        { payment_term_id: 2, customer_id: customer13.id, created_at: '2021-02-10' , gst_rate : 7, offset: 1 }, 
+        { payment_term_id: 2, customer_id: customer14.id, created_at: '2021-04-10', gst_rate : 0, offset: 1 },
+        { payment_term_id: 2, customer_id: customer14.id, created_at:'2021-04-10' , gst_rate :7, offset: 1 }, 
+        { payment_term_id: 2, customer_id: customer15.id, created_at: '2021-06-10', gst_rate : 7 , offset: 1 },
+        { payment_term_id: 2, customer_id: customer15.id, created_at: '2021-06-10', gst_rate : 7, offset: 1  },
+        { payment_term_id: 2, customer_id: customer16.id, created_at: '2021-08-10', gst_rate : 7, offset: 1}, 
+        { payment_term_id: 2, customer_id: customer16.id, created_at:'2021-08-10' , gst_rate : 0 , offset: 1},
+        { payment_term_id: 2, customer_id: customer17.id, created_at: '2021-10-10', gst_rate: 7  , offset: 1}, 
+        { payment_term_id: 2, customer_id: customer17.id, created_at:'2021-10-10', gst_rate : 7 , offset: 1 },
+        { payment_term_id: 2, customer_id: customer18.id, created_at:'2021-12-10' , gst_rate :9, offset: 1 }, 
+        { payment_term_id: 2, customer_id: customer18.id, created_at: '2021-12-10' , gst_rate :9 , offset: 1},
+        { payment_term_id: 2, customer_id: customer19.id, created_at:'2021-12-10' , gst_rate : 9 , offset: 1}, 
+        { payment_term_id: 2, customer_id: customer19.id, created_at: '2021-12-10' , gst_rate : 9, offset: 1},
+        { payment_term_id: 2, customer_id: customer20.id, created_at: '2021-12-10'  , gst_rate : 9, offset: 1}, 
+        { payment_term_id: 2, customer_id: customer20.id, created_at: '2021-12-10' , gst_rate : 9, offset: 1 }
+      ]); 
+
+      await SalesOrderItem.bulkCreate([
+        { unit_price: 2.2,  quantity: 5 , sales_order_id: 1, product_id: product1.id, created_at: '2021-01-10' }, //quantity = product id * 10, unit_cost = product id
+        { unit_price: 3.2,  quantity: 5 , sales_order_id: 1, product_id: product2.id, created_at: '2021-01-10' }, //purchase months = purchase_order_id 
+        { unit_price: 5.1,  quantity: 2 , sales_order_id: 2, product_id: product3.id, created_at: '2021-02-10' },
+        { unit_price: 6.5,  quantity: 5 , sales_order_id: 2, product_id: product4.id, created_at: '2021-02-10' }, 
+        { unit_price: 6.2,  quantity: 15 , sales_order_id: 3, product_id: product5.id, created_at:'2021-03-10' }, 
+        { unit_price: 7.6,  quantity: 23 , sales_order_id: 3, product_id: product6.id, created_at:'2021-03-10' },
+        { unit_price: 9.2,  quantity: 34 , sales_order_id: 4, product_id: product7.id, created_at:'2021-04-10' },
+        { unit_price: 9.5,  quantity: 32 , sales_order_id: 4, product_id: product8.id, created_at: '2021-04-10' },
+        { unit_price: 10.2,  quantity: 45 , sales_order_id: 5, product_id: product9.id, created_at: '2021-05-10'},
+        { unit_price: 1.9,  quantity: 24 , sales_order_id: 5, product_id: product1.id, created_at: '2021-05-10' },
+        { unit_price: 3.5,  quantity: 24 , sales_order_id: 6, product_id: product2.id, created_at:'2021-06-10'  },
+        { unit_price: 5.1,  quantity: 34 , sales_order_id: 6, product_id: product3.id, created_at:'2021-06-10'  },
+        { unit_price: 9.2,  quantity: 65 , sales_order_id: 7, product_id: product4.id, created_at: '2021-07-10' },
+        { unit_price: 12.2,  quantity: 42 , sales_order_id: 7, product_id: product5.id, created_at: '2021-07-10'},
+        { unit_price: 8.3,  quantity: 40 , sales_order_id: 8, product_id: product6.id, created_at: '2021-08-10' },
+        { unit_price: 9.2,  quantity: 40 , sales_order_id: 8, product_id: product7.id, created_at: '2021-08-10' },
+        { unit_price: 12.5,  quantity: 40 , sales_order_id: 9, product_id: product8.id, created_at: '2021-09-10' },
+        { unit_price: 13.5,  quantity: 40 , sales_order_id: 9, product_id: product9.id, created_at:'2021-09-10' },
+        { unit_price: 12.2,  quantity: 50 , sales_order_id: 10, product_id: product10.id, created_at:'2021-10-10' },
+        { unit_price: 2.2,  quantity: 50 , sales_order_id: 10, product_id: product1.id, created_at: '2021-10-10'},
+        { unit_price: 4.5,  quantity: 50 , sales_order_id: 11, product_id: product2.id, created_at:'2021-11-10' },
+        { unit_price: 5.5,  quantity: 50 , sales_order_id: 11, product_id: product3.id, created_at:'2021-11-10' },
+        { unit_price: 6.1,  quantity: 72 , sales_order_id: 12, product_id: product4.id, created_at: '2021-12-10' },
+        { unit_price: 7.8,  quantity: 71 , sales_order_id: 12, product_id: product5.id, created_at:'2021-12-10' },
+        { unit_price: 7.2,  quantity: 35 , sales_order_id: 13, product_id: product6.id, created_at:'2021-02-10' },
+        { unit_price: 8.6,  quantity: 85 , sales_order_id: 13, product_id: product7.id, created_at:'2021-02-10' },
+        { unit_price: 9.5,  quantity: 70 , sales_order_id: 14, product_id: product8.id, created_at:'2021-04-10'},
+        { unit_price: 10.2,  quantity: 90 , sales_order_id: 14, product_id: product9.id, created_at: '2021-04-10'},
+        { unit_price: 11.5,  quantity: 80 , sales_order_id: 15, product_id: product10.id, created_at:'2021-06-10'},
+        { unit_price: 12.1,  quantity: 80 , sales_order_id: 15, product_id: product1.id, created_at: '2021-06-10'},
+        { unit_price: 5.1,  quantity: 90 , sales_order_id: 16, product_id: product2.id, created_at: '2021-08-10' },
+        { unit_price: 5.5,  quantity: 90 , sales_order_id: 16, product_id: product3.id, created_at: '2021-08-10' },
+        { unit_price: 6.5,  quantity: 120 , sales_order_id: 17, product_id: product4.id, created_at: '2021-10-10' },
+        { unit_price: 7.2,  quantity: 5 , sales_order_id: 17, product_id: product5.id, created_at: '2021-10-10' },
+        { unit_price: 8.2,  quantity: 123 , sales_order_id: 18, product_id: product6.id, created_at:'2021-12-10' },
+        { unit_price: 9.2,  quantity: 123 , sales_order_id: 18, product_id: product7.id, created_at: '2021-12-10'},
+        { unit_price: 10.5,  quantity: 90 , sales_order_id: 19, product_id: product8.id, created_at:'2021-12-10' },
+        { unit_price: 11.2,  quantity: 90 , sales_order_id: 19, product_id: product9.id, created_at:'2021-12-10' },
+        { unit_price: 12.2,  quantity: 100 , sales_order_id: 20, product_id: product10.id, created_at:'2021-12-10'},
+        { unit_price: 13.5,  quantity: 100 , sales_order_id: 20, product_id: product1.id, created_at:'2021-12-10' }
+      ]); 
+
+      const so1a = await SalesOrderItem.findOne({ where: {    unit_price: 2.2,  quantity: 5 , sales_order_id: 1, product_id: product1.id } });
+      const so1b = await SalesOrderItem.findOne({ where: {    unit_price: 3.2,  quantity: 5 , sales_order_id: 1, product_id: product2.id  } });
+      const so2a = await SalesOrderItem.findOne({ where: {    unit_price: 5.1,  quantity: 2 , sales_order_id: 2, product_id: product3.id  } });
+      const so2b = await SalesOrderItem.findOne({ where: {     unit_price: 6.5,  quantity: 5 , sales_order_id: 2, product_id: product4.id } });
+      const so3a = await SalesOrderItem.findOne({ where: {   unit_price: 6.2,  quantity: 15 , sales_order_id: 3, product_id: product5.id  } });
+      const so3b = await SalesOrderItem.findOne({ where: {    unit_price: 7.6,  quantity: 23 , sales_order_id: 3, product_id: product6.id  } });
+      const so4a = await SalesOrderItem.findOne({ where: {  unit_price: 9.2,  quantity: 34 , sales_order_id: 4, product_id: product7.id   } });
+      const so4b = await SalesOrderItem.findOne({ where: {    unit_price: 9.5,  quantity: 32 , sales_order_id: 4, product_id: product8.id   } });
+      const so5a = await SalesOrderItem.findOne({ where: {   unit_price: 10.2,  quantity: 45 , sales_order_id: 5, product_id: product9.id  } });
+      const so5b = await SalesOrderItem.findOne({ where: {  unit_price: 1.9,  quantity: 24 , sales_order_id: 5, product_id: product1.id  } });
+      const so6a = await SalesOrderItem.findOne({ where: {   unit_price: 3.5,  quantity: 24 , sales_order_id: 6, product_id: product2.id  } });
+      const so6b = await SalesOrderItem.findOne({ where: {  unit_price: 5.1,  quantity: 34 , sales_order_id: 6, product_id: product3.id  } });
+      const so7a = await SalesOrderItem.findOne({ where: {  unit_price: 9.2,  quantity: 65 , sales_order_id: 7, product_id: product4.id   } });
+      const so7b = await SalesOrderItem.findOne({ where: {   unit_price: 12.2,  quantity: 42 , sales_order_id: 7, product_id: product5.id} });
+      const so8a = await SalesOrderItem.findOne({ where: {  unit_price: 8.3,  quantity: 40 , sales_order_id: 8, product_id: product6.id } });
+      const so8b = await SalesOrderItem.findOne({ where: {   unit_price: 9.2,  quantity: 40 , sales_order_id: 8, product_id: product7.id  } });
+      const so9a = await SalesOrderItem.findOne({ where: {   unit_price: 12.5,  quantity: 40 , sales_order_id: 9, product_id: product8.id   } });
+      const so9b = await SalesOrderItem.findOne({ where: {   unit_price: 13.5,  quantity: 40 , sales_order_id: 9, product_id: product9.id  } });
+      const so10a = await SalesOrderItem.findOne({ where: { unit_price: 12.2,  quantity: 50 , sales_order_id: 10, product_id: product10.id } });
+      const so10b = await SalesOrderItem.findOne({ where: {  unit_price: 2.2,  quantity: 50 , sales_order_id: 10, product_id: product1.id } });
+      const so11a = await SalesOrderItem.findOne({ where: {  unit_price: 4.5,  quantity: 50 , sales_order_id: 11, product_id: product2.id  } });
+      const so11b = await SalesOrderItem.findOne({ where: { unit_price: 5.5,  quantity: 50 , sales_order_id: 11, product_id: product3.id  } });
+      const so12a = await SalesOrderItem.findOne({ where: {   unit_price: 6.1,  quantity: 72 , sales_order_id: 12, product_id: product4.id   } });
+      const so12b = await SalesOrderItem.findOne({ where: { unit_price: 7.8,  quantity: 71 , sales_order_id: 12, product_id: product5.id   } });
+      const so13a = await SalesOrderItem.findOne({ where: {  unit_price: 7.2,  quantity: 35 , sales_order_id: 13, product_id: product6.id   } });
+      const so13b = await SalesOrderItem.findOne({ where: {  unit_price: 8.6,  quantity: 85 , sales_order_id: 13, product_id: product7.id  } });
+      const so14a = await SalesOrderItem.findOne({ where: {   unit_price: 9.5,  quantity: 70 , sales_order_id: 14, product_id: product8.id   } });
+      const so14b = await SalesOrderItem.findOne({ where: {   unit_price: 10.2,  quantity: 90 , sales_order_id: 14, product_id: product9.id   } });
+      const so15a = await SalesOrderItem.findOne({ where: { unit_price: 11.5,  quantity: 80 , sales_order_id: 15, product_id: product10.id   } });
+      const so15b = await SalesOrderItem.findOne({ where: {   unit_price: 12.1,  quantity: 80 , sales_order_id: 15, product_id: product1.id } });
+      const so16a = await SalesOrderItem.findOne({ where: {  unit_price: 5.1,  quantity: 90 , sales_order_id: 16, product_id: product2.id   } });
+      const so16b = await SalesOrderItem.findOne({ where: {unit_price: 5.5,  quantity: 90 , sales_order_id: 16, product_id: product3.id  } });
+      const so17a = await SalesOrderItem.findOne({ where: {   unit_price: 6.5,  quantity: 120 , sales_order_id: 17, product_id: product4.id   } });
+      const so17b = await SalesOrderItem.findOne({ where: {  unit_price: 7.2,  quantity: 5 , sales_order_id: 17, product_id: product5.id } });
+      const so18a = await SalesOrderItem.findOne({ where: {   unit_price: 8.2,  quantity: 123 , sales_order_id: 18, product_id: product6.id  } });
+      const so18b = await SalesOrderItem.findOne({ where: {  unit_price: 9.2,  quantity: 123 , sales_order_id: 18, product_id: product7.id   } });
+      const so19a = await SalesOrderItem.findOne({ where: {    unit_price: 10.5,  quantity: 90 , sales_order_id: 19, product_id: product8.id  } });
+      const so19b = await SalesOrderItem.findOne({ where: {   unit_price: 11.2,  quantity: 90 , sales_order_id: 19, product_id: product9.id  } });
+      const so20a = await SalesOrderItem.findOne({ where: {   unit_price: 12.2,  quantity: 100 , sales_order_id: 20, product_id: product10.id  } });
+      const so20b = await SalesOrderItem.findOne({ where: {   unit_price: 13.5,  quantity: 100 , sales_order_id: 20, product_id: product1.id  } });
+
 
       const {ExpensesType} = require('../models/Expenses');
       await ExpensesType.bulkCreate(Object.keys(ExpensesTypeEnum).map(key => ExpensesTypeEnum[key]));

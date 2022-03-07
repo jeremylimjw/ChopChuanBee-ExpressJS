@@ -23,9 +23,6 @@ const DeliveryOrder = sequelize.define('delivery_order', {
         type: DataTypes.DECIMAL,
         allowNull: false
     },
-    deliver_by: {
-        type: DataTypes.DATE,
-    },
     deliver_at: {
         type: DataTypes.DATE,
     },

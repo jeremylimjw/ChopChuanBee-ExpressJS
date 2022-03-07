@@ -124,6 +124,10 @@ async function syncAssociations() {
     const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
 
     // 1-M association
+    PaymentMethod.hasMany(PurchaseOrder, { foreignKey: { name: 'payment_method_id' }});
+    PurchaseOrder.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
+
+    // 1-M association
     Product.hasMany(InventoryMovement, { foreignKey: { allowNull: false, name: 'product_id' }});
     InventoryMovement.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
 
@@ -164,6 +168,10 @@ async function syncAssociations() {
     SalesOrder.belongsTo(PaymentTerm, { foreignKey: { name: 'payment_term_id' }});
 
     // 1-M association
+    PaymentMethod.hasMany(SalesOrder, { foreignKey: { name: 'payment_method_id' }});
+    SalesOrder.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
+
+    // 1-M association
     SalesOrder.hasMany(SalesOrderItem, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
     SalesOrderItem.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
 
@@ -192,11 +200,6 @@ async function syncAssociations() {
     SalesOrder.belongsTo(POStatus, { foreignKey: { allowNull: false, name: 'sales_order_status_id' }});
 
     const { DeliveryOrder } = require('../models/DeliveryOrder');
-
-    // 1-M association
-    //Rename employee id to driver id to be more clear.
-    Employee.hasMany(DeliveryOrder, { foreignKey: { allowNull: false, name: 'driver_id' }});
-    DeliveryOrder.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
 
     // 1-1 association
     SalesOrder.hasOne(DeliveryOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});

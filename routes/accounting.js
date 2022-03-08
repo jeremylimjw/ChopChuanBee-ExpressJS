@@ -467,6 +467,85 @@ router.post('/income_statement/activate', requireAccess(ViewType.ACCOUNTING, tru
 
 });
 
+
+router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+
+  const {start_date, end_date, charged_under_id } = req.query;
+
+  const input_tax = await sequelize.query(
+      `SELECT subquery.id as sales_order_id, c.id as customer_id, c.company_name, cu.name as charged_under_name, subquery.created_at as transaction_date, ((total*(1+subquery.gst_rate/100))+subquery.offset) AS total_transaction_amount, (subquery.gst_rate) AS gst_rate, ((subquery.gst_rate/100)*((total*(1+subquery.gst_rate/100))+subquery.offset)/(1+subquery.gst_rate/100)) AS gst_amount  
+      FROM ( 
+          SELECT so.id, so.created_at, so.customer_id, SUM(si.unit_price * si.quantity) AS total, MIN(so.gst_rate) AS gst_rate, MIN(so.offset) AS offset 
+          FROM sales_orders so JOIN sales_order_items si ON so.id = si.sales_order_id  
+          GROUP BY so.id   
+      ) AS subquery JOIN customers c ON subquery.customer_id = c.id  
+       JOIN charged_unders cu ON c.charged_under_id = cu.id
+       WHERE  subquery.created_at BETWEEN '${start_date}' AND '${end_date}'
+       AND cu.id = '${charged_under_id}'`,
+    { 
+      raw: true, 
+      type: sequelize.QueryTypes.SELECT 
+    }
+  );
+
+  let total_amount = input_tax.map(input_tax => input_tax.total_transaction_amount).reduce((amt1,amt2) => (+amt1) + (+amt2));
+  total_amount = Math.floor(total_amount*100)/100 
+  const obj = {total_amount};
+  // const result = Object.assign(input_tax, obj)
+  input_tax.push(obj)
+  // const result = {...input_tax, obj};
+  console.log(input_tax);
+  try {
+    
+    res.send(input_tax);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+router.get('/output_tax', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+
+  const {start_date,end_date, charged_under_id } = req.query;
+
+  const output_tax = await sequelize.query(
+      `SELECT subquery.id as purchase_order_id, s.id as supplier_id, cu.name as charged_under_name, s.company_name, subquery.created_at as transaction_date, ((total*(1+subquery.gst_rate/100))+subquery.offset) AS total_transaction_amount, (subquery.gst_rate) AS gst_rate, ((subquery.gst_rate/100)*((total*(1+subquery.gst_rate/100))+subquery.offset)/(1+subquery.gst_rate/100)) AS gst_amount  
+      FROM ( 
+          SELECT po.id,po.charged_under_id, po.created_at, po.supplier_id, SUM(pi.unit_cost * pi.quantity) AS total, MIN(po.gst_rate) AS gst_rate, MIN(po.offset) AS offset 
+          FROM purchase_orders po JOIN purchase_order_items pi ON po.id = pi.purchase_order_id  
+          GROUP BY po.id   
+      ) AS subquery JOIN suppliers s ON subquery.supplier_id = s.id  
+      JOIN charged_unders cu ON subquery.charged_under_id = cu.id
+       WHERE subquery.created_at BETWEEN '${start_date}' AND '${end_date}'
+       AND cu.id = '${charged_under_id}`,
+    { 
+      raw: true, 
+      type: sequelize.QueryTypes.SELECT 
+    }
+  );
+
+  try {
+    
+    res.send(output_tax);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+
+
+
+
+
+
 module.exports = router; 
 
 

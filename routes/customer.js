@@ -1,7 +1,7 @@
 var express = require('express');
 const { requireAccess } = require('../auth');
 var router = express.Router();
-const { Customer, CustomerMenu } = require('../models/Customer');
+const { Customer, CustomerMenu, ChargedUnder } = require('../models/Customer');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');
@@ -16,15 +16,44 @@ const { sequelize } = require('../db');
 
 /**
  *  GET method: Get customers
- *  - e.g. /api/customer OR /api/customer?id=123
  *  - requireAccess(ViewType.CRM, false) because this is only reading data
  * */ 
 router.get('/', requireAccess(ViewType.CRM, false), async function(req, res, next) {
-  const predicate = parseRequest(req.query);
+  const { id, company_name, p1_name, status } = req.query;
   
-  try {
-    const customers = await Customer.findAll(predicate);
-    res.send(customers);
+  try { // join charged under
+    const results = await sequelize.query(
+      `
+      SELECT *, COALESCE(sq.ar, 0) ar FROM customers c
+        LEFT OUTER JOIN 
+        (
+          SELECT so.customer_id, SUM(amount) ar FROM payments p
+          LEFT JOIN sales_orders so ON so.id = p.sales_order_id
+          AND so.payment_term_id = 2
+          AND so.sales_order_status_id IN (2,3,5)
+          GROUP BY so.customer_id
+        ) sq ON sq.customer_id = c.id
+        WHERE TRUE 
+        ${id ? `AND c.id = '${id}'` : ''}
+        ${ company_name != null ? `AND LOWER(c.company_name) LIKE '%${company_name.toLowerCase()}%'` : ''}
+        ${ p1_name != null ? `AND LOWER(c.p1_name) LIKE '%${p1_name.toLowerCase()}%'` : ''}
+        ${ status === 'true' ? `AND c.deactivated_date IS NULL` : '' }
+        ${ status === 'false' ? `AND c.deactivated_date IS NOT NULL` : '' }
+        ORDER BY c.created_at DESC
+      `,
+      { 
+        bind: [],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+    
+    const joinedResults = [];
+    for (let customer of results) {
+      const cu = await ChargedUnder.findByPk(customer.charged_under_id);
+      joinedResults.push({...customer, charged_under: cu });
+    }
+
+    res.send(joinedResults);
     
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database

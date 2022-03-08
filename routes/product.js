@@ -33,7 +33,7 @@ router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, re
             ${ name != null ? `AND LOWER(p.name) LIKE '%${name.toLowerCase()}%'` : ''}
             ${ status === 'true' ? `AND p.deactivated_date IS NULL` : '' }
             ${ status === 'false' ? `AND p.deactivated_date IS NOT NULL` : '' }
-          ORDER BY p.created_at DESC
+          ORDER BY (total_quantity - p.min_inventory_level) DESC
       `,
       { 
         bind: [],

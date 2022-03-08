@@ -11,24 +11,46 @@ const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const { ChargedUnder, Customer } = require('../models/Customer');
 const { SalesOrder, SalesOrderItem, updateSalesOrder, buildNewPayment, buildRefundPayment, validateOrderItems, validateAndBuildNewInventories, buildDeliveryOrder, buildRefundInventories } = require('../models/SalesOrder');
 const { DeliveryOrder } = require('../models/DeliveryOrder');
+const { Sequelize } = require('sequelize');
 
 
 router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
-  const predicate = parseRequest(req.query);
+  // const predicate = parseRequest(req.query);
+  const { id, sales_order_status_id, payment_term_id, customer_id, customer_name, start_date, end_date } = req.query;
+  
+  // Build associations to return
+  const customerInc = { model: Customer };
+  const include = [
+    { model: SalesOrderItem, include: [InventoryMovement, Product] }, 
+    { model: Payment, include: [PaymentMethod] },
+    ChargedUnder,
+    customerInc,
+  ];
+
+  // Build query
+  const where = {};
+  if (id != null)
+    where.id = id;
+  if (sales_order_status_id != null)
+    where.sales_order_status_id = sales_order_status_id;
+  if (payment_term_id != null)
+    where.payment_term_id = payment_term_id;
+  if (customer_id != null)
+    where.customer_id = customer_id;
+  if (customer_name != null)
+  customerInc.where = { company_name: { [Sequelize.Op.iLike]: `%${customer_name}%` } };
+  if (start_date != null && end_date != null)
+    where.created_at = { [Sequelize.Op.between]: [start_date, end_date] };
+
+  // Build order
+  const order = [
+    ['created_at', 'DESC'],
+    [Payment, 'created_at', 'ASC'], 
+    [SalesOrderItem, InventoryMovement, 'created_at', 'ASC']
+  ];
 
   try {
-    predicate.include = [
-      { model: SalesOrderItem, include: [InventoryMovement, Product] }, // im order by created_at desc
-      { model: Payment, include: [PaymentMethod] }, // payments by created_at desc
-      Customer,
-      ChargedUnder
-    ];
-    predicate.order = [
-      ['created_at', 'DESC'],
-      [Payment, 'created_at', 'ASC'], 
-      [SalesOrderItem, InventoryMovement, 'created_at', 'ASC']
-    ];
-    const results = await SalesOrder.findAll(predicate);
+    const results = await SalesOrder.findAll({ where: where, include: include, order: order });
 
     res.send(results);
 

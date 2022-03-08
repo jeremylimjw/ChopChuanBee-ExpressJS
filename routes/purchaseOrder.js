@@ -11,19 +11,45 @@ const { InventoryMovement } = require('../models/InventoryMovement');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const { ChargedUnder } = require('../models/Customer');
+const { Sequelize } = require('sequelize');
 
 
 router.get('/', requireAccess(ViewType.GENERAL, false), async function(req, res, next) {
-  const predicate = parseRequest(req.query);
+  const { id, purchase_order_status_id, payment_term_id, supplier_id, supplier_name, start_date, end_date } = req.query;
+  
+  // Build associations to return
+  const supplierInc = { model: Supplier };
+  const include = [
+    { model: PurchaseOrderItem, include: [InventoryMovement, Product] }, 
+    { model: Payment, include: [PaymentMethod] },
+    ChargedUnder,
+    supplierInc,
+  ];
+
+  // Build query
+  const where = {};
+  if (id != null)
+    where.id = id;
+  if (purchase_order_status_id != null)
+    where.purchase_order_status_id = purchase_order_status_id;
+  if (payment_term_id != null)
+    where.payment_term_id = payment_term_id;
+  if (supplier_id != null)
+    where.supplier_id = supplier_id;
+  if (supplier_name != null)
+    supplierInc.where = { company_name: { [Sequelize.Op.iLike]: `%${supplier_name}%` } };
+  if (start_date != null && end_date != null)
+    where.created_at = { [Sequelize.Op.between]: [start_date, end_date] };
+
+  // Build order
+  const order = [
+    ['created_at', 'DESC'],
+    [Payment, 'created_at', 'ASC'], 
+    [PurchaseOrderItem, InventoryMovement, 'created_at', 'ASC']
+  ];
 
   try {
-    predicate.include = [
-      { model: PurchaseOrderItem, include: [InventoryMovement, Product] }, 
-      { model: Payment, include: [PaymentMethod] },
-      Supplier,
-      ChargedUnder
-    ];
-    const purchaseOrders = await PurchaseOrder.findAll(predicate);
+    const purchaseOrders = await PurchaseOrder.findAll({ where: where, include: include, order: order });
 
     res.send(purchaseOrders);
 

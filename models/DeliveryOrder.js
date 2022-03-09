@@ -27,9 +27,23 @@ const DeliveryOrder = sequelize.define('delivery_order', {
         type: DataTypes.DATE,
     },
     remarks: DataTypes.STRING,
+    qr_code: DataTypes.BLOB,
 }, {
     updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
     createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
 });
 
-module.exports = { DeliveryOrder };
+const DeliveryStatus = sequelize.define('delivery_status', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+}, { 
+  timestamps: false // Dont record 'updatedAt' and 'createdAt'
+});
+
+module.exports = { DeliveryOrder, DeliveryStatus };

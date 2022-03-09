@@ -12,6 +12,7 @@ const { ChargedUnder, Customer } = require('../models/Customer');
 const { SalesOrder, SalesOrderItem, updateSalesOrder, buildNewPayment, buildRefundPayment, validateOrderItems, validateAndBuildNewInventories, buildDeliveryOrder, buildRefundInventories } = require('../models/SalesOrder');
 const { DeliveryOrder } = require('../models/DeliveryOrder');
 const { Sequelize } = require('sequelize');
+const QRCode = require('qrcode')
 
 
 router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
@@ -173,7 +174,9 @@ router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res
     await InventoryMovement.bulkCreate(inventoryMovements);
     // Create delivery order
     if (deliveryOrder) {
-      await DeliveryOrder.create(deliveryOrder);
+      const newDeliveryOrder = await DeliveryOrder.create(deliveryOrder);
+      const qr = await QRCode.toDataURL(`${process.env.BASE_URL}/api/deliveryOrder/assign?id=${newDeliveryOrder.id}`)
+      await DeliveryOrder.update({ qr_code: qr }, { where: { id: newDeliveryOrder.id } });
     }
 
     // Record to admin logs

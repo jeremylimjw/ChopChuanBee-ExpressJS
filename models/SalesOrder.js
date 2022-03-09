@@ -7,6 +7,7 @@ const { Product } = require('./Product');
 const axios = require('axios');
 const PaymentMethodType = require('../common/PaymentMethodType');
 const { InventoryMovement } = require('./InventoryMovement');
+const DeliveryStatusEnum = require('../common/DeliveryStatusEnum');
 
 const SalesOrder = sequelize.define('sales_order', {
     id: {
@@ -249,12 +250,13 @@ async function buildDeliveryOrder(salesOrder) {
     }
 
     const deliveryOrder = {
-        sales_order_id: salesOrder.id,
-        address: salesOrder.delivery_address,
-        postal_code: salesOrder.delivery_postal_code,
-        remarks: salesOrder.delivery_remarks,
-        longitude: geocode.results[0].LONGITUDE,
-        latitude: geocode.results[0].LATITUDE,
+      delivery_status_id: DeliveryStatusEnum.PENDING.id,
+      sales_order_id: salesOrder.id,
+      address: salesOrder.delivery_address,
+      postal_code: salesOrder.delivery_postal_code,
+      remarks: salesOrder.delivery_remarks,
+      longitude: geocode.results[0].LONGITUDE,
+      latitude: geocode.results[0].LATITUDE,
     }
   
     return deliveryOrder;

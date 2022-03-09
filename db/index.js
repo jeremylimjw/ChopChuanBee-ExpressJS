@@ -448,7 +448,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { amount: -140, purchase_order_id: 15, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-01-01'},
         { amount: 100, purchase_order_id: 15, payment_method_id:1, movement_type_id:3 , created_at: '2021-01-01'}, //PO-15 supplier refund
 
-        { amount: 896, purchase_order_id: 16, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-04-01'}, // cash 
+        { amount: -896, purchase_order_id: 16, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-04-01'}, // cash 
         { amount: 196, purchase_order_id: 16, payment_method_id:1, movement_type_id:3 , created_at: '2021-01-01'}, //PO-16 supplier refund
 
         { amount: 1649, purchase_order_id: 17, accounting_type_id: 1, movement_type_id:1, created_at: '2021-05-01' }, // cash 
@@ -660,7 +660,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const so15a = await SalesOrderItem.findOne({ where: { unit_price: 11.5,  quantity: 80 , sales_order_id: 15, product_id: product10.id   } });
       const so15b = await SalesOrderItem.findOne({ where: {   unit_price: 12.1,  quantity: 80 , sales_order_id: 15, product_id: product1.id } });
       const so16a = await SalesOrderItem.findOne({ where: {  unit_price: 5.1,  quantity: 90 , sales_order_id: 16, product_id: product2.id   } });
-      const so16b = await SalesOrderItem.findOne({ where: {unit_price: 5.5,  quantity: 90 , sales_order_id: 16, product_id: product3.id  } });
+      const so16b = await SalesOrderItem.findOne({ where: {  unit_price: 5.5,  quantity: 90 , sales_order_id: 16, product_id: product3.id  } });
       const so17a = await SalesOrderItem.findOne({ where: {   unit_price: 6.5,  quantity: 120 , sales_order_id: 17, product_id: product4.id   } });
       const so17b = await SalesOrderItem.findOne({ where: {  unit_price: 7.2,  quantity: 5 , sales_order_id: 17, product_id: product5.id } });
       const so18a = await SalesOrderItem.findOne({ where: {   unit_price: 8.2,  quantity: 123 , sales_order_id: 18, product_id: product6.id  } });
@@ -670,6 +670,159 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const so20a = await SalesOrderItem.findOne({ where: {   unit_price: 12.2,  quantity: 100 , sales_order_id: 20, product_id: product10.id  } });
       const so20b = await SalesOrderItem.findOne({ where: {   unit_price: 13.5,  quantity: 100 , sales_order_id: 20, product_id: product1.id  } });
 
+
+      //inventory movement
+      await InventoryMovement.bulkCreate([
+        { unit_cost: 1.1 , unit_price: 2.2,  quantity: -5 , sales_order_item_id: so1b.id, movement_type_id:2 , created_at: '2021-01-12'} ,//deliver 2 days later
+        { unit_cost: 2.1 , unit_price: 3.2,  quantity: -5 ,sales_order_item_id: so1b.id, movement_type_id:2 , created_at: '2021-01-12' } ,
+
+        { unit_cost: 3.5 , unit_price: 5.1,  quantity: -2 , sales_order_item_id: so2a.id, movement_type_id:2, created_at: '2021-02-12' },
+        { unit_cost: 4.5 , unit_price: 6.5,  quantity: -5 , sales_order_item_id: so2b.id, movement_type_id:2 , created_at: '2021-02-12'} ,
+
+        { unit_cost: 5.9, unit_price: 6.2,  quantity: -15 ,sales_order_item_id: so3a.id, movement_type_id:2 , created_at: '2021-03-12' }  ,
+        { unit_cost: 6.2, unit_price: 7.6,  quantity: -23 , sales_order_item_id: so3b.id, movement_type_id:2 , created_at: '2021-03-12' }  ,
+
+        { unit_cost: 7.2 , unit_price: 9.2,  quantity: -34 , sales_order_item_id: so4a.id, movement_type_id:2 , created_at: '2021-04-12'  }  ,
+        { unit_cost: 8.5, unit_price: 9.5,  quantity: -32 ,sales_order_item_id: so4b.id, movement_type_id:2 , created_at: '2021-04-12'  }  ,
+
+        { unit_cost:  9.2, unit_price: 10.2,  quantity: -45 , sales_order_item_id: so5a.id, movement_type_id:2 , created_at: '2021-05-12'}  ,
+        { unit_cost:  0.9, unit_price: 1.9,  quantity: -24 , sales_order_item_id: so5b.id, movement_type_id:2, created_at: '2021-05-12'  }  ,
+
+        { unit_cost: 2.5 ,  unit_price: 3.5,  quantity: -24 ,sales_order_item_id: so6a.id, movement_type_id:2 , created_at: '2021-06-12'}  ,
+        { unit_cost: 3.1, unit_price: 5.1,  quantity: -34 , sales_order_item_id: so6b.id, movement_type_id:2 , created_at: '2021-06-12' } ,
+
+        { unit_cost: 4.2 , unit_price: 9.2,  quantity: -65 , sales_order_item_id: so7a.id, movement_type_id:2 , created_at: '2021-07-12' }  ,
+        { unit_cost:  5.2, unit_price: 12.2,  quantity: -42 , sales_order_item_id: so7b.id, movement_type_id:2, created_at: '2021-07-12'}  ,
+
+        { unit_cost:  6.3, unit_price: 8.3,  quantity: -40 , sales_order_item_id: so8a.id, movement_type_id:2 , created_at: '2021-08-12'} ,
+        { unit_cost:  7.2, unit_price: 9.2,  quantity: -40 , sales_order_item_id: so8b.id, movement_type_id:2 , created_at: '2021-08-12' }  ,
+
+        { unit_cost:  8.5, unit_price: 12.5,  quantity: -40 ,sales_order_item_id: so9a.id, movement_type_id:2 , created_at: '2021-09-12' }  ,
+        { unit_cost:  9.5, unit_price: 13.5,  quantity: -40 , sales_order_item_id: so9b.id, movement_type_id:2 , created_at: '2021-09-12' } ,
+
+        { unit_cost:  10.2, unit_price: 12.2,  quantity: -50 , sales_order_item_id: so10a.id, movement_type_id:2, created_at: '2021-10-12' }  ,
+        { unit_cost:  1.2, unit_price: 2.2,  quantity: -50 , sales_order_item_id: so10b.id, movement_type_id:2, created_at: '2021-10-12' }  ,
+
+        { unit_cost:  2.5, unit_price: 4.5,  quantity: -50 , sales_order_item_id: so11a.id, movement_type_id:2  , created_at: '2021-11-12'}  ,
+        { unit_cost:  3.5, unit_price: 5.5,  quantity: -50 ,sales_order_item_id: so11b.id, movement_type_id:2 , created_at: '2021-11-12'}  ,
+
+        { unit_cost:  4.1, unit_price: 6.1,  quantity: -72 , sales_order_item_id: so12a.id, movement_type_id:2 , created_at: '2021-12-12'}  ,
+        { unit_cost:  5.8, unit_price: 7.8,  quantity: -71 ,sales_order_item_id: so12b.id, movement_type_id:2, created_at: '2021-12-12' }  ,
+
+        { unit_cost: 6.2 , unit_price: 7.2,  quantity: -35 , sales_order_item_id: so13a.id, movement_type_id:2  , created_at: '2021-02-12'}  ,
+        { unit_cost:  7.6, unit_price: 8.6,  quantity: -85 , sales_order_item_id: so13b.id, movement_type_id:2, created_at: '2021-02-12'}  ,
+
+        { unit_cost:  8.5, unit_price: 9.5,  quantity: -70 ,sales_order_item_id: so14a.id, movement_type_id:2  , created_at: '2021-04-12'}  ,
+        { unit_cost:  9.2, unit_price: 10.2,  quantity: -90 ,sales_order_item_id: so14b.id, movement_type_id:2  , created_at: '2021-04-12' }  ,
+
+        { unit_cost:  10.5, unit_price: 11.5,  quantity: -80 ,sales_order_item_id: so15a.id, movement_type_id:2  , created_at: '2021-06-12'}  , //customer refunds below
+        { unit_cost:  1.1,  unit_price: 12.1,  quantity: -80 , sales_order_item_id: so15b.id, movement_type_id:2 , created_at: '2021-06-12'}  ,
+        { unit_cost:  1.1,  unit_price: 12.1,  quantity: 50 , sales_order_item_id: so15b.id, movement_type_id:3 , created_at: '2021-06-13'}  ,
+
+        { unit_cost:  2.1, unit_price: 5.1,  quantity: -90 ,sales_order_item_id: so16a.id, movement_type_id:2  , created_at: '2021-08-12'}  ,
+        { unit_cost:  3.5, unit_price: 5.5,  quantity: -90 , sales_order_item_id: so16b.id, movement_type_id:2 , created_at: '2021-08-12'}  ,
+        { unit_cost:  1.1,  unit_price: 12.1,  quantity: 50 , sales_order_item_id: so16b.id, movement_type_id:3 , created_at: '2021-08-13'}  ,
+
+        { unit_cost:  4.5, unit_price: 6.5,  quantity: -120 ,sales_order_item_id: so17a.id, movement_type_id:2  , created_at: '2021-10-12' }  ,
+        { unit_cost:  5.2, unit_price: 7.2,  quantity: -5 ,sales_order_item_id: so17b.id, movement_type_id:2 , created_at: '2021-10-12'}  ,
+        { unit_cost:  1.1,  unit_price: 12.1,  quantity: 1 , sales_order_item_id: so17b.id, movement_type_id:3 , created_at: '2021-10-13'}  ,
+
+        { unit_cost:  6.2, unit_price: 8.2,  quantity: -123 ,sales_order_item_id: so18a.id, movement_type_id:2, created_at: '2021-12-12'  }  ,
+        { unit_cost:  7.2, unit_price: 9.2,  quantity: -123 , sales_order_item_id: so18b.id, movement_type_id:2  , created_at: '2021-12-12' } ,
+        { unit_cost:  1.1,  unit_price: 12.1,  quantity: 23 , sales_order_item_id: so18b.id, movement_type_id:3 , created_at: '2021-12-13'},
+
+        { unit_cost:  8.5, unit_price: 10.5,  quantity: -90 , sales_order_item_id: so19a.id, movement_type_id:2  , created_at: '2021-12-12'} ,
+        { unit_cost:  9.2, unit_price: 11.2,  quantity: -90 ,sales_order_item_id: so19b.id, movement_type_id:2 , created_at: '2021-12-12' }  ,
+        { unit_cost:  1.1,  unit_price: 12.1,  quantity: 1 , sales_order_item_id: so19b.id, movement_type_id:3 , created_at: '2021-12-13'}  ,
+
+        { unit_cost:  10.2, unit_price: 12.2,  quantity: -100 ,sales_order_item_id: so20a.id, movement_type_id:2  , created_at: '2021-12-12'} ,
+        { unit_cost:  1.5, unit_price: 13.5,  quantity: -100 , sales_order_item_id: so20b.id, movement_type_id:2, created_at: '2021-12-12' } ,
+        { unit_cost:  1.1,  unit_price: 12.1,  quantity: 10 , sales_order_item_id: so20b.id, movement_type_id:3 , created_at: '2021-12-13' }  
+
+
+      ]); 
+
+      await Payment.bulkCreate([
+        // { amount: 22, purchase_order_id: 1, accounting_type_id: 1, movement_type_id: 1, created_at: '2021-01-01'},
+        // { amount: -10, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-01-02'}, //double payment for PO1 to PO10
+        // { amount: -2, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-01-03'},  //1 day apart
+
+        // { amount: 660, purchase_order_id: 11, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-11-01'},
+        // { amount: -60, purchase_order_id: 11, payment_method_id:1, accounting_type_id: 1, movement_type_id:1, created_at: '2021-11-02' },
+        // { amount: 100, purchase_order_id: 11, payment_method_id:1, movement_type_id:3 , created_at: '2021-11-03'}, //PO-11 supplier refund
+
+        // { amount: 1649, purchase_order_id: 17, accounting_type_id: 1, movement_type_id:1, created_at: '2021-05-01' }, // cash 
+
+        {amount: 27 , sales_order_id: 1, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-01-12', payment_method_id:1 }, //cash
+
+        {amount: 42.7 , sales_order_id: 2, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-02-12', payment_method_id:1},
+
+        {amount: 267.8 , sales_order_id: 3, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-03-12', payment_method_id:1},
+
+        {amount: 616.8 , sales_order_id: 4, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-04-12', payment_method_id:1},
+
+        {amount: 504.6 , sales_order_id: 5, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-05-12', payment_method_id:1},
+
+        {amount: 257.4 , sales_order_id: 6, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-06-12', payment_method_id:1},
+
+        {amount: -1110.4, sales_order_id: 7, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-07-12'},//credit
+        {amount: 1000, sales_order_id: 7, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-07-13', payment_method_id:1},
+
+        {amount: -700 , sales_order_id: 8, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-08-12'},
+        {amount: 500 , sales_order_id: 8, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-08-12', payment_method_id:1},
+
+        {amount: -1040 , sales_order_id: 9, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-09-12'},
+        {amount: 900 , sales_order_id: 9, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-09-12', payment_method_id:1},
+
+        {amount: -720 , sales_order_id: 10, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-10-12'},
+        {amount: 720 , sales_order_id: 10, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-10-12', payment_method_id:1},
+
+        {amount: -500 , sales_order_id: 11, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-11-12'},
+        {amount: 500 , sales_order_id: 11, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-11-12', payment_method_id:1},
+
+        {amount: -993 , sales_order_id: 12, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+        {amount: 803 , sales_order_id: 12, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
+
+        {amount: -983 , sales_order_id: 13, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-02-12'},
+        {amount: 903 , sales_order_id: 13, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-02-12', payment_method_id:1},
+
+        {amount: -1583 , sales_order_id: 14, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-04-12'},
+        {amount: 1500 , sales_order_id: 14, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-04-12', payment_method_id:1},
+
+        {amount: -1888 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-06-12'}, //refunds below
+        {amount: 1783 , sales_order_id: 14, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-04-12', payment_method_id:1},
+        {amount: -80 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-06-13'},
+
+        {amount: -954 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-08-12'},
+        {amount: 854 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-08-12', payment_method_id:1},
+        {amount: -204 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-08-12'},
+
+        {amount: -816 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-10-12'},
+        {amount: 716 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-10-12', payment_method_id:1},
+        {amount: -16 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-10-12'},
+
+        {amount: -2140.2 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+        {amount: 1500.2 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
+        {amount: -40.2 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-12-12'},
+
+        {amount: -1953 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+        {amount: 1253 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
+        {amount: -53 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+
+        {amount: -2570 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+        {amount: 2070 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
+        {amount: -70 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+       
+
+      ]); 
+
+
+
+
+
+
+
+      
 
       const {ExpensesType} = require('../models/Expenses');
       await ExpensesType.bulkCreate(Object.keys(ExpensesTypeEnum).map(key => ExpensesTypeEnum[key]));

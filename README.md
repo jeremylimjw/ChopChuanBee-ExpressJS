@@ -19,6 +19,7 @@ PGHOST=localhost
 PGPASSWORD=<yourpassword>
 PGDATABASE=chopchuanbee
 PGPORT=5432
+BASE_URL=http://localhost:3000
 PORT=3000
 REACT_URL=http://localhost:3001
 EMAIL_USERNAME=nuschopchuanbee@gmail.com

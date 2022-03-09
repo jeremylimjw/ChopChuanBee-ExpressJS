@@ -13,7 +13,6 @@ function sendEmailTo(email, templateName, params) {
     from: process.env.EMAIL_USERNAME,
     to: email,
     subject: params.subject,
-    text: "Reset Password",
     html: require(`./templates/${templateName}`)(params),
   });
 

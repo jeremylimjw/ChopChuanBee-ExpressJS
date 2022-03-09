@@ -31,7 +31,7 @@ router.post('/', async function(req, res, next) {
         const user = employee.toJSON();
 
         // Verify user credentials
-        const match = await compareHash(password, user.password)
+        const match = await compareHash(password, user.password || '')
         if (!match) {
             res.status(400).send("Invalid username or password.");
             return;

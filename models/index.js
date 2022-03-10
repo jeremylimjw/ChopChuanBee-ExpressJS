@@ -206,12 +206,18 @@ async function syncAssociations() {
     DeliveryOrder.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
 
     // 1-1 association
-    Employee.hasOne(DeliveryOrder, { foreignKey: { name: 'driver_id' }});
-    DeliveryOrder.belongsTo(Employee, { foreignKey: { name: 'driver_id' }});
+    DeliveryStatus.hasOne(DeliveryOrder, { foreignKey: { allowNull: false, name: 'delivery_status_id' }});
+    DeliveryOrder.belongsTo(DeliveryStatus, { foreignKey: { allowNull: false, name: 'delivery_status_id' }});
 
-    // 1-1 association
-    DeliveryStatus.hasOne(DeliveryOrder, { allowNull: false, foreignKey: { name: 'delivery_status_id' }});
-    DeliveryOrder.belongsTo(DeliveryStatus, { allowNull: false, foreignKey: { name: 'delivery_status_id' }});
+    const { Itinerary } = require('../models/Itinerary');
+
+    // 1-M association
+    Employee.hasMany(Itinerary, { foreignKey: { allowNull: false, name: 'driver_id' }});
+    Itinerary.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
+
+    // 1-M association
+    Itinerary.hasMany(DeliveryOrder, { foreignKey: { name: 'itinerary_id' }});
+    DeliveryOrder.belongsTo(Itinerary, { foreignKey: { name: 'itinerary_id' }});
     
     await sequelize.sync(); // This will create tables if not exists
     // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create

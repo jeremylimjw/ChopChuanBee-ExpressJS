@@ -7,10 +7,6 @@ const Itinerary = sequelize.define('itinerary', {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
     },
-    deliver_date: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
     start_time: {
         type: DataTypes.DATE,
         allowNull: false

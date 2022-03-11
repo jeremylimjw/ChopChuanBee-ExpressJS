@@ -234,20 +234,30 @@ async function buildRefundInventories(orderItems) {
 }
 
 
+async function getGeocode(postal_code) {
+  const { data: geocode } = await axios.get(`https://developers.onemap.sg/commonapi/search`, {
+    params: {
+      searchVal: postal_code,     // Keywords entered by user that is used to filter out the results.
+      returnGeom: 'Y',            // Checks if user wants to return the geometry.
+      getAddrDetails: 'Y',        // Checks if user wants to return address details for a point.
+      pageNum: 1,                 // Specifies the page to retrieve your search results from.
+    }
+  })
+  
+  if (geocode.results.length === 0) {
+    throw `Could not find any location with the postal code ${postal_code}`;
+  }
+
+  return {
+    longitude: geocode.results[0].LONGITUDE,
+    latitude: geocode.results[0].LATITUDE,
+  }
+}
+
+
 async function buildDeliveryOrder(salesOrder) {
     // Retrieve geocoordinates of the delivery destination
-    const { data: geocode } = await axios.get(`https://developers.onemap.sg/commonapi/search`, {
-      params: {
-        searchVal: salesOrder.delivery_postal_code,     // Keywords entered by user that is used to filter out the results.
-        returnGeom: 'Y',            // Checks if user wants to return the geometry.
-        getAddrDetails: 'Y',        // Checks if user wants to return address details for a point.
-        pageNum: 1,                 // Specifies the page to retrieve your search results from.
-      }
-    })
-    
-    if (geocode.results.length === 0) {
-      throw `Could not find any location with the postal code ${salesOrder.delivery_postal_code}`;
-    }
+    const { longitude, latitude } = await getGeocode(salesOrder.delivery_postal_code);
 
     const deliveryOrder = {
       delivery_status_id: DeliveryStatusEnum.PENDING.id,
@@ -255,8 +265,8 @@ async function buildDeliveryOrder(salesOrder) {
       address: salesOrder.delivery_address,
       postal_code: salesOrder.delivery_postal_code,
       remarks: salesOrder.delivery_remarks,
-      longitude: geocode.results[0].LONGITUDE,
-      latitude: geocode.results[0].LATITUDE,
+      longitude: longitude,
+      latitude: latitude,
     }
   
     return deliveryOrder;
@@ -273,4 +283,5 @@ module.exports = {
     buildRefundPayment,
     buildRefundInventories,
     buildDeliveryOrder,
+    getGeocode,
 };

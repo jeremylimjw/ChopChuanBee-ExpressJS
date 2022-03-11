@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const axios = require('axios');
+const { getGeocode } = require('../models/SalesOrder');
 
 router.get('/publicHolidays', async function(req, res, next) {
     
@@ -12,6 +13,27 @@ router.get('/publicHolidays', async function(req, res, next) {
         .then(results => results.data)
         .then(results => res.send(results.result))
         .catch(err => res.status(500).send(err))
+
+});
+
+router.get('/geocode', async function(req, res, next) {
+    const { postal_code } = req.query;
+
+    if (postal_code == null) {
+        res.status(400).send(`'postal_code' is required.`);
+        return;
+    }
+    
+    try {
+        const results = await getGeocode(postal_code);
+
+        res.send(results);
+
+    } catch(err) {
+        // Throws error if postal code not found
+        res.status(400).send(err);
+        return;
+    }
 
 });
 

@@ -2,35 +2,39 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../db');
 
 const DeliveryOrder = sequelize.define('delivery_order', {
-    id: {
-        type: DataTypes.UUID,
-        primaryKey: true,
-        defaultValue: DataTypes.UUIDV4
-    },
-    address: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    postal_code: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    longitude: {
-        type: DataTypes.DECIMAL,
-        allowNull: false
-    },
-    latitude: {
-        type: DataTypes.DECIMAL,
-        allowNull: false
-    },
-    deliver_at: {
-        type: DataTypes.DATE,
-    },
-    remarks: DataTypes.STRING,
-    qr_code: DataTypes.BLOB,
+  id: {
+    type: DataTypes.UUID,
+    primaryKey: true,
+    defaultValue: DataTypes.UUIDV4
+  },
+  address: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  postal_code: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  longitude: {
+    type: DataTypes.DECIMAL,
+    allowNull: false
+  },
+  latitude: {
+    type: DataTypes.DECIMAL,
+    allowNull: false
+  },
+  deliver_at: {
+    type: DataTypes.DATE,
+  },
+  sequence: {
+    type: DataTypes.INTEGER,
+    defaultValue: -1,
+  },
+  remarks: DataTypes.STRING,
+  qr_code: DataTypes.BLOB,
 }, {
-    updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
-    createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
+  updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
+  createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
 });
 
 const DeliveryStatus = sequelize.define('delivery_status', {

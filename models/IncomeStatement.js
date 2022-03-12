@@ -105,7 +105,8 @@ const IncomeStatement = sequelize.define('income_statement', {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    deleted_date: DataTypes.DATE
+    deleted_date: DataTypes.DATE,
+    remarks: DataTypes.STRING,
   }, {
       updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
       createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'

@@ -286,7 +286,7 @@ router.get('/Product_Analytics', requireAccess(ViewType.ANALYTICS, true), async 
 
 //4. Returned goods for supplier
 // returns list of products that have been returned for supplier
-router.get('/Returned_Goods_Supplier', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+router.get('/Supplier_Returned_Goods', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
   const {start_date ,end_date } = req.query;
   try {
       const returned_goods = await sequelize.query(
@@ -294,7 +294,7 @@ router.get('/Returned_Goods_Supplier', requireAccess(ViewType.ANALYTICS, true), 
           SELECT 
             pdt.name,
             SUM(ims.quantity * -1) AS quantity_returned,
-            SUM(ims.quantity * ims.unit_cost * -1) AS total_damaged_inventory_value
+            SUM(ims.quantity * ims.unit_cost * -1) AS supplier_returned_goods_total_value
           FROM inventory_movements ims
             INNER JOIN purchase_order_items poitems ON ims.purchase_order_item_id = poitems.id
             INNER JOIN products pdt ON poitems.product_id = pdt.id
@@ -302,7 +302,7 @@ router.get('/Returned_Goods_Supplier', requireAccess(ViewType.ANALYTICS, true), 
             AND ims.created_at::DATE >= '${start_date}'
             AND ims.created_at::DATE <= '${end_date}'
           GROUP BY pdt.id
-          ORDER BY total_damaged_inventory_value DESC;
+          ORDER BY supplier_returned_goods_total_value DESC;
       
           `,
           {
@@ -317,6 +317,50 @@ router.get('/Returned_Goods_Supplier', requireAccess(ViewType.ANALYTICS, true), 
         employee_id: user.id, 
         view_id: ViewType.ANALYTICS.id,
         text: `${user.name} viewed the Returned Goods Dashboard`, 
+      });
+  
+      res.send(returned_goods);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+//4. Returned goods for customer
+// returns list of products that have been returned for customer
+router.get('/Customer_Returned_Goods', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query;
+  try {
+      const returned_goods = await sequelize.query(
+          `
+          SELECT 
+            pdt.name,
+            SUM(ims.quantity) AS quantity_returned,
+            SUM(ims.quantity * ims.unit_cost) AS customer_returned_goods_total_value
+          FROM inventory_movements ims
+            INNER JOIN sales_order_items soitems ON ims.sales_order_item_id = soitems.id
+            INNER JOIN products pdt ON soitems.product_id = pdt.id
+          WHERE movement_type_id = 3
+            AND ims.created_at::DATE >= '${start_date}'
+            AND ims.created_at::DATE <= '${end_date}'
+          GROUP BY pdt.id
+          ORDER BY customer_returned_goods_total_value DESC;
+      
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Customer Returned Goods Dashboard`, 
       });
   
       res.send(returned_goods);

@@ -745,6 +745,8 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { unit_cost:  3.5, unit_price: 0,  quantity: -6 ,sales_order_item_id: so11b.id, movement_type_id:4 , created_at: '2021-11-12'}  ,
         { unit_cost:  4.5, unit_price: 0,  quantity: -10 ,sales_order_item_id: so17a.id, movement_type_id:4  , created_at: '2021-10-12' }  ,
         { unit_cost:  5.2, unit_price: 0,  quantity: -2 ,sales_order_item_id: so17b.id, movement_type_id:4 , created_at: '2021-10-12'}  ,
+        { unit_cost:  1.1,  unit_price: 0,  quantity: -19 , sales_order_item_id: so19b.id, movement_type_id:4 , created_at: '2021-12-13'}  ,
+        { unit_cost:  10.2, unit_price: 0,  quantity: -5 ,sales_order_item_id: so20a.id, movement_type_id:4  , created_at: '2021-12-12'} ,
       ]); 
 
       await Payment.bulkCreate([

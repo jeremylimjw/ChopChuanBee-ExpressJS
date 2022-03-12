@@ -137,7 +137,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
     
       //>>> For analytics - Supplier ['company_name', 's1_name', 's1_phone_number', 'address', 'postal_code']
       await Supplier.bulkCreate([
-        { company_name: 'supplier1', s1_name: 'supplier1', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA', created_at: '2021-01-10'},
+        { company_name: 'supplier1', s1_name: 'supplier1', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA', created_at: '2021-01-10' },
         { company_name: 'supplier2', s1_name: 'supplier2', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA', created_at: '2021-01-10' },
         { company_name: 'supplier3', s1_name: 'supplier3', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA', created_at: '2021-01-09' },
         { company_name: 'supplier4', s1_name: 'supplier4', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA', created_at: '2021-01-09' },

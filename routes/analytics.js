@@ -417,7 +417,7 @@ router.get('/Damaged_Goods', requireAccess(ViewType.ANALYTICS, true), async func
 });
 
 
-//4. Payments Dashboard: Unsettled AR -- customer level
+//5. Payments Dashboard: Unsettled AR -- customer level
 //returns top 10 customers
 router.get('/Customer_AR', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
    
@@ -457,7 +457,7 @@ router.get('/Customer_AR', requireAccess(ViewType.ANALYTICS, true), async functi
 });
 
 
-//4. Payments Dashboard: Unsettled AP -- supplier level
+//5. Payments Dashboard: Unsettled AP -- supplier level
 // returns top 10 supplier
 router.get('/Supplier_AP', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
    
@@ -497,7 +497,7 @@ router.get('/Supplier_AP', requireAccess(ViewType.ANALYTICS, true), async functi
 });
 
 
-//4. Payments Dashboard: Unsettled AP -- invoice level
+//5. Payments Dashboard: Unsettled AP -- invoice level
 // returns top 10 invoice
 router.get('/Unsettled_AP', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
    
@@ -533,7 +533,7 @@ router.get('/Unsettled_AP', requireAccess(ViewType.ANALYTICS, true), async funct
       }
 });
 
-//4. Payments Dashboard: Unsettled AR -- invoice level
+//5. Payments Dashboard: Unsettled AR -- invoice level
 // returns top 10 invoice
 router.get('/Unsettled_AR', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
    

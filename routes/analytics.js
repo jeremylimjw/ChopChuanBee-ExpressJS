@@ -79,6 +79,53 @@ router.get('/Revenue_table', requireAccess(ViewType.ANALYTICS, true), async func
     }
 });
 
+//1. Profits Dashboard: Profits
+router.get('/Profits_table', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query;
+  try {
+      const profitsTable = await sequelize.query(
+          `WITH revenue AS (
+            SELECT to_char(created_at, 'YYYY-MM') AS DATE, SUM(qty_unitprice.total) AS rev
+            FROM (SELECT (quantity * unit_price*-1) AS total, created_at, movement_type_id FROM inventory_movements) qty_unitprice
+            WHERE movement_type_id = 2
+            AND created_at::DATE >= '${start_date}'
+            AND created_at::DATE <= '${end_date}'
+            GROUP BY date
+            ORDER BY date ASC
+            ), cost AS (
+            SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitcost.total) as cost_of_goods_sold
+            FROM (select (quantity * unit_cost) as total, created_at, movement_type_id FROM inventory_movements) qty_unitcost
+            WHERE movement_type_id = 2
+            AND created_at::DATE >= '${start_date}'
+            AND created_at::DATE <= '${end_date}'
+            GROUP BY date
+            ORDER BY date ASC
+            )
+            SELECT revenue.date, revenue.rev + cost.cost_of_goods_sold AS profit
+            FROM revenue NATURAL JOIN cost
+            ORDER BY date ASC;`,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Profits Dashboard (Profits        ) `, 
+      });
+  
+      res.send(profitsTable);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
 
 
 //2. Payments Dashboard: Unsettled AP

@@ -186,6 +186,104 @@ router.get('/Customer_Profits', requireAccess(ViewType.ANALYTICS, true), async f
     }
 });
 
+
+// 2. Product Analytics
+// returns all the products
+router.get('/Product_Analytics', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query;
+  try {
+      const productAnalytics = await sequelize.query(
+          `WITH
+          start_inventory_table
+          AS
+          (
+              SELECT id, name, sum(qty_unitcost.total) as start_inv_at_hand
+              FROM (
+              SELECT pdt.id, pdt.name, (ims.quantity * ims.unit_cost) AS total
+                  FROM inventory_movements ims INNER JOIN purchase_order_items poitems ON ims.purchase_order_item_id = poitems.id
+                      INNER JOIN products pdt ON poitems.product_id = pdt.id
+                      WHERE ims.created_at::DATE <= '${start_date}' 
+              ) qty_unitcost
+              GROUP BY id, name
+          ),
+          end_inventory_table
+          AS
+          (
+              SELECT id, name, sum(qty_unitcost.total) as end_inv_at_hand
+              FROM (
+              SELECT pdt.id, pdt.name, (ims.quantity * ims.unit_cost) AS total
+                  FROM inventory_movements ims INNER JOIN purchase_order_items poitems ON ims.purchase_order_item_id = poitems.id
+                      INNER JOIN products pdt ON poitems.product_id = pdt.id
+                  WHERE ims.created_at <= '${end_date}'
+              ) qty_unitcost
+              GROUP BY id, name
+          ),
+          inventory_sub_table
+          AS
+          (
+              SELECT
+                  id AS product_id,
+                  name AS product_name,
+                  SUM(totalPrice*-1) AS total_price,
+                  SUM(quantity*-1) AS quantity_sold,
+                  SUM(sold_inventory_table.totalCOGS)/SUM(quantity) AS average_cogs,
+                  SUM(sold_inventory_table.totalPrice)/SUM(quantity) AS average_selling_price,
+                  SUM(sold_inventory_table.totalPrice)/SUM(quantity) - SUM(sold_inventory_table.totalCOGS)/SUM(quantity) AS contribution,
+                  (SUM(sold_inventory_table.totalPrice)/SUM(quantity) - SUM(sold_inventory_table.totalCOGS)/SUM(quantity)) * SUM(quantity*-1) AS total_contribution
+              FROM ( 
+              SELECT
+                      (ims.quantity * ims.unit_cost *-1) AS totalCOGS,
+                      (ims.quantity * ims.unit_price *-1) AS totalPrice,
+                      ims.quantity *-1 AS quantity,
+                      ims.created_at,
+                      ims.movement_type_id,
+                      pdt.id,
+                      pdt.name
+                  FROM inventory_movements ims
+                      INNER JOIN sales_order_items soitems ON ims.sales_order_item_id = soitems.id
+                      INNER JOIN products pdt ON soitems.product_id = pdt.id
+                  WHERE movement_type_id = 2
+                      AND ims.created_at::DATE >= '${start_date}'
+                      AND ims.created_at::DATE <= '${end_date}'
+          ) sold_inventory_table
+              GROUP BY product_id, product_name
+          )
+      SELECT
+          t1.product_name,
+          t1.quantity_sold * -1 AS quantity_sold,
+          t1.average_cogs,
+          t1.average_selling_price,
+          t1.contribution,
+          t1.total_contribution *-1 AS total_contribution,
+          (365*(t1.total_price/t1.quantity_sold) / ((t2.start_inv_at_hand + t3.end_inv_at_hand)/2)) AS inventory_turnaround_period
+      FROM inventory_sub_table t1
+          LEFT JOIN start_inventory_table t2 ON t1.product_id = t2.id
+          LEFT JOIN end_inventory_table t3 ON t3.id = t2.id
+          ORDER BY total_contribution DESC; `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Product Analytics Dashboard`, 
+      });
+  
+      res.send(productAnalytics);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+
 //3. Payments Dashboard: Unsettled AR -- customer level
 //returns top 10 customers
 router.get('/Customer_AR', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {

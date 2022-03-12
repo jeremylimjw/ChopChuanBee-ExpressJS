@@ -157,12 +157,22 @@ const SOFP = sequelize.define('sofp', {
       defaultValue: 0,
       allowNull: false,
     },
-    other_liability_1: {
+    other_current_liability_1: {
       type: DataTypes.DECIMAL,
       defaultValue: 0,
       allowNull: false,
     },
-    other_liability_2: {
+    other_current_liability_2: {
+      type: DataTypes.DECIMAL,
+      defaultValue: 0,
+      allowNull: false,
+    },
+    other_non_current_liability_1: {
+      type: DataTypes.DECIMAL,
+      defaultValue: 0,
+      allowNull: false,
+    },
+    other_non_current_liability_2: {
       type: DataTypes.DECIMAL,
       defaultValue: 0,
       allowNull: false,

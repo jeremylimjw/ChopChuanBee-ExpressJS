@@ -128,12 +128,90 @@ router.get('/Profits_table', requireAccess(ViewType.ANALYTICS, true), async func
 });
 
 
-//2. Payments Dashboard: Unsettled AP
+//2. Payments Dashboard: Unsettled AR -- customer level
+router.get('/Customer_AR', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+   
+  try {
+      const customer_ar = await sequelize.query(
+          `SELECT cust.company_name, cust.p1_name, SUM(pmt.amount) AS total_AR_amount
+          FROM 
+              payments pmt INNER JOIN sales_orders so ON pmt.sales_order_id = so.id
+              INNER JOIN customers cust ON  so.customer_id = cust.id
+          WHERE 
+              pmt.accounting_type_id = 2 
+          GROUP BY cust.id
+          ORDER BY total_AR_amount
+          LIMIT 10`,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )    
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Unsettled AR Dashboard (Customer Level) `, 
+      });
+      res.send(customer_ar)
+  
+      
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+
+//2. Payments Dashboard: Unsettled AP -- supplier level
+router.get('/Supplier_AP', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+   
+  try {
+      const customer_ar = await sequelize.query(
+          `SELECT supp.company_name, supp.s1_name, SUM(pmt.amount) AS total_AP_amount
+          FROM 
+              payments pmt INNER JOIN purchase_orders pos ON pmt.purchase_order_id = pos.id
+              INNER JOIN suppliers supp ON  pos.supplier_id = supp.id
+          WHERE 
+              pmt.accounting_type_id = 1 
+          GROUP BY supp.id
+          ORDER BY total_AP_amount DESC
+          LIMIT 10`,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )    
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Unsettled AR Dashboard (Customer Level) `, 
+      });
+      res.send(customer_ar)
+  
+      
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+
+//2. Payments Dashboard: Unsettled AP -- invoice level
 router.get('/Unsettled_AP', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
    
     try {
         const unsettled_AP = await sequelize.query(
-            `SELECT pos.id, SUM(pmt.amount) 
+            `SELECT pos.id, pos.supplier_invoice_id, SUM(pmt.amount) 
             FROM payments pmt INNER JOIN purchase_orders pos ON pmt.purchase_order_id = pos.id
             WHERE pmt.accounting_type_id = 1 
             GROUP BY pos.id
@@ -150,7 +228,7 @@ router.get('/Unsettled_AP', requireAccess(ViewType.ANALYTICS, true), async funct
         await Log.create({ 
           employee_id: user.id, 
           view_id: ViewType.ANALYTICS.id,
-          text: `${user.name} viewed the Unsettled AP Dashboard `, 
+          text: `${user.name} viewed the Unsettled AP Dashboard (Invoice Level) `, 
         });
         res.send(unsettled_AP)
     
@@ -163,7 +241,7 @@ router.get('/Unsettled_AP', requireAccess(ViewType.ANALYTICS, true), async funct
       }
 });
 
-//2. Payments Dashboard: Unsettled AR
+//2. Payments Dashboard: Unsettled AR -- invoice level
 router.get('/Unsettled_AR', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
    
   try {
@@ -185,7 +263,7 @@ router.get('/Unsettled_AR', requireAccess(ViewType.ANALYTICS, true), async funct
       await Log.create({ 
         employee_id: user.id, 
         view_id: ViewType.ANALYTICS.id,
-        text: `${user.name} viewed the Unsettled AR Dashboard `, 
+        text: `${user.name} viewed the Unsettled AR Dashboard (Invoice Level) `, 
       });
       res.send(unsettled_AR)
   

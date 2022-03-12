@@ -673,7 +673,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       //inventory movement
       await InventoryMovement.bulkCreate([
-        { unit_cost: 1.1 , unit_price: 2.2,  quantity: -5 , sales_order_item_id: so1b.id, movement_type_id:2 , created_at: '2021-01-12'} ,//deliver 2 days later
+        { unit_cost: 1.1 , unit_price: 2.2,  quantity: -5 , sales_order_item_id: so1a.id, movement_type_id:2 , created_at: '2021-01-12'} ,//deliver 2 days later
         { unit_cost: 2.1 , unit_price: 3.2,  quantity: -5 ,sales_order_item_id: so1b.id, movement_type_id:2 , created_at: '2021-01-12' } ,
 
         { unit_cost: 3.5 , unit_price: 5.1,  quantity: -2 , sales_order_item_id: so2a.id, movement_type_id:2, created_at: '2021-02-12' },
@@ -737,9 +737,16 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
         { unit_cost:  10.2, unit_price: 12.2,  quantity: -100 ,sales_order_item_id: so20a.id, movement_type_id:2  , created_at: '2021-12-12'} ,
         { unit_cost:  1.5, unit_price: 13.5,  quantity: -100 , sales_order_item_id: so20b.id, movement_type_id:2, created_at: '2021-12-12' } ,
-        { unit_cost:  1.1,  unit_price: 12.1,  quantity: 10 , sales_order_item_id: so20b.id, movement_type_id:3 , created_at: '2021-12-13' }  
+        { unit_cost:  1.1,  unit_price: 12.1,  quantity: 10 , sales_order_item_id: so20b.id, movement_type_id:3 , created_at: '2021-12-13' },
 
-
+        //damaged goods
+        { unit_cost: 7.2 , unit_price: 0,  quantity: -3 , sales_order_item_id: so4a.id, movement_type_id:4 , created_at: '2021-04-12'  }  ,
+        { unit_cost:  2.5, unit_price: 0,  quantity: -5 , sales_order_item_id: so11a.id, movement_type_id:4  , created_at: '2021-11-12'}  ,
+        { unit_cost:  3.5, unit_price: 0,  quantity: -6 ,sales_order_item_id: so11b.id, movement_type_id:4 , created_at: '2021-11-12'}  ,
+        { unit_cost:  4.5, unit_price: 0,  quantity: -10 ,sales_order_item_id: so17a.id, movement_type_id:4  , created_at: '2021-10-12' }  ,
+        { unit_cost:  5.2, unit_price: 0,  quantity: -2 ,sales_order_item_id: so17b.id, movement_type_id:4 , created_at: '2021-10-12'}  ,
+        { unit_cost:  1.1,  unit_price: 0,  quantity: -19 , sales_order_item_id: so19b.id, movement_type_id:4 , created_at: '2021-12-13'}  ,
+        { unit_cost:  10.2, unit_price: 0,  quantity: -5 ,sales_order_item_id: so20a.id, movement_type_id:4  , created_at: '2021-12-12'} ,
       ]); 
 
       await Payment.bulkCreate([

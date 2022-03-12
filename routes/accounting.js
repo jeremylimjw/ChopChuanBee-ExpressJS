@@ -207,7 +207,7 @@ router.post('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async
 });
 //SOFP PUT
 router.put('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
-    const { id, name,cash_sales_of_goods, cash_others, account_receivable, inventory, supplies, prepaid_insurance, prepaid_rent, other_current_asset_1,other_current_asset_2, land, less_accumulated_depreciation_land, building, less_accumulated_depreciation_building, equipments, less_accumulated_depreciation_equipments, other_non_current_asset_1, other_non_current_asset_2, goodwill, trade_names, other_intangible_asset_1, other_intangible_asset_2, salary_payable, interest_payable, taxes_payable, warranty_payable, rental_payable, notes_payable, bonds_payable, other_liability_1, other_liability_2, share_capital, less_withdrawal, retained_earning, other_equity_1, other_equity_2,end_date} = req.body;
+    const { id, name,cash_sales_of_goods, cash_others, account_receivable, inventory, supplies, prepaid_insurance, prepaid_rent, other_current_asset_1,other_current_asset_2, land, less_accumulated_depreciation_land, building, less_accumulated_depreciation_building, equipments, less_accumulated_depreciation_equipments, other_non_current_asset_1, other_non_current_asset_2, goodwill, trade_names, other_intangible_asset_1, other_intangible_asset_2, account_payable, salary_payable, interest_payable, taxes_payable, warranty_payable, rental_payable, notes_payable, bonds_payable, other_liability_1, other_liability_2, share_capital, less_withdrawal, retained_earning, other_equity_1, other_equity_2,end_date} = req.body;
   
 
     try {
@@ -218,7 +218,7 @@ router.put('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(req
                                 'less_accumulated_depreciation_building', 'equipments', 
                                 'less_accumulated_depreciation_equipments', 'other_non_current_asset_1', 
                                 'other_non_current_asset_2', 'goodwill', 'trade_names', 
-                                'other_intangible_asset_1', 'other_intangible_asset_2', 'salary_payable', 
+                                'other_intangible_asset_1', 'other_intangible_asset_2', 'account_payable', 'salary_payable', 
                                 'interest_payable', 'taxes_payable', 'warranty_payable', 'rental_payable', 
                                 'notes_payable', 'bonds_payable', 'other_liability_1', 'other_liability_2', 
                                 'share_capital', 'less_withdrawal', 'retained_earning', 'other_equity_1', 
@@ -231,7 +231,7 @@ router.put('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(req
   
     try {
       const result = await SOFP.update(
-        { name, cash_sales_of_goods, cash_others, account_receivable, inventory, supplies, prepaid_insurance, prepaid_rent, other_current_asset_1,other_current_asset_2, land, less_accumulated_depreciation_land, building, less_accumulated_depreciation_building, equipments, less_accumulated_depreciation_equipments, other_non_current_asset_1, other_non_current_asset_2, goodwill, trade_names, other_intangible_asset_1, other_intangible_asset_2, salary_payable, interest_payable, taxes_payable, warranty_payable, rental_payable, notes_payable, bonds_payable, other_liability_1, other_liability_2, share_capital, less_withdrawal, retained_earning, other_equity_1, other_equity_2, end_date },
+        { name, cash_sales_of_goods, cash_others, account_receivable, inventory, supplies, prepaid_insurance, prepaid_rent, other_current_asset_1,other_current_asset_2, land, less_accumulated_depreciation_land, building, less_accumulated_depreciation_building, equipments, less_accumulated_depreciation_equipments, other_non_current_asset_1, other_non_current_asset_2, goodwill, trade_names, other_intangible_asset_1, other_intangible_asset_2,account_payable, salary_payable, interest_payable, taxes_payable, warranty_payable, rental_payable, notes_payable, bonds_payable, other_liability_1, other_liability_2, share_capital, less_withdrawal, retained_earning, other_equity_1, other_equity_2, end_date },
         { where: { id : id } }
       );
   

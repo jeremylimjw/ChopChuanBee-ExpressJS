@@ -12,11 +12,14 @@ const { Employee } = require('../models/Employee');
 
 
 router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res, next) {
-    const { employee_name, start_date, end_date, session } = req.query;
+    const { id, employee_name, start_date, end_date, session } = req.query;
 
     const where = {};
     const incEmployee = { model: Employee };
 
+    if (id != null) {
+        where.id = id;
+    }
     if (employee_name != null) {
         incEmployee.where = { name: { [Sequelize.Op.iLike]: `%${employee_name}%` } };
     }
@@ -32,7 +35,7 @@ router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res
 
         const fullItinerarys = await Promise.all(itinerarys.map(async itinerary => ({
             ...itinerary.toJSON(),
-            delivery_orders: await DeliveryOrder.findAll({ where: { itinerary_id: itinerary.id } }),
+            delivery_orders: await DeliveryOrder.findAll({ where: { itinerary_id: itinerary.id }, order: [['sequence', 'ASC']] }),
         })));
 
         res.send(fullItinerarys);
@@ -48,6 +51,7 @@ router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res
 
 router.post('/', requireAccess(ViewType.DISPATCH, true), async function(req, res, next) {
     const { driver_id, delivery_orders } = req.body;
+
     // Validation
     try {
         assertNotNull(req.body, ['start_time', 'session', 'origin_postal_code', 'longitude', 'latitude', 'driver_id', 'delivery_orders']);
@@ -59,14 +63,14 @@ router.post('/', requireAccess(ViewType.DISPATCH, true), async function(req, res
     try {
         const newItinerary = await Itinerary.create(req.body);
 
-        for (let order of delivery_orders) {
+        for (let i = 0; i < delivery_orders.length; i++) {
             await DeliveryOrder.update({ 
                 itinerary_id: newItinerary.id, 
-                sequence: order.sequence, 
+                sequence: i, 
                 delivery_status_id: DeliveryStatusEnum.ASSIGNED.id 
             }, 
             { 
-                where: { id: order.id } 
+                where: { id: delivery_orders[i].id } 
             })
         }
         
@@ -80,6 +84,107 @@ router.post('/', requireAccess(ViewType.DISPATCH, true), async function(req, res
         });
 
         res.send(newItinerary);
+        
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+router.put('/', requireAccess(ViewType.DISPATCH, true), async function(req, res, next) {
+    const { id, delivery_orders, driver_id } = req.body;
+
+    // Validation
+    try {
+        assertNotNull(req.body, ['id', 'start_time', 'session', 'origin_postal_code', 'longitude', 'latitude', 'driver_id', 'delivery_orders']);
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        // Update itinerary fields
+        await Itinerary.update(req.body, { where: { id: id }});
+        
+        // Unassign all previous DOs
+        await DeliveryOrder.update({ 
+            itinerary_id: null, 
+            sequence: -1, 
+            delivery_status_id: DeliveryStatusEnum.PENDING.id 
+        }, {
+            where: { itinerary_id: id }
+        })
+
+        // Re-assign all new DOs
+        for (let i = 0; i < delivery_orders.length; i++) {
+            await DeliveryOrder.update({ 
+                itinerary_id: id, 
+                sequence: i, 
+                delivery_status_id: DeliveryStatusEnum.ASSIGNED.id 
+            }, 
+            { 
+                where: { id: delivery_orders[i].id } 
+            })
+        }
+        
+        // Record to admin logs
+        const user = res.locals.user;
+        const driver = await Employee.findByPk(driver_id);
+        await Log.create({ 
+            employee_id: user.id, 
+            view_id: ViewType.DISPATCH.id,
+            text: `${user.name} edited an itinerary for ${driver.name}`, 
+        });
+
+        res.send({ id: id });
+        
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+router.delete('/', requireAccess(ViewType.DISPATCH, true), async function(req, res, next) {
+    const { id } = req.query;
+
+    // Validation
+    try {
+        assertNotNull(req.query, ['id']);
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        const itinerary = await Itinerary.findByPk(id, { include: [Employee] });
+
+        // Unassign all previous DOs
+        await DeliveryOrder.update({ 
+            itinerary_id: null, 
+            sequence: -1, 
+            delivery_status_id: DeliveryStatusEnum.PENDING.id 
+        }, {
+            where: { itinerary_id: id }
+        })
+        
+        // Delete itinerary
+        await Itinerary.destroy({ where: { id: id }});
+        
+        // Record to admin logs
+        const user = res.locals.user;
+        await Log.create({ 
+            employee_id: user.id, 
+            view_id: ViewType.DISPATCH.id,
+            text: `${user.name} deleted an itinerary for ${itinerary.employee.name}`, 
+        });
+
+        res.send({ id: id });
         
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database

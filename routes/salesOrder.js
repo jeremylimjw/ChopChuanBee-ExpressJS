@@ -63,7 +63,7 @@ router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
 });
 
 
-router.post('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.post('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   // Validation here
   try {
     assertNotNull(req.body, ['customer_id', 'sales_order_status_id', 'sales_order_items'])
@@ -93,12 +93,18 @@ router.post('/', requireAccess(ViewType.GENERAL), async function(req, res, next)
 });
 
 
-router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
-  const { id, sales_order_items, sales_order_status_id } = req.body;
+router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { id, has_delivery } = req.body;
 
+  let deliveryOrder;
   // Validation here
   try {
     assertNotNull(req.body, ['id'])
+
+    // Validate delivery postal code if delivery is opted for
+    if (has_delivery) {
+      deliveryOrder = await buildDeliveryOrder(req.body);
+    }
   } catch(err) {
     res.status(400).send(err);
     return;
@@ -106,6 +112,19 @@ router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
 
   try {
     await updateSalesOrder(req.body);
+    
+    // Update associated delivery order
+    if (has_delivery) {
+      // If have existing then do update, else create a new do
+      const exists = await DeliveryOrder.findAll({ where: { sales_order_id: id }});
+      if (exists.length > 0) {
+        await DeliveryOrder.update(deliveryOrder, { where: { sales_order_id: id }})
+      } else {
+        await DeliveryOrder.create(deliveryOrder);
+      }
+    } else {
+      await DeliveryOrder.destroy({ where: { sales_order_id: id }})
+    }
     
     // Record to admin logs
     const user = res.locals.user;
@@ -126,7 +145,7 @@ router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
 });
 
 
-router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.post('/confirm', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { id } = req.body;
 
   // Validation here
@@ -207,7 +226,7 @@ router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res
 
 
 // cancel sales order
-router.post('/cancel', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.post('/cancel', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { id } = req.body;
 
   // Validation here
@@ -236,6 +255,9 @@ router.post('/cancel', requireAccess(ViewType.GENERAL), async function(req, res,
       top_up: Math.abs(x.inventory_movements.reduce((prev, current) => prev + current.quantity, 0)), // sum will be in negative, Math.abs() to flip to positive
     }))
     const inventoryMovements = await buildRefundInventories(movements);
+
+    // Delete any delivery orders
+    await DeliveryOrder.destroy({ where: { sales_order_id: id }});
 
     // Create payment
     await Payment.create(payment);
@@ -273,7 +295,7 @@ router.post('/cancel', requireAccess(ViewType.GENERAL), async function(req, res,
 
 
 // Handles new payment or refund payment
-router.post('/payment', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.post('/payment', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { sales_order_id, amount, type, payment_method_id } = req.body;
 
   // Validation here
@@ -313,7 +335,7 @@ router.post('/payment', requireAccess(ViewType.GENERAL), async function(req, res
 
 
 // For sales refund
-router.post('/inventory/refund', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.post('/inventory/refund', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { inventory_movements } = req.body;
 
   // Validation here

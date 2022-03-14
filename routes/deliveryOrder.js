@@ -9,6 +9,7 @@ const { DeliveryOrder } = require('../models/DeliveryOrder');
 const { SalesOrder, getGeocode } = require('../models/SalesOrder');
 const { Customer } = require('../models/Customer');
 const { sequelize } = require('../db');
+const DeliveryStatusEnum = require('../common/DeliveryStatusEnum');
 
 
 router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res, next) {
@@ -48,31 +49,43 @@ router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res
 
 
 router.put('/', requireAccess(ViewType.DISPATCH, true), async function(req, res, next) {
-    const { id, postal_code } = req.body;
+    const deliveryOrder = req.body;
 
     let geoCoordinates;
     // Validation
     try {
-        assertNotNull(req.body, ['id', 'address', 'postal_code', 'sales_order_id', 'delivery_status_id']);
+        assertNotNull(deliveryOrder, ['id', 'address', 'postal_code', 'sales_order_id', 'delivery_status_id']);
 
-        geoCoordinates = await getGeocode(postal_code);
+        geoCoordinates = await getGeocode(deliveryOrder.postal_code);
     } catch(err) {
         res.status(400).send(err);
         return;
     }
     
     try {
-        await DeliveryOrder.update({...req.body, ...geoCoordinates }, { where: { id: id }});
+        // If setting to PENDING, unassign any attached driver
+        if (deliveryOrder.delivery_status_id === DeliveryStatusEnum.PENDING.id) {
+            deliveryOrder.itinerary_id = null;
+        }
+
+        // If setting to COMPLETED, record timestamp
+        if (deliveryOrder.delivery_status_id === DeliveryStatusEnum.COMPLETED.id && deliveryOrder.deliver_at == null) {
+            deliveryOrder.deliver_at = new Date();
+        }
+
+        const newDeliveryOrder = {...deliveryOrder, ...geoCoordinates };
+        
+        await DeliveryOrder.update(newDeliveryOrder, { where: { id: deliveryOrder.id }});
         
         // Record to admin logs
         const user = res.locals.user;
         await Log.create({ 
             employee_id: user.id, 
             view_id: ViewType.DISPATCH.id,
-            text: `${user.name} edited a delivery order with ID ${id}`, 
+            text: `${user.name} edited a delivery order with ID ${newDeliveryOrder.id}`, 
         });
 
-        res.send({ id: id });
+        res.send(newDeliveryOrder);
         
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database

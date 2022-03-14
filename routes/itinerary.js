@@ -9,6 +9,8 @@ const { DeliveryOrder } = require('../models/DeliveryOrder');
 const { Itinerary } = require('../models/Itinerary');
 const DeliveryStatusEnum = require('../common/DeliveryStatusEnum');
 const { Employee } = require('../models/Employee');
+const { SalesOrder } = require('../models/SalesOrder');
+const { Customer } = require('../models/Customer');
 
 
 router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res, next) {
@@ -35,7 +37,7 @@ router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res
 
         const fullItinerarys = await Promise.all(itinerarys.map(async itinerary => ({
             ...itinerary.toJSON(),
-            delivery_orders: await DeliveryOrder.findAll({ where: { itinerary_id: itinerary.id }, order: [['sequence', 'ASC']] }),
+            delivery_orders: await DeliveryOrder.findAll({ where: { itinerary_id: itinerary.id }, order: [['sequence', 'ASC']], include: [{ model: SalesOrder, include: [Customer]}] }),
         })));
 
         res.send(fullItinerarys);

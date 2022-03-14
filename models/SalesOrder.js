@@ -107,7 +107,7 @@ async function validateOrderItems(orderItems) {
     const temp = [];
     for (let item of orderItems) {
         // Validation
-        if (!item.unit_price) throw 'Each order item must have a unit price.';
+        if (item.unit_price == null) throw 'Each order item must have a unit price.';
         if (item.quantity <= 0) throw 'Each order item must have a valid quantity.';
 
         const foundIndex = temp.findIndex(x => x.product_id === item.product_id);
@@ -142,7 +142,7 @@ async function validateOrderItems(orderItems) {
 
       if (results.length && results[0].total_quantity && results[0].total_quantity < item.quantity) {
         const product = await Product.findByPk(item.product_id);
-        throw `${product.name} does not have enough stock (left ${results[0].total_quantity}) for order quantity ${item.quantity}`;
+        throw `${product.name} does not have enough stock (left ${results[0].total_quantity}) for quantity ${item.quantity}`;
       }
     }
 
@@ -195,8 +195,8 @@ async function validateAndBuildNewInventories(salesOrder, orderItems) {
         product_id: x.product_id,
         quantity: -x.quantity, // negative since its taking out from our inventory
         unit_cost: x.unit_cost,
-        unit_price: x.unit_price*(1+salesOrder.gst_rate/100),
-        movement_type_id: MovementType.SALE.id,
+        unit_price: salesOrder ? x.unit_price*(1+salesOrder.gst_rate/100) : 0, // if its from a sales order, calculate gst
+        movement_type_id: x.movement_type_id ? x.movement_type_id : MovementType.SALE.id,
     }))
       
     return movements;

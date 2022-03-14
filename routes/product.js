@@ -9,8 +9,9 @@ const { SupplierMenu, GUEST_ID, Supplier } = require('../models/Supplier');
 const { sequelize } = require('../db');
 const { InventoryMovement } = require('../models/InventoryMovement');
 const { PurchaseOrderItem, PurchaseOrder } = require('../models/PurchaseOrder');
-const { SalesOrderItem, SalesOrder } = require('../models/SalesOrder');
+const { SalesOrderItem, SalesOrder,  validateOrderItems, validateAndBuildNewInventories } = require('../models/SalesOrder');
 const { Customer } = require('../models/Customer');
+const MovementType = require('../common/MovementTypeEnum');
 
 
 router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, res, next) {
@@ -297,6 +298,52 @@ router.get('/inventoryMovement', requireAccess(ViewType.GENERAL), async function
   }
   
   try {
+    const results = await InventoryMovement.findAll({ where: { product_id: product_id },
+      include: [
+        { model: PurchaseOrderItem, include: [{ model: PurchaseOrder, include: [Supplier]}] }, 
+        { model: SalesOrderItem, include: [{ model: SalesOrder, include: [Customer]}] }
+      ],
+      order: [['created_at', 'DESC']]
+    });
+    res.send(results);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+// Record a damaged inventory
+router.post('/inventoryMovement', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { product_id, quantity } = req.body;
+
+  const movement = {
+    id: null, // sales_order_item_id
+    product_id: product_id,
+    unit_price: 0,
+    quantity: quantity,
+    movement_type_id: MovementType.DAMAGED.id,
+  }
+  
+  try {
+    assertNotNull(req.body, ['product_id', 'quantity']);
+
+    // Validate available stock
+    await validateOrderItems([movement]);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+  
+  try {
+    const movements = await validateAndBuildNewInventories(null, [movement]);
+
+    const newMovements = await InventoryMovement.bulkCreate(movements);
+    console.log(newMovements)
+
     const results = await InventoryMovement.findAll({ where: { product_id: product_id },
       include: [
         { model: PurchaseOrderItem, include: [{ model: PurchaseOrder, include: [Supplier]}] }, 

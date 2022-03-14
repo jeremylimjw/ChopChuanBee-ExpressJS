@@ -28,28 +28,37 @@ router.get('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(req
 
 //incomeStatement  
 router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
-
-    //const predicate = parseRequest(req.query);
     
-    const {name,start_date,end_date, id } = req.query;
-    let queryString = '';
-    if(name != null && start_date != null && end_date != null){
-      queryString = `SELECT * FROM income_statements WHERE name like '%${name}%' and (end_date >= '${start_date}' and end_date <= '${end_date}') or (start_date >= '${start_date}' and start_date <= '${end_date}')`
+    const {name,start_date,end_date, id , status } = req.query;
+    let queryString ='';
+   
+    if (status == null) {
+      queryString  = `WITH IC AS (SELECT * FROM income_statements) `
+    }
+    else if (status == 2){
+      queryString  = `WITH IC AS(SELECT * FROM income_statements WHERE deleted_date IS NOT NULL) `
+    }
+    else if (status == 1) {
+      queryString  = `WITH IC AS (SELECT * FROM income_statements WHERE deleted_date IS NULL) `
+    }
+    if(name != null && start_date != null && end_date != null ){
+      queryString += `SELECT * FROM IC WHERE name like '%${name}%' AND (end_date >= '${start_date}' AND end_date <= '${end_date}') OR (start_date >= '${start_date}' AND start_date <= '${end_date}')`
     }                                                   
     else if (name != null ){
-      queryString = `SELECT * FROM income_statements WHERE name like '%${name}%'`
+      queryString += `SELECT * FROM IC WHERE name like '%${name}%'`
     }
     else if (start_date != null && end_date != null ){
-      queryString = `SELECT * FROM income_statements WHERE (end_date >= '${start_date}' and end_date <= '${end_date}') or (start_date >= '${start_date}' and start_date <= '${end_date}')`
+      queryString += `SELECT * FROM IC WHERE (end_date >= '${start_date}' AND end_date <= '${end_date}') OR (start_date >= '${start_date}' AND start_date <= '${end_date}')`
     }
     else if (id != null){
-      queryString = `SELECT * FROM income_statements WHERE ( id ='${id}')`
+      queryString += `SELECT * FROM IC WHERE ( id ='${id}')`
     }
     else 
     {
-      queryString = `SELECT * FROM income_statements`
+      queryString += `SELECT * FROM IC`
     }
-    console.log (queryString);
+    queryString += ` ORDER BY created_at desc`
+
     const income_statement = await sequelize.query(
       queryString,
       { 
@@ -63,11 +72,9 @@ router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async 
       res.send(income_statement);
       
     } catch(err) {
-      // Catch and return any uncaught exceptions while inserting into database
       console.log(err);
       res.status(500).send(err);
     }
-  
 });
 
 //SOFP

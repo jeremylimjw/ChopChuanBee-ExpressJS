@@ -202,8 +202,8 @@ async function syncAssociations() {
     const { DeliveryOrder, DeliveryStatus } = require('../models/DeliveryOrder');
 
     // 1-1 association
-    SalesOrder.hasOne(DeliveryOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
-    DeliveryOrder.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+    SalesOrder.hasOne(DeliveryOrder, { foreignKey: { name: 'sales_order_id' }});
+    DeliveryOrder.belongsTo(SalesOrder, { foreignKey: { name: 'sales_order_id' }});
 
     // 1-1 association
     DeliveryStatus.hasOne(DeliveryOrder, { foreignKey: { allowNull: false, name: 'delivery_status_id' }});

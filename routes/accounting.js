@@ -31,7 +31,7 @@ router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async 
 
     //const predicate = parseRequest(req.query);
     
-    const {name,start_date,end_date } = req.query;
+    const {name,start_date,end_date, id } = req.query;
     let queryString = '';
     if(name != null && start_date != null && end_date != null){
       queryString = `SELECT * FROM income_statements WHERE name like '%${name}%' and (end_date >= '${start_date}' and end_date <= '${end_date}') or (start_date >= '${start_date}' and start_date <= '${end_date}')`
@@ -41,6 +41,9 @@ router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async 
     }
     else if (start_date != null && end_date != null ){
       queryString = `SELECT * FROM income_statements WHERE (end_date >= '${start_date}' and end_date <= '${end_date}') or (start_date >= '${start_date}' and start_date <= '${end_date}')`
+    }
+    else if (id != null){
+      queryString = `SELECT * FROM income_statements WHERE ( id ='${id}')`
     }
     else 
     {

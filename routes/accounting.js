@@ -72,7 +72,7 @@ router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async 
 
 //SOFP
 router.post('/sofp', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
-    const {name,end_date } = req.body;
+    const {name,end_date , remarks } = req.body;
     try {
 
         const account_receivable = await sequelize.query(
@@ -124,7 +124,7 @@ router.post('/sofp', requireAccess(ViewType.ACCOUNTING, true), async function(re
           const ar = parseFloat(account_receivable[0].ar) || 0;
           const ap = parseFloat(account_payable[0].ap) || 0;
           const inv_at_hand = parseFloat(inventory[0].inv_at_hand) || 0;
-          const newSOFP = await SOFP.create({name,cash_sales_of_goods:cash_business, account_receivable:ar, inventory:inv_at_hand,account_payable:ap, end_date });
+          const newSOFP = await SOFP.create({name,cash_sales_of_goods:cash_business, account_receivable:ar, inventory:inv_at_hand,account_payable:ap, end_date ,remarks});
       
         // Record to admin logs
         const user = res.locals.user;
@@ -147,7 +147,7 @@ router.post('/sofp', requireAccess(ViewType.ACCOUNTING, true), async function(re
 
 //create income statement 
 router.post('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
-    const {name, start_date, end_date} = req.body;
+    const {name, start_date, end_date , remarks} = req.body;
     try {
         const revenue = await sequelize.query(
             `SELECT sum(qty_unitprice.total) as revenue 
@@ -189,7 +189,7 @@ router.post('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async
         const COGS_converted = parseFloat(COGS[0].cost_of_goods_sold)|| 0;
         const customer_sales_return_converted = parseFloat(customer_sales_return[0].sales) || 0;
         
-        const newIncomeStatement = await IncomeStatement.create({name,revenue:revenue_converted, less_cost_of_goods_sold:COGS_converted, less_customer_sales_return:customer_sales_return_converted,  start_date, end_date });
+        const newIncomeStatement = await IncomeStatement.create({name,revenue:revenue_converted, less_cost_of_goods_sold:COGS_converted, less_customer_sales_return:customer_sales_return_converted,  start_date, end_date , remarks});
         // Record to admin logs
         const user = res.locals.user;
         await Log.create({ 

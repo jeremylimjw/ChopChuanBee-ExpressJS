@@ -491,7 +491,8 @@ router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async functio
       ) AS subquery JOIN customers c ON subquery.customer_id = c.id  
        JOIN charged_unders cu ON c.charged_under_id = cu.id
        WHERE  subquery.created_at BETWEEN '${start_date}' AND '${end_date}'
-       and cu.name = '${charged_under_name}'
+       AND cu.name = '${charged_under_name}'
+       AND subquery.gst_rate > 0
        `,
     { 
       raw: true, 
@@ -504,7 +505,6 @@ router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async functio
   let total_input_tax = input_tax.map(input_tax => input_tax.gst_amount).reduce((amt1,amt2) => (+amt1) + (+amt2));
   total_amount = Math.floor(total_input_tax*100)/100 
   const total_input_tax_obj = {total_input_tax};
-  // const result = Object.assign(input_tax, obj)
   input_tax.push(total_amount_obj);
   input_tax.push(total_input_tax_obj);
 
@@ -533,7 +533,8 @@ router.get('/output_tax', requireAccess(ViewType.ACCOUNTING, true), async functi
       ) AS subquery JOIN suppliers s ON subquery.supplier_id = s.id  
       JOIN charged_unders cu ON subquery.charged_under_id = cu.id
        WHERE subquery.created_at BETWEEN '${start_date}' AND '${end_date}'
-       AND cu.name = '${charged_under_name}'`,
+       AND cu.name = '${charged_under_name}'
+       AND subquery.gst_rate > 0`,
     { 
       raw: true, 
       type: sequelize.QueryTypes.SELECT 

@@ -134,35 +134,76 @@ router.get('/Profits_table', requireAccess(ViewType.ANALYTICS, true), async func
 //2. Profits for each Customer
 // returns all the customers
 router.get('/Customer_Profits', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
-  const {start_date ,end_date } = req.query;
+  const {start_date ,end_date,customer_id } = req.query;
+
   try {
       const profitsTable = await sequelize.query(
-          `WITH invoiceProfits AS (
-            SELECT 
-                SUM(ims.rev) AS revenue, 
-                SUM(ims.cogs) AS cost_of_goods_sold, 
-                sales_order_item_id
-            FROM 
-                (
-                    SELECT (quantity*unit_price*-1) AS rev, 
-                    (quantity * unit_cost) AS cogs, 
-                    created_at, sales_order_item_id, 
-                    movement_type_id FROM inventory_movements
-                ) ims
-            WHERE movement_type_id = 2
-                AND created_at::DATE >= '${start_date}'
-                AND created_at::DATE <= '${end_date}'
-            GROUP BY sales_order_item_id
-            )
-            SELECT 
-                so.id AS sales_order_id, 
-                invoiceProfits.revenue AS total_revenue, 
-                invoiceProfits.cost_of_goods_sold*-1 AS total_COGS,
-                invoiceProfits.revenue +  invoiceProfits.cost_of_goods_sold AS total_profits
-            FROM invoiceProfits 
-            INNER JOIN sales_order_items poitems ON invoiceProfits.sales_order_item_id = poitems.id
-            INNER JOIN sales_orders so ON so.id = poitems.sales_order_id
-            INNER JOIN customers c ON so.customer_id = c.id; `,
+          `WITH
+          invoiceProfits
+          AS
+          (
+              SELECT
+                  SUM(ims.rev) AS revenue,
+                  SUM(ims.cogs) AS cost_of_goods_sold,
+                  sales_order_item_id
+              FROM
+                  (
+                          SELECT (quantity*unit_price*-1) AS rev,
+                      (quantity * unit_cost) AS cogs,
+                      created_at, sales_order_item_id,
+                      movement_type_id
+                  FROM inventory_movements
+                      ) ims
+              WHERE movement_type_id = 2
+              GROUP BY sales_order_item_id
+          )
+      SELECT
+          so.id AS sales_order_id,
+          c.id,
+          invoiceProfits.revenue AS total_revenue,
+          invoiceProfits.cost_of_goods_sold*-1 AS total_COGS,
+          invoiceProfits.revenue +  invoiceProfits.cost_of_goods_sold AS total_profits
+      FROM invoiceProfits
+          INNER JOIN sales_order_items poitems ON invoiceProfits.sales_order_item_id = poitems.id
+          INNER JOIN sales_orders so ON so.id = poitems.sales_order_id
+          INNER JOIN customers c ON so.customer_id = c.id
+      WHERE c.id ='49cdb879-cea8-4458-b88b-1681a41d51a6';
+      
+      
+      WITH
+          invoiceProfits
+          AS
+          (
+              SELECT
+                  SUM(ims.rev) AS revenue,
+                  SUM(ims.cogs) AS cost_of_goods_sold,
+                  sales_order_item_id
+              FROM
+                  (
+                           SELECT (quantity*unit_price*-1) AS rev,
+                      (quantity * unit_cost) AS cogs,
+                      created_at, sales_order_item_id,
+                      movement_type_id
+                  FROM inventory_movements
+                      ) ims
+              WHERE movement_type_id = 2
+                  AND created_at::DATE >= '${start_date}'
+                  AND created_at::DATE <= '${end_date}'
+              GROUP BY sales_order_item_id
+          )
+      SELECT
+          so.id AS sales_order_id,
+          c.id,
+          c.company_name,
+          c.p1_name,
+          invoiceProfits.revenue AS total_revenue,
+          invoiceProfits.cost_of_goods_sold*-1 AS total_COGS,
+          invoiceProfits.revenue +  invoiceProfits.cost_of_goods_sold AS total_profits
+      FROM invoiceProfits
+          INNER JOIN sales_order_items poitems ON invoiceProfits.sales_order_item_id = poitems.id
+          INNER JOIN sales_orders so ON so.id = poitems.sales_order_id
+          INNER JOIN customers c ON so.customer_id = c.id
+      WHERE c.id = '${customer_id}';`,
           {
               raw: true,
               type: sequelize.QueryTypes.SELECT
@@ -559,6 +600,133 @@ router.get('/Unsettled_AR', requireAccess(ViewType.ANALYTICS, true), async funct
         text: `${user.name} viewed the Unsettled AR Dashboard (Invoice Level) `, 
       });
       res.send(unsettled_AR)
+  
+      
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+
+//6. AR Table for Demo
+// returns list of customers 
+router.get('/Aging_AR_Table_Demo', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+   
+  try {
+      const AR_table = await sequelize.query(
+          `
+           WITH
+              AR_Aging_Table
+              AS
+              (
+                  SELECT
+                      cust.id AS customer_id,
+                      cust.company_name AS company_name,
+                      cust.p1_name AS p1_name,
+                      SUM(pmt.amount*-1) AS amount_due,
+                      so.created_at AS created_date,
+                      so.id AS invoice_id
+                  FROM
+                      payments pmt INNER JOIN sales_orders so ON pmt.sales_order_id = so.id
+                      INNER JOIN customers cust ON  so.customer_id = cust.id
+                  WHERE pmt.accounting_type_id = 2
+                  GROUP BY  cust.id, so.id, company_name, p1_name
+          
+              )
+          SELECT customer_id, company_name, p1_name, SUM(a) AS over_less_than_60, SUM(b) AS overdue_61_to_180_days, SUM(c) AS  overdue_181_to_270_days, SUM(d) AS overdue_more_than_271_days
+          FROM (
+              SELECT customer_id, company_name, p1_name, invoice_id, 
+                  DATE_PART('day', '2021-12-31' - created_date) AS days_past_due,
+                  SUM(CASE WHEN DATE_PART('day', '2021-12-31' - created_date) <= 60 THEN amount_due ELSE 0 END) AS a,
+                  SUM(CASE WHEN DATE_PART('day', '2021-12-31' - created_date) BETWEEN 61 AND 180 THEN amount_due ELSE 0 END) AS b,
+                  SUM(CASE WHEN DATE_PART('day', '2021-12-31' - created_date) BETWEEN 181 AND 270 THEN amount_due ELSE 0 END) AS c,
+                  SUM(CASE WHEN DATE_PART('day', '2021-12-31' - created_date) >= 271 THEN amount_due ELSE 0 END) AS d
+              FROM AR_Aging_Table
+              GROUP BY customer_id, invoice_id, created_date, company_name, p1_name
+          ) AS AR_table
+          GROUP BY customer_id, company_name, p1_name;
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )    
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the AR Aging Table (Demo Version) `, 
+      });
+      res.send(AR_table)
+  
+      
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+
+
+//6. AR Table 
+// returns list of customers 
+router.get('/Aging_AR_Table', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+   
+  try {
+      const AR_table = await sequelize.query(
+          `
+          WITH
+          AR_Aging_Table
+          AS
+          (
+              SELECT
+                  cust.id AS customer_id,
+                  cust.company_name AS company_name,
+                  cust.p1_name AS p1_name,
+                  SUM(pmt.amount*-1) AS amount_due,
+                  so.created_at AS created_date,
+                  so.id AS invoice_id
+              FROM
+                  payments pmt INNER JOIN sales_orders so ON pmt.sales_order_id = so.id
+                  INNER JOIN customers cust ON  so.customer_id = cust.id
+              WHERE pmt.accounting_type_id = 2
+              GROUP BY  cust.id, so.id, company_name, p1_name
+      
+          )
+      SELECT customer_id, company_name, p1_name, SUM(a) AS over_less_than_60, SUM(b) AS overdue_61_to_180_days, SUM(c) AS  overdue_181_to_270_days, SUM(d) AS overdue_more_than_271_days
+      FROM (
+          SELECT customer_id, company_name, p1_name, invoice_id, 
+              DATE_PART('day', CURRENT_TIMESTAMP - created_date) AS days_past_due,
+              SUM(CASE WHEN DATE_PART('day', CURRENT_TIMESTAMP - created_date) <= 30 THEN amount_due ELSE 0 END) AS a,
+              SUM(CASE WHEN DATE_PART('day', CURRENT_TIMESTAMP - created_date) BETWEEN 31 AND 60 THEN amount_due ELSE 0 END) AS b,
+              SUM(CASE WHEN DATE_PART('day', CURRENT_TIMESTAMP - created_date) BETWEEN 61 AND 90 THEN amount_due ELSE 0 END) AS c,
+              SUM(CASE WHEN DATE_PART('day', CURRENT_TIMESTAMP - created_date) >= 91 THEN amount_due ELSE 0 END) AS d
+          FROM AR_Aging_Table
+          GROUP BY customer_id, invoice_id, created_date, company_name, p1_name
+      ) AS AR_table
+      GROUP BY customer_id, company_name, p1_name;
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )    
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the AR Aging Table (Demo Version) `, 
+      });
+      res.send(AR_table)
   
       
   

@@ -448,16 +448,16 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { amount: -140, purchase_order_id: 15, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-01-01'},
         { amount: 100, purchase_order_id: 15, payment_method_id:1, movement_type_id:3 , created_at: '2021-01-01'}, //PO-15 supplier refund
 
-        { amount: -896, purchase_order_id: 16, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-04-01'}, // cash 
+        { amount: -896, purchase_order_id: 16, movement_type_id:1 , created_at: '2021-04-01'}, // cash 
         { amount: 196, purchase_order_id: 16, payment_method_id:1, movement_type_id:3 , created_at: '2021-01-01'}, //PO-16 supplier refund
 
-        { amount: 1649, purchase_order_id: 17, accounting_type_id: 1, movement_type_id:1, created_at: '2021-05-01' }, // cash 
+        { amount: 1649, purchase_order_id: 17, movement_type_id:1, created_at: '2021-05-01' }, // cash 
 
-        { amount: 2412, purchase_order_id: 18, accounting_type_id: 1, movement_type_id:1, created_at: '2021-06-01' }, // cash 
+        { amount: 2412, purchase_order_id: 18,  movement_type_id:1, created_at: '2021-06-01' }, // cash 
 
-        { amount: 3363, purchase_order_id: 19, accounting_type_id: 1, movement_type_id:1, created_at: '2021-07-01' }, // cash 
+        { amount: 3363, purchase_order_id: 19,  movement_type_id:1, created_at: '2021-07-01' }, // cash 
 
-        { amount: 2340, purchase_order_id: 20, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-08-01'}, // cash 
+        { amount: 2340, purchase_order_id: 20,  movement_type_id:1 , created_at: '2021-08-01'}, // cash 
       ]); 
 
       //inventory movement
@@ -760,17 +760,17 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
         // { amount: 1649, purchase_order_id: 17, accounting_type_id: 1, movement_type_id:1, created_at: '2021-05-01' }, // cash 
 
-        {amount: 27 , sales_order_id: 1, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-01-12', payment_method_id:1 }, //cash
+        {amount: 27 , sales_order_id: 1, movement_type_id: 2, created_at: '2021-01-12', payment_method_id:1 }, //cash
 
-        {amount: 42.7 , sales_order_id: 2, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-02-12', payment_method_id:1},
+        {amount: 42.7 , sales_order_id: 2, movement_type_id: 2, created_at: '2021-02-12', payment_method_id:1},
 
-        {amount: 267.8 , sales_order_id: 3, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-03-12', payment_method_id:1},
+        {amount: 267.8 , sales_order_id: 3,  movement_type_id: 2, created_at: '2021-03-12', payment_method_id:1},
 
-        {amount: 616.8 , sales_order_id: 4, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-04-12', payment_method_id:1},
+        {amount: 616.8 , sales_order_id: 4,  movement_type_id: 2, created_at: '2021-04-12', payment_method_id:1},
 
-        {amount: 504.6 , sales_order_id: 5, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-05-12', payment_method_id:1},
+        {amount: 504.6 , sales_order_id: 5, movement_type_id: 2, created_at: '2021-05-12', payment_method_id:1},
 
-        {amount: 257.4 , sales_order_id: 6, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-06-12', payment_method_id:1},
+        {amount: 257.4 , sales_order_id: 6,  movement_type_id: 2, created_at: '2021-06-12', payment_method_id:1},
 
         {amount: -1110.4, sales_order_id: 7, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-07-12'},//credit
         {amount: 1000, sales_order_id: 7, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-07-13', payment_method_id:1},
@@ -797,28 +797,28 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         {amount: 1500 , sales_order_id: 14, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-04-12', payment_method_id:1},
 
         {amount: -1888 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-06-12'}, //refunds below
-        {amount: 1783 , sales_order_id: 14, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-04-12', payment_method_id:1},
+        {amount: 1783 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-04-12', payment_method_id:1},
         {amount: -80 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-06-13'},
 
-        {amount: -954 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-08-12'},
-        {amount: 854 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-08-12', payment_method_id:1},
-        {amount: -204 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-08-12'},
+        {amount: -954 , sales_order_id: 16, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-08-12'},
+        {amount: 854 , sales_order_id: 16, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-08-12', payment_method_id:1},
+        {amount: -204 , sales_order_id: 16, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-08-12'},
 
-        {amount: -816 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-10-12'},
-        {amount: 716 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-10-12', payment_method_id:1},
-        {amount: -16 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-10-12'},
+        {amount: -816 , sales_order_id: 17, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-10-12'},
+        {amount: 716 , sales_order_id: 17, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-10-12', payment_method_id:1},
+        {amount: -16 , sales_order_id: 17, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-10-12'},
 
-        {amount: -2140.2 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
-        {amount: 1500.2 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
-        {amount: -40.2 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-12-12'},
+        {amount: -2140.2 , sales_order_id: 18, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+        {amount: 1500.2 , sales_order_id: 18, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
+        {amount: -40.2 , sales_order_id: 18, accounting_type_id: 2, movement_type_id: 3, created_at: '2021-12-12'},
 
-        {amount: -1953 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
-        {amount: 1253 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
-        {amount: -53 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+        {amount: -1953 , sales_order_id: 19, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+        {amount: 1253 , sales_order_id: 19, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
+        {amount: -53 , sales_order_id: 19, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
 
-        {amount: -2570 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
-        {amount: 2070 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
-        {amount: -70 , sales_order_id: 15, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+        {amount: -2570 , sales_order_id: 20, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
+        {amount: 2070 , sales_order_id: 20, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
+        {amount: -70 , sales_order_id: 20, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
        
 
       ]); 

@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../db');
+const QRCode = require('qrcode')
 
 const DeliveryOrder = sequelize.define('delivery_order', {
   id: {
@@ -50,4 +51,10 @@ const DeliveryStatus = sequelize.define('delivery_status', {
   timestamps: false // Dont record 'updatedAt' and 'createdAt'
 });
 
-module.exports = { DeliveryOrder, DeliveryStatus };
+
+async function generateAndSaveQRCode(deliveryOrder) {
+  const qr = await QRCode.toDataURL(`${process.env.BASE_URL}/api/deliveryOrder/assign?id=${deliveryOrder.id}`)
+  await DeliveryOrder.update({ qr_code: qr }, { where: { id: deliveryOrder.id } });
+}
+
+module.exports = { DeliveryOrder, DeliveryStatus, generateAndSaveQRCode };

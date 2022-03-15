@@ -5,7 +5,7 @@ const ViewType = require('../common/ViewType');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const { Sequelize } = require('sequelize');
 const Log = require('../models/Log');
-const { DeliveryOrder } = require('../models/DeliveryOrder');
+const { DeliveryOrder, generateAndSaveQRCode } = require('../models/DeliveryOrder');
 const { SalesOrder, getGeocode } = require('../models/SalesOrder');
 const { Customer } = require('../models/Customer');
 const { sequelize } = require('../db');
@@ -38,6 +38,54 @@ router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res
         );
 
         res.send(results);
+        
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+router.post('/', requireAccess(ViewType.DISPATCH, true), async function(req, res, next) {
+    const { address, postal_code, remarks } = req.body;
+
+    // Validation
+    let geoCoords;
+    try {
+        assertNotNull(req.body, ['address', 'postal_code']);
+
+        geoCoords = await getGeocode(postal_code);
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        const deliveryOrder = {
+          delivery_status_id: DeliveryStatusEnum.PENDING.id,
+          address: address,
+          postal_code: postal_code,
+          remarks: remarks,
+          longitude: geoCoords.longitude,
+          latitude: geoCoords.latitude,
+        }
+
+        const newDeliveryOrder = await DeliveryOrder.create(deliveryOrder);
+
+        // Create QR Code
+        await generateAndSaveQRCode(newDeliveryOrder);
+
+        // Record to admin logs
+        const user = res.locals.user;
+        await Log.create({ 
+            employee_id: user.id, 
+            view_id: ViewType.DISPATCH.id,
+            text: `${user.name} created a custom delivery order for address ${address}`, 
+        });
+
+        res.send(newDeliveryOrder);
         
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database

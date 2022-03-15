@@ -10,13 +10,11 @@ const { parseRequest, assertNotNull } = require('../common/helpers');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const { ChargedUnder, Customer } = require('../models/Customer');
 const { SalesOrder, SalesOrderItem, updateSalesOrder, buildNewPayment, buildRefundPayment, validateOrderItems, validateAndBuildNewInventories, buildDeliveryOrder, buildRefundInventories } = require('../models/SalesOrder');
-const { DeliveryOrder } = require('../models/DeliveryOrder');
+const { DeliveryOrder, generateAndSaveQRCode } = require('../models/DeliveryOrder');
 const { Sequelize } = require('sequelize');
-const QRCode = require('qrcode')
 
 
 router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
-  // const predicate = parseRequest(req.query);
   const { id, sales_order_status_id, payment_term_id, customer_id, customer_name, start_date, end_date } = req.query;
   
   // Build associations to return
@@ -194,8 +192,9 @@ router.post('/confirm', requireAccess(ViewType.CRM, true), async function(req, r
     // Create delivery order
     if (deliveryOrder) {
       const newDeliveryOrder = await DeliveryOrder.create(deliveryOrder);
-      const qr = await QRCode.toDataURL(`${process.env.BASE_URL}/api/deliveryOrder/assign?id=${newDeliveryOrder.id}`)
-      await DeliveryOrder.update({ qr_code: qr }, { where: { id: newDeliveryOrder.id } });
+
+      // Create QR Code
+      await generateAndSaveQRCode(newDeliveryOrder);
     }
 
     // Record to admin logs

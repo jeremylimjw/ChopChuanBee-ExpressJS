@@ -91,8 +91,9 @@ router.post('/', requireAccess(ViewType.CRM, true), async function(req, res, nex
 });
 
 
+// 'Save for later' use case
 router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
-  const { id, has_delivery } = req.body;
+  const { id, has_delivery, sales_order_status_id } = req.body;
 
   let deliveryOrder;
   // Validation here
@@ -111,17 +112,23 @@ router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next
   try {
     await updateSalesOrder(req.body);
     
-    // Update associated delivery order
-    if (has_delivery) {
-      // If have existing then do update, else create a new do
-      const exists = await DeliveryOrder.findAll({ where: { sales_order_id: id }});
-      if (exists.length > 0) {
-        await DeliveryOrder.update(deliveryOrder, { where: { sales_order_id: id }})
+    // Create Delivery Orders only when saving SO in other statuses other than PENDING
+    if (sales_order_status_id !== PurchaseOrderStatusType.PENDING.id) {
+      // Update associated delivery order
+      if (has_delivery) {
+        // If have existing then do update, else create a new do
+        const exists = await DeliveryOrder.findAll({ where: { sales_order_id: id }});
+        if (exists.length > 0) {
+          await DeliveryOrder.update(deliveryOrder, { where: { sales_order_id: id }})
+        } else {
+          const newDeliveryOrder = await DeliveryOrder.create(deliveryOrder);
+
+          // Create QR Code
+          await generateAndSaveQRCode(newDeliveryOrder);
+        }
       } else {
-        await DeliveryOrder.create(deliveryOrder);
+        await DeliveryOrder.destroy({ where: { sales_order_id: id }})
       }
-    } else {
-      await DeliveryOrder.destroy({ where: { sales_order_id: id }})
     }
     
     // Record to admin logs
@@ -189,6 +196,7 @@ router.post('/confirm', requireAccess(ViewType.CRM, true), async function(req, r
     await Payment.create(payment);
     // Create inventory Movements
     await InventoryMovement.bulkCreate(inventoryMovements);
+
     // Create delivery order
     if (deliveryOrder) {
       const newDeliveryOrder = await DeliveryOrder.create(deliveryOrder);

@@ -24,6 +24,7 @@ PORT=3000
 REACT_URL=http://localhost:3001
 EMAIL_USERNAME=nuschopchuanbee@gmail.com
 EMAIL_PASSWORD=Nuschopchuanbee1
+GOOGLE_API_KEY=<API_KEY>
 ```
 4. Start the server with `npm start` or `npm run dev`
 5. Ensure that `Connected to database` appears in the server logs

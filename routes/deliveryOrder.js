@@ -102,7 +102,7 @@ router.put('/', requireAccess(ViewType.DISPATCH, true), async function(req, res,
     let geoCoordinates;
     // Validation
     try {
-        assertNotNull(deliveryOrder, ['id', 'address', 'postal_code', 'sales_order_id', 'delivery_status_id']);
+        assertNotNull(deliveryOrder, ['id', 'address', 'postal_code', 'delivery_status_id']);
 
         geoCoordinates = await getGeocode(deliveryOrder.postal_code);
     } catch(err) {
@@ -134,6 +134,39 @@ router.put('/', requireAccess(ViewType.DISPATCH, true), async function(req, res,
         });
 
         res.send(newDeliveryOrder);
+        
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+router.delete('/', requireAccess(ViewType.DISPATCH, true), async function(req, res, next) {
+    const { id } = req.query;
+    
+    // Validation
+    try {
+        assertNotNull(req.query, ['id']);
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        await DeliveryOrder.destroy({ where: { id: id }});
+        
+        // Record to admin logs
+        const user = res.locals.user;
+        await Log.create({ 
+            employee_id: user.id, 
+            view_id: ViewType.DISPATCH.id,
+            text: `${user.name} deleted a custom delivery order with ID ${id}`, 
+        });
+
+        res.send({ id: id });
         
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database

@@ -483,7 +483,7 @@ router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async functio
   const {start_date, end_date , charged_under_name } = req.query;
 
   const input_tax = await sequelize.query(
-      `SELECT subquery.id as sales_order_id, c.id as customer_id, c.company_name, cu.name as charged_under_name, subquery.created_at as transaction_date, ((total*(1+subquery.gst_rate/100))+subquery.offset) AS total_transaction_amount, (subquery.gst_rate) AS gst_rate, ((subquery.gst_rate/100)*((total*(1+subquery.gst_rate/100))+subquery.offset)/(1+subquery.gst_rate/100)) AS gst_amount  
+      `SELECT subquery.id as order_id, c.id as customer_id, c.company_name, cu.name as charged_under_name, subquery.created_at as transaction_date, ((total*(1+subquery.gst_rate/100))+subquery.offset) AS total_transaction_amount, (subquery.gst_rate) AS gst_rate, ((subquery.gst_rate/100)*((total*(1+subquery.gst_rate/100))+subquery.offset)/(1+subquery.gst_rate/100)) AS gst_amount  
       FROM ( 
           SELECT so.id, so.created_at, so.customer_id, SUM(si.unit_price * si.quantity) AS total, MIN(so.gst_rate) AS gst_rate, MIN(so.offset) AS offset 
           FROM sales_orders so JOIN sales_order_items si ON so.id = si.sales_order_id  
@@ -499,17 +499,16 @@ router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async functio
       type: sequelize.QueryTypes.SELECT 
     }
   );
-  let total_amount = input_tax.map(input_tax => input_tax.total_transaction_amount).reduce((amt1,amt2) => (+amt1) + (+amt2));
+  let total_amount = input_tax.map(input_tax => input_tax.total_transaction_amount).reduce((amt1,amt2) => (+amt1) + (+amt2), 0);
   total_amount = Math.floor(total_amount*100)/100 
   const total_amount_obj = {total_amount};
-  let total_input_tax = input_tax.map(input_tax => input_tax.gst_amount).reduce((amt1,amt2) => (+amt1) + (+amt2));
-  total_amount = Math.floor(total_input_tax*100)/100 
-  const total_input_tax_obj = {total_input_tax};
+  let total_tax = input_tax.map(input_tax => input_tax.gst_amount).reduce((amt1,amt2) => (+amt1) + (+amt2), 0);
+  total_amount = Math.floor(total_tax*100)/100 
+  const total_input_tax_obj = {total_tax};
   input_tax.push(total_amount_obj);
   input_tax.push(total_input_tax_obj);
 
   try {
-    
     res.send(input_tax);
     
   } catch(err) {
@@ -525,7 +524,7 @@ router.get('/output_tax', requireAccess(ViewType.ACCOUNTING, true), async functi
   const {start_date,end_date, charged_under_name } = req.query;
 
   const output_tax = await sequelize.query(
-      `SELECT subquery.id as purchase_order_id, subquery.supplier_id as supplier_id, cu.name as charged_under_name, s.company_name, subquery.created_at as transaction_date, ((total*(1+subquery.gst_rate/100))+subquery.offset) AS total_transaction_amount, (subquery.gst_rate) AS gst_rate, ((subquery.gst_rate/100)*((total*(1+subquery.gst_rate/100))+subquery.offset)/(1+subquery.gst_rate/100)) AS gst_amount  
+      `SELECT subquery.id as order_id, subquery.supplier_id as supplier_id, cu.name as charged_under_name, s.company_name, subquery.created_at as transaction_date, ((total*(1+subquery.gst_rate/100))+subquery.offset) AS total_transaction_amount, (subquery.gst_rate) AS gst_rate, ((subquery.gst_rate/100)*((total*(1+subquery.gst_rate/100))+subquery.offset)/(1+subquery.gst_rate/100)) AS gst_amount  
       FROM ( 
           SELECT po.id,po.charged_under_id, po.created_at, po.supplier_id, SUM(pi.unit_cost * pi.quantity) AS total, MIN(po.gst_rate) AS gst_rate, MIN(po.offset) AS offset 
           FROM purchase_orders po JOIN purchase_order_items pi ON po.id = pi.purchase_order_id  
@@ -540,13 +539,12 @@ router.get('/output_tax', requireAccess(ViewType.ACCOUNTING, true), async functi
       type: sequelize.QueryTypes.SELECT 
     }
   );
-  console.log(output_tax);
-  let total_amount = output_tax.map(output_tax => output_tax.total_transaction_amount).reduce((amt1,amt2) => (+amt1) + (+amt2));
+  let total_amount = output_tax.map(output_tax => output_tax.total_transaction_amount).reduce((amt1,amt2) => (+amt1) + (+amt2), 0);
   total_amount = Math.floor(total_amount*100)/100 
   const total_amount_obj = {total_amount};
-  let total_output_tax = output_tax.map(output_tax => output_tax.gst_amount).reduce((amt1,amt2) => (+amt1) + (+amt2));
-  total_amount = Math.floor(total_output_tax*100)/100 
-  const total_output_tax_obj = {total_output_tax};
+  let total_tax = output_tax.map(output_tax => output_tax.gst_amount).reduce((amt1,amt2) => (+amt1) + (+amt2), 0);
+  total_amount = Math.floor(total_tax*100)/100 
+  const total_output_tax_obj = {total_tax};
   output_tax.push(total_amount_obj);
   output_tax.push(total_output_tax_obj);
 

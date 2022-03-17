@@ -254,12 +254,12 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const product8 = await Product.findOne({ where: { name: "product8" } });
       const product9 = await Product.findOne({ where: { name: "product9" } });
       const product10 = await Product.findOne({ where: { name: "product10" } });
-
+      
 
       // Analytics - Purchase Order
       await PurchaseOrder.bulkCreate([
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier1.id, created_at: '2021-01-01' , gst_rate: 7, offset: 2 }, // credit payment term
-        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier1.id, created_at: '2021-01-01' , gst_rate: 7, offset: 2 },
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier1.id, created_at: '2021-01-01' , gst_rate: 7, offset: 2 , charged_under_id : ccb.id}, // credit payment term
+        { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier1.id, created_at: '2021-01-01' , gst_rate: 7, offset: 2 , charged_under_id : ccb.id},
         { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier2.id, created_at: '2021-02-01', gst_rate: 0, offset: 2  },
         { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier2.id, created_at: '2021-02-01', gst_rate: 7, offset: 0  },
         { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: supplier3.id, created_at: '2021-03-01', gst_rate: 7, offset: 2  },

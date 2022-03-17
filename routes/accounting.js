@@ -169,7 +169,7 @@ router.post('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async
           );
     
           const COGS = await sequelize.query(
-            `SELECT sum(qty_unitcost.total) as cost_of_goods_sold
+            `SELECT (sum(qty_unitcost.total)*-1) as cost_of_goods_sold
             FROM (select (quantity * unit_cost) as total, created_at, movement_type_id FROM inventory_movements) qty_unitcost
             WHERE movement_type_id = 2
             AND created_at >= '${start_date}'

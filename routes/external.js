@@ -67,7 +67,7 @@ router.post('/optimizeRoutes', async function(req, res, next) {
             return;
         }
 
-        res.send(data.routes[0]);
+        res.send(data.routes[0].waypoint_order);
 
     } catch(err) {
         // Throws error if postal code not found

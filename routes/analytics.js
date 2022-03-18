@@ -15,7 +15,7 @@ router.get('/COGS_table', requireAccess(ViewType.ANALYTICS, true), async functio
     const {start_date ,end_date } = req.query;
     try {
         const cogsTable = await sequelize.query(
-            `SELECT to_char(created_at, 'YYYY-MM') AS month-year, SUM(qty_unitcost.total) AS COGS
+            `SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitcost.total) AS value
             FROM (SELECT (quantity * unit_cost) AS total, created_at, movement_type_id FROM inventory_movements) qty_unitcost
             WHERE movement_type_id = 2
             AND created_at::DATE >= '${start_date}'
@@ -51,7 +51,7 @@ router.get('/Revenue_table', requireAccess(ViewType.ANALYTICS, true), async func
   const {start_date ,end_date } = req.query;
   try {
       const revenueTable = await sequelize.query(
-          `SELECT to_char(created_at, 'YYYY-MM') AS month-year, SUM(qty_unitprice.total) AS Revenue
+          `SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitprice.total) AS value
           FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id FROM inventory_movements) qty_unitprice
           WHERE movement_type_id = 2
           AND created_at::DATE >= '${start_date}'
@@ -104,7 +104,7 @@ router.get('/Profits_table', requireAccess(ViewType.ANALYTICS, true), async func
             GROUP BY date
             ORDER BY date ASC
             )
-            SELECT revenue.date, revenue.rev + cost.cost_of_goods_sold AS profit
+            SELECT revenue.date AS date, revenue.rev + cost.cost_of_goods_sold AS value
             FROM revenue NATURAL JOIN cost
             ORDER BY date ASC;`,
           {

@@ -181,7 +181,7 @@ router.post('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async
           );
 
           const customer_sales_return = await sequelize.query(
-            `SELECT sum(qty_unitcost.total) as sales
+            `SELECT sum(qty_unitcost.total *-1) as sales
             FROM (select (quantity * (unit_price - unit_cost)) as total, created_at, movement_type_id FROM inventory_movements) qty_unitcost
             WHERE movement_type_id = 3
             AND created_at >= '${start_date}'

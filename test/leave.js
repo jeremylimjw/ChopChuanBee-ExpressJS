@@ -113,6 +113,9 @@ describe('/employee/leave', () => {
                 newLeaveApplications.push(postData);
             }
 
+            // const { data: getData1 } = await http.get(`/employee/leave/application?employee_id=${newEmployee.id}`);
+            // assert.notEqual(getData1.length, 5)
+
         } catch(err) {
             if (err.response) {
                 console.log(err.response.status, err.response.data);
@@ -127,7 +130,7 @@ describe('/employee/leave', () => {
     it('UPDATE /application', async () => {
         try {
             // Update applications to APPROVED
-            newLeaveApplications.forEach(element => {
+            newLeaveApplications = newLeaveApplications.map(element => {
                 element.leave_status_id = 2;
                 return element;
             })

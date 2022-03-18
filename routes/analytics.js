@@ -15,7 +15,7 @@ router.get('/COGS_table', requireAccess(ViewType.ANALYTICS, true), async functio
     const {start_date ,end_date } = req.query;
     try {
         const cogsTable = await sequelize.query(
-            `SELECT to_char(created_at, 'YYYY-MM') AS month-year, SUM(qty_unitcost.total) AS COGS
+            `SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitcost.total) AS value
             FROM (SELECT (quantity * unit_cost) AS total, created_at, movement_type_id FROM inventory_movements) qty_unitcost
             WHERE movement_type_id = 2
             AND created_at::DATE >= '${start_date}'
@@ -51,7 +51,7 @@ router.get('/Revenue_table', requireAccess(ViewType.ANALYTICS, true), async func
   const {start_date ,end_date } = req.query;
   try {
       const revenueTable = await sequelize.query(
-          `SELECT to_char(created_at, 'YYYY-MM') AS month-year, SUM(qty_unitprice.total) AS Revenue
+          `SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitprice.total) AS value
           FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id FROM inventory_movements) qty_unitprice
           WHERE movement_type_id = 2
           AND created_at::DATE >= '${start_date}'
@@ -104,7 +104,7 @@ router.get('/Profits_table', requireAccess(ViewType.ANALYTICS, true), async func
             GROUP BY date
             ORDER BY date ASC
             )
-            SELECT revenue.date, revenue.rev + cost.cost_of_goods_sold AS profit
+            SELECT revenue.date AS date, revenue.rev + cost.cost_of_goods_sold AS value
             FROM revenue NATURAL JOIN cost
             ORDER BY date ASC;`,
           {
@@ -138,38 +138,7 @@ router.get('/Customer_Profits', requireAccess(ViewType.ANALYTICS, true), async f
 
   try {
       const profitsTable = await sequelize.query(
-          `WITH
-          invoiceProfits
-          AS
-          (
-              SELECT
-                  SUM(ims.rev) AS revenue,
-                  SUM(ims.cogs) AS cost_of_goods_sold,
-                  sales_order_item_id
-              FROM
-                  (
-                          SELECT (quantity*unit_price*-1) AS rev,
-                      (quantity * unit_cost) AS cogs,
-                      created_at, sales_order_item_id,
-                      movement_type_id
-                  FROM inventory_movements
-                      ) ims
-              WHERE movement_type_id = 2
-              GROUP BY sales_order_item_id
-          )
-      SELECT
-          so.id AS sales_order_id,
-          c.id,
-          invoiceProfits.revenue AS total_revenue,
-          invoiceProfits.cost_of_goods_sold*-1 AS total_COGS,
-          invoiceProfits.revenue +  invoiceProfits.cost_of_goods_sold AS total_profits
-      FROM invoiceProfits
-          INNER JOIN sales_order_items poitems ON invoiceProfits.sales_order_item_id = poitems.id
-          INNER JOIN sales_orders so ON so.id = poitems.sales_order_id
-          INNER JOIN customers c ON so.customer_id = c.id
-      WHERE c.id ='49cdb879-cea8-4458-b88b-1681a41d51a6';
-      
-      
+          `      
       WITH
           invoiceProfits
           AS
@@ -700,7 +669,7 @@ router.get('/Aging_AR_Table', requireAccess(ViewType.ANALYTICS, true), async fun
               GROUP BY  cust.id, so.id, company_name, p1_name
       
           )
-      SELECT customer_id, company_name, p1_name, SUM(a) AS over_less_than_60, SUM(b) AS overdue_61_to_180_days, SUM(c) AS  overdue_181_to_270_days, SUM(d) AS overdue_more_than_271_days
+      SELECT customer_id, company_name, p1_name, SUM(a) AS over_less_than_30, SUM(b) AS overdue_31_to_60_days, SUM(c) AS  overdue_61_to_90_days, SUM(d) AS overdue_more_than_91_days
       FROM (
           SELECT customer_id, company_name, p1_name, invoice_id, 
               DATE_PART('day', CURRENT_TIMESTAMP - created_date) AS days_past_due,

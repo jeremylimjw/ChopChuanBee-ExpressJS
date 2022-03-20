@@ -53,7 +53,7 @@ const DeliveryStatus = sequelize.define('delivery_status', {
 
 
 async function generateAndSaveQRCode(deliveryOrder) {
-  const qr = await QRCode.toDataURL(`${process.env.BASE_URL}/api/deliveryOrder/assign?id=${deliveryOrder.id}`)
+  const qr = await QRCode.toDataURL(`${process.env.REACT_URL}/completeDelivery?id=${deliveryOrder.id}`)
   await DeliveryOrder.update({ qr_code: qr }, { where: { id: deliveryOrder.id } });
 }
 

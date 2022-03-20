@@ -176,4 +176,50 @@ router.delete('/', requireAccess(ViewType.DISPATCH, true), async function(req, r
 
 });
 
+
+// For Scan QR code to complete delivery use case
+router.post('/complete', async function(req, res, next) {
+    const { id } = req.body;
+
+    // Validation
+    try {
+        assertNotNull(req.body, ['id']);
+
+        if (id.length !== 36) {
+            res.status(400).send('Invalid delivery order ID!');
+            return;
+        }
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        const deliveryOrder = await DeliveryOrder.findByPk(id);
+
+        if (deliveryOrder == null) {
+            res.status(400).send('Invalid delivery order ID!');
+            return;
+        }
+
+        if (deliveryOrder.delivery_status_id === DeliveryStatusEnum.COMPLETED.id) {
+            res.status(400).send('Delivery order already completed!');
+            return;
+        }
+
+        deliveryOrder.delivery_status_id = DeliveryStatusEnum.COMPLETED.id;
+        deliveryOrder.deliver_at = new Date();
+        
+        await deliveryOrder.save();
+
+        res.send({ id: id });
+        
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
 module.exports = router;

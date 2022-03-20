@@ -119,7 +119,13 @@ router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next
         // If have existing then do update, else create a new do
         const exists = await DeliveryOrder.findAll({ where: { sales_order_id: id }});
         if (exists.length > 0) {
-          await DeliveryOrder.update(deliveryOrder, { where: { sales_order_id: id }})
+          await DeliveryOrder.update({
+            address: deliveryOrder.address,
+            postal_code: deliveryOrder.postal_code,
+            longitude: deliveryOrder.longitude,
+            latitude: deliveryOrder.latitude,
+            remarks: deliveryOrder.remarks,
+          }, { where: { sales_order_id: id }})
         } else {
           const newDeliveryOrder = await DeliveryOrder.create(deliveryOrder);
 

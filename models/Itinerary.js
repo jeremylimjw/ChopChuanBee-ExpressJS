@@ -11,10 +11,6 @@ const Itinerary = sequelize.define('itinerary', {
         type: DataTypes.DATE,
         allowNull: false
     },
-    session: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
     origin_postal_code: {
         type: DataTypes.STRING,
         allowNull: false

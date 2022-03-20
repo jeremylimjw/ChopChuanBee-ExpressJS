@@ -14,7 +14,7 @@ const { Customer } = require('../models/Customer');
 
 
 router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res, next) {
-    const { id, employee_name, start_date, end_date, session } = req.query;
+    const { id, employee_name, start_date, end_date } = req.query;
 
     const where = {};
     const incEmployee = { model: Employee };
@@ -24,9 +24,6 @@ router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res
     }
     if (employee_name != null) {
         incEmployee.where = { name: { [Sequelize.Op.iLike]: `%${employee_name}%` } };
-    }
-    if (session != null) {
-        where.session = session;
     }
     if (start_date != null && end_date != null) {
         where.created_at = { [Sequelize.Op.between]: [start_date, end_date] };
@@ -56,7 +53,7 @@ router.post('/', requireAccess(ViewType.DISPATCH, true), async function(req, res
 
     // Validation
     try {
-        assertNotNull(req.body, ['start_time', 'session', 'origin_postal_code', 'longitude', 'latitude', 'driver_id', 'delivery_orders']);
+        assertNotNull(req.body, ['start_time', 'origin_postal_code', 'longitude', 'latitude', 'driver_id', 'delivery_orders']);
     } catch(err) {
         res.status(400).send(err);
         return;
@@ -101,7 +98,7 @@ router.put('/', requireAccess(ViewType.DISPATCH, true), async function(req, res,
 
     // Validation
     try {
-        assertNotNull(req.body, ['id', 'start_time', 'session', 'origin_postal_code', 'longitude', 'latitude', 'driver_id', 'delivery_orders']);
+        assertNotNull(req.body, ['id', 'start_time', 'origin_postal_code', 'longitude', 'latitude', 'driver_id', 'delivery_orders']);
     } catch(err) {
         res.status(400).send(err);
         return;

@@ -19,7 +19,7 @@ router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res
         const results = await sequelize.query(
             `
             SELECT 
-                d.id, d.address, d.postal_code, d.longitude, d.latitude, d.deliver_at, d.remarks, d.qr_code, d.created_at, d.sales_order_id, d.delivery_status_id, d.itinerary_id,
+                d.id, d.address, d.postal_code, d.longitude, d.latitude, d.deliver_at, d.remarks, d.qr_code, d.created_at, d.sales_order_id, d.delivery_status_id, d.itinerary_id, d.signature,
                 c.id AS customer_id, c.company_name AS customer_company_name, c.p1_name AS customer_p1_name, c.p1_phone_number AS customer_phone_number, c.company_email AS customer_email
             FROM delivery_orders d
             LEFT JOIN sales_orders so ON so.id = d.sales_order_id

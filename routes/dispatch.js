@@ -9,8 +9,10 @@ const { DeliveryOrder } = require('../models/DeliveryOrder');
 const { Itinerary } = require('../models/Itinerary');
 const DeliveryStatusEnum = require('../common/DeliveryStatusEnum');
 const { Employee } = require('../models/Employee');
-const { SalesOrder } = require('../models/SalesOrder');
+const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
 const { Customer } = require('../models/Customer');
+const { Product } = require('../models/Product');
+
 
 /**
  * These routes have different access roles as they are for mobile app drivers
@@ -27,30 +29,15 @@ router.get('/itinerary', requireAccess(ViewType.GENERAL), async function(req, re
     }
     
     try {
-        const itinerarys = await Itinerary.findAll({ where: where, include: [incEmployee], order: [['created_at', 'DESC']]});
+        const itinerarys = await Itinerary.findAll({ where: where, include: [incEmployee], order: [['start_time', 'DESC']]});
 
         const fullItinerarys = await Promise.all(itinerarys.map(async itinerary => ({
             ...itinerary.toJSON(),
-            delivery_orders: await DeliveryOrder.findAll({ where: { itinerary_id: itinerary.id }, order: [['sequence', 'ASC']], include: [{ model: SalesOrder, include: [Customer]}] }),
+            delivery_orders: await DeliveryOrder.findAll({ where: { itinerary_id: itinerary.id }, order: [['sequence', 'ASC']], include: [{ model: SalesOrder, include: [{ model: SalesOrderItem, include: [Product] }, Customer]}] }),
         })));
 
-        // Only return those that have outstanding DOs
-        const filteredItinerarys = []
-        for (let itinerary of fullItinerarys) {
-            let done = true;
-            for (let delivery_order of itinerary.delivery_orders) {
-                if (delivery_order.delivery_status_id !== DeliveryStatusEnum.COMPLETED.id) {
-                    done = false;
-                    break;
-                }
-            }
-            if (!done) {
-                filteredItinerarys.push(itinerary);
-            }
-        }
+        res.send(fullItinerarys);
 
-        res.send(filteredItinerarys);
-        
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database
         console.log(err);
@@ -159,6 +146,52 @@ router.post('/deliveryOrder/unassign', requireAccess(ViewType.GENERAL), async fu
             employee_id: user.id, 
             view_id: ViewType.DISPATCH.id,
             text: `${user.name} unassigned a delivery order with ID ${id}`, 
+        });
+
+        res.send({ id: id });
+        
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+router.post('/deliveryOrder/signature', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+    const { id, signature } = req.body;
+
+    // Validation
+    try {
+        assertNotNull(req.body, ['id', 'signature']);
+
+        if (id.length !== 36) {
+            res.status(400).send('Invalid delivery order ID!');
+            return;
+        }
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        const deliveryOrder = await DeliveryOrder.findByPk(id);
+
+        if (deliveryOrder == null) {
+            res.status(400).send('Invalid delivery order ID!');
+            return;
+        }
+        
+        deliveryOrder.signature = signature;
+        await deliveryOrder.save();
+
+        // Record to admin logs
+        const user = res.locals.user;
+        await Log.create({ 
+            employee_id: user.id, 
+            view_id: ViewType.DISPATCH.id,
+            text: `${user.name} recorded signature for a delivery order with ID ${id}`, 
         });
 
         res.send({ id: id });

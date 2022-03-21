@@ -32,7 +32,8 @@ const DeliveryOrder = sequelize.define('delivery_order', {
     defaultValue: -1,
   },
   remarks: DataTypes.STRING,
-  qr_code: DataTypes.BLOB,
+  qr_code: DataTypes.TEXT,
+  signature: DataTypes.TEXT,
 }, {
   updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
   createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'

@@ -15,7 +15,8 @@ const { Product } = require('../models/Product');
 
 
 /**
- * These routes have different access roles as they are for mobile app drivers
+ * FOR MOBILE APP use cases
+ * These routes only requires to be logged in as they are for mobile app drivers
  */
 
 router.get('/itinerary', requireAccess(ViewType.GENERAL), async function(req, res, next) {

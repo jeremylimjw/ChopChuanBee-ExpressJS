@@ -357,7 +357,7 @@ router.get('/SORA', requireAccess(ViewType.GENERAL), async function(req, res, ne
         WHERE payment_method_id IS NOT NULL 
         GROUP BY sales_order_id 
     ) 
-    SELECT customer_name , so_id, created_at,   (total + min_offset) as charges, COALESCE(paid,0) AS amount_paid,   ((total + min_offset) -COALESCE(paid,0)) as balance 
+    SELECT customer_name , so_id, created_at,   ROUND((total*(1+(gst/100)) + min_offset),2) as charges, ROUND(COALESCE(paid,0),2) AS amount_paid,   ROUND(((total*(1+(gst/100)) + min_offset) -COALESCE(paid,0)),2) as balance 
     FROM subquery1 sq LEFT OUTER JOIN subquery2 sq2 USING (so_id)
    
       `,

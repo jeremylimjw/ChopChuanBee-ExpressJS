@@ -7,6 +7,7 @@ const { Product } = require('../models/Product');
 const { Payment, PaymentMethod } = require('../models/Payment');
 const { InventoryMovement } = require('../models/InventoryMovement');
 const { parseRequest, assertNotNull } = require('../common/helpers');
+const PaymentTermType = require('../common/PaymentTermType');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const { ChargedUnder, Customer } = require('../models/Customer');
 const { SalesOrder, SalesOrderItem, updateSalesOrder, buildNewPayment, buildRefundPayment, validateOrderItems, validateAndBuildNewInventories, buildDeliveryOrder, buildRefundInventories } = require('../models/SalesOrder');
@@ -156,6 +157,7 @@ router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next
 });
 
 
+// Confirm sales order use case
 router.post('/confirm', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { id } = req.body;
 
@@ -175,7 +177,12 @@ router.post('/confirm', requireAccess(ViewType.CRM, true), async function(req, r
     total = total * (1+salesOrder.gst_rate/100) + (+salesOrder.offset);
     total = Math.floor(total*100)/100; // Truncate trailing decimals 
 
-    const payment = buildNewPayment(salesOrder.id, total, salesOrder.payment_term_id, salesOrder.payment_method_id);
+    // Build initial payment
+    // NOTE: buildNewPayment() always attaches the payment_method_id. For initial credit SO, set it to null.
+    let payment = buildNewPayment(salesOrder.id, total, salesOrder.payment_term_id, salesOrder.payment_method_id);
+    if (salesOrder.payment_term_id === PaymentTermType.CREDIT.id) {
+      payment.payment_method_id = null;
+    }
 
     // Calculate inventory movements to add
     let inventoryMovements;

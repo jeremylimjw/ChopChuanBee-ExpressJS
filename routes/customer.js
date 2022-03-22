@@ -348,6 +348,7 @@ router.get('/SORA', requireAccess(ViewType.GENERAL), async function(req, res, ne
         FROM sales_orders so JOIN sales_order_items si ON so.id = si.sales_order_id 
         JOIN customers c ON so.customer_id = c.id 
         WHERE so.payment_term_id = 2 
+        AND so.sales_order_status_id = 2
         AND so.customer_id = '${customer_id}'
         GROUP BY so.id, c.company_name 
 
@@ -366,7 +367,16 @@ router.get('/SORA', requireAccess(ViewType.GENERAL), async function(req, res, ne
         type: sequelize.QueryTypes.SELECT 
       }
     );
-    console.log(results);
+
+    // Record to admin logs
+    const user = res.locals.user;
+    const customer = await Customer.findByPk(customer_id);
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.CRM.id,
+      text: `${user.name} viewed ${customer.company_name}'s Statement of Account Receivable`, 
+    });
+
     res.send(results);
   
   

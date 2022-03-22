@@ -67,36 +67,35 @@ async function updateSalesOrder(newSalesOrder) {
 
 
 function buildNewPayment(salesOrderId, amount, paymentTermId, paymentMethodId) {
-    const payment = {
-        sales_order_id: salesOrderId, 
-        movement_type_id: MovementType.SALE.id,
-        amount: amount,
-    }
+  const payment = {
+    sales_order_id: salesOrderId, 
+    movement_type_id: MovementType.SALE.id,
+    amount: amount,
+    payment_method_id: paymentMethodId,
+  }
 
-    if (paymentTermId === PaymentTermType.CASH.id) {
-        payment.payment_method_id = paymentMethodId;
-    } else if (paymentTermId === PaymentTermType.CREDIT.id) {
-        payment.accounting_type_id = AccountingTypeEnum.RECEIVABLE.id;
-    }
+  if (paymentTermId === PaymentTermType.CREDIT.id) {
+    payment.accounting_type_id = AccountingTypeEnum.RECEIVABLE.id;
+    payment.amount = -amount;
+  }
 
-    return payment;
+  return payment;
 }
 
 
 function buildRefundPayment(salesOrderId, amount, paymentTermId, paymentMethodId = PaymentMethodType.CASH.id) {
-    const payment = {
-        sales_order_id: salesOrderId, 
-        movement_type_id: MovementType.REFUND.id,
-        amount: -amount,
-    }
+  const payment = {
+    sales_order_id: salesOrderId, 
+    movement_type_id: MovementType.REFUND.id,
+    amount: -amount,
+    payment_method_id: paymentMethodId,
+  }
 
-    if (paymentTermId === PaymentTermType.CASH.id) {
-        payment.payment_method_id = paymentMethodId;
-    } else if (paymentTermId === PaymentTermType.CREDIT.id) {
-        payment.accounting_type_id = AccountingTypeEnum.RECEIVABLE.id;
-    }
+  if (paymentTermId === PaymentTermType.CREDIT.id) {
+    payment.accounting_type_id = AccountingTypeEnum.RECEIVABLE.id;
+  }
 
-    return payment;
+  return payment;
 }
 
 

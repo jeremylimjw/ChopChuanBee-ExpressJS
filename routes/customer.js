@@ -21,7 +21,7 @@ const { sequelize } = require('../db');
 router.get('/', requireAccess(ViewType.CRM, false), async function(req, res, next) {
   const { id, company_name, p1_name, status } = req.query;
   
-  try { // join charged under
+  try {
     const results = await sequelize.query(
       `
       SELECT *, COALESCE(sq.ar, 0) ar FROM customers c
@@ -281,39 +281,6 @@ router.get('/latestPrice', requireAccess(ViewType.GENERAL), async function(req, 
           WHERE so.sales_order_status_id IN (2,3,5)
           AND so.customer_id = '${customer_id}'
           ORDER BY soi.product_id, soi.created_at DESC
-      `,
-      { 
-        bind: [],
-        type: sequelize.QueryTypes.SELECT 
-      }
-    );
-
-    res.send(results);
-    
-  } catch(err) {
-    // Catch and return any uncaught exceptions while inserting into database
-    console.log(err);
-    res.status(500).send(err);
-  }
-
-});
-
-router.get('/ar', requireAccess(ViewType.GENERAL), async function(req, res, next) {
-  const { customer_id } = req.query;
-
-  if (customer_id == null) {
-    res.status(400).send("'customer_id' is required.");
-    return;
-  }
-  
-  try {
-    const results = await sequelize.query(
-      `
-        SELECT SUM(amount) total FROM payments p
-          LEFT JOIN sales_orders so ON so.id = p.sales_order_id
-          WHERE so.customer_id = '${customer_id}'
-          AND so.payment_term_id = 2
-          AND so.purchase_order_status_id IN (2,3,5)
       `,
       { 
         bind: [],

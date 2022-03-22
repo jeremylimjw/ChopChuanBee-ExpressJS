@@ -88,11 +88,6 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       ]); 
  
       const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
-      const { PaymentTerm, POStatus } = require('../models/PurchaseOrder');
-      await PaymentTerm.bulkCreate(Object.keys(PaymentTermType).map(key => PaymentTermType[key]));
-      await POStatus.bulkCreate(Object.keys(PurchaseOrderStatusType).map(key => PurchaseOrderStatusType[key]));
-
-      const { PaymentMethod, AccountingType } = require('../models/Payment');
       await PaymentMethod.bulkCreate(Object.keys(PaymentMethodType).map(key => PaymentMethodType[key]));
       await AccountingType.bulkCreate(Object.keys(AccountingTypeEnum).map(key => AccountingTypeEnum[key]));
 

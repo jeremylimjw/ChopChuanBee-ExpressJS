@@ -15,7 +15,7 @@ const { DeliveryOrder, generateAndSaveQRCode } = require('../models/DeliveryOrde
 const { Sequelize } = require('sequelize');
 
 
-router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.get('/', requireAccess(ViewType.CRM, false), async function(req, res, next) {
   const { id, sales_order_status_id, payment_term_id, customer_id, customer_name, start_date, end_date } = req.query;
   
   // Build associations to return

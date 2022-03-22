@@ -6,10 +6,11 @@ const { parseRequest, assertNotNull } = require('../common/helpers');
 const { Sequelize } = require('sequelize');
 const Log = require('../models/Log');
 const { DeliveryOrder, generateAndSaveQRCode } = require('../models/DeliveryOrder');
-const { SalesOrder, getGeocode } = require('../models/SalesOrder');
+const { SalesOrder, getGeocode, SalesOrderItem } = require('../models/SalesOrder');
 const { Customer } = require('../models/Customer');
 const { sequelize } = require('../db');
 const DeliveryStatusEnum = require('../common/DeliveryStatusEnum');
+const { Product } = require('../models/Product');
 
 
 router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res, next) {
@@ -32,10 +33,16 @@ router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res
             ORDER BY d.created_at DESC
             `,
             { 
-            bind: [],
-            type: sequelize.QueryTypes.SELECT 
+                bind: [],
+                type: sequelize.QueryTypes.SELECT 
             }
         );
+
+        for (let order of results) {
+            if (order.sales_order_id != null) {
+                order.sales_order = await SalesOrder.findByPk(order.sales_order_id, { include: [{ model: SalesOrderItem, include: [Product] }, Customer] })
+            }
+        }
 
         res.send(results);
         

@@ -34,7 +34,11 @@ router.get('/itinerary', requireAccess(ViewType.GENERAL), async function(req, re
 
         const fullItinerarys = await Promise.all(itinerarys.map(async itinerary => ({
             ...itinerary.toJSON(),
-            delivery_orders: await DeliveryOrder.findAll({ where: { itinerary_id: itinerary.id }, order: [['sequence', 'ASC']], include: [{ model: SalesOrder, include: [{ model: SalesOrderItem, include: [Product] }, Customer]}] }),
+            delivery_orders: await DeliveryOrder.findAll({ 
+                where: { itinerary_id: itinerary.id }, 
+                order: [['sequence', 'ASC']], 
+                include: [{ model: SalesOrder, include: [{ model: SalesOrderItem, include: [Product] }, Customer]}] 
+            }),
         })));
 
         res.send(fullItinerarys);

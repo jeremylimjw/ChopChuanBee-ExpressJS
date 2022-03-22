@@ -12,6 +12,7 @@ const AccountingTypeEnum = require('../common/AccountingTypeEnum');
 const MovementTypeEnum = require('../common/MovementTypeEnum');
 const ExpensesTypeEnum = require('../common/ExpensesTypeEnum');
 const { insertDemoData } = require('../demo');
+const DeliveryStatusEnum = require('../common/DeliveryStatusEnum');
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
@@ -47,14 +48,14 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const { LeaveType, LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
       const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
+      const { DeliveryStatus } = require('../models/DeliveryOrder');
 
       await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
       await Role.bulkCreate(Object.keys(RoleType).map(key => RoleType[key]));
       await LeaveType.bulkCreate(Object.keys(LeaveTypeEnum).map(key => LeaveTypeEnum[key]));
       await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
-
-
+      await DeliveryStatus.bulkCreate(Object.keys(DeliveryStatusEnum).map(key => DeliveryStatusEnum[key]));
 
       const { Supplier } = require('../models/Supplier');
       await Supplier.bulkCreate([
@@ -62,7 +63,6 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
         { company_name: "Sheng Shiong", s1_name: "David King", s1_phone_number: "9277472", address: "Hougang Ave 8", postal_code: "565523" },
         { company_name: "Fairprice", s1_name: "Laurie", s1_phone_number: "87476828", address: "2 Buona Vista Rd", postal_code: "845125" },
       ]);
-
 
       const { Product } = require('../models/Product');
       await Product.bulkCreate([
@@ -88,6 +88,11 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       ]); 
  
       const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
+      const { PaymentTerm, POStatus } = require('../models/PurchaseOrder');
+      await PaymentTerm.bulkCreate(Object.keys(PaymentTermType).map(key => PaymentTermType[key]));
+      await POStatus.bulkCreate(Object.keys(PurchaseOrderStatusType).map(key => PurchaseOrderStatusType[key]));
+
+      const { PaymentMethod, AccountingType } = require('../models/Payment');
       await PaymentMethod.bulkCreate(Object.keys(PaymentMethodType).map(key => PaymentMethodType[key]));
       await AccountingType.bulkCreate(Object.keys(AccountingTypeEnum).map(key => AccountingTypeEnum[key]));
 
@@ -116,7 +121,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
           gst_rate: 0 
         },
       ]);
-     
+      
       const employees = await Employee.bulkCreate([
         { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
         { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },

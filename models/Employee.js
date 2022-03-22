@@ -16,15 +16,12 @@ const Employee = sequelize.define('employee', {
     allowNull: false,
     unique: true,
   },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
   email: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
   },
+  password: DataTypes.STRING,
   contact_number: DataTypes.STRING,
   nok_name: DataTypes.STRING,
   nok_number: DataTypes.STRING,
@@ -32,6 +29,7 @@ const Employee = sequelize.define('employee', {
   postal_code: DataTypes.STRING,
   discharge_date: DataTypes.DATE,
   last_active: DataTypes.DATE,
+  activation_token: DataTypes.STRING,
 }, {
   updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
   createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'

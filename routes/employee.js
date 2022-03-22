@@ -29,8 +29,8 @@ router.get('/', requireAccess(ViewType.HR, false), async function(req, res, next
     
     try {
         predicate.order = predicate.order || [];
-        predicate.include = [{ model: AccessRight, include: View }, Role]
-        predicate.order.push([AccessRight, 'has_write_access', 'DESC'])
+        predicate.order.push([AccessRight, 'has_write_access', 'DESC']);
+        predicate.include = [{ model: AccessRight, include: View }, Role];
 
         const employees = await Employee.findAll(predicate);
         res.send(employees);
@@ -76,23 +76,21 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
             return;
         }
 
-        // Generate random password
-        const passwordPlaintext = crypto.createHash('sha1').update(Math.random().toString()).digest('hex').substring(0, 8);
-        const password = await hashPassword(passwordPlaintext);
+        // Generate activation token
+        const activation_token = crypto.createHash('sha1').update(Math.random().toString()).digest('hex');
 
         // Create new employee
         const newEmployee = await Employee.create(
-            { name, username, password, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights, leave_accounts: STANDARD_LEAVE_ACCOUNTS }, 
+            { name, username, email, role_id, contact_number, nok_name, nok_number, address, postal_code, access_rights, activation_token, leave_accounts: STANDARD_LEAVE_ACCOUNTS }, 
             { include: [AccessRight, LeaveAccount] }
         );
 
         if (send_email == true) {
             // Send account information to user's email
-            await sendEmailTo(newEmployee.email, 'newEmployee', { 
+            sendEmailTo(newEmployee.email, 'newEmployee', { 
                 subject: "New Account Created", 
                 name: newEmployee.name, 
-                username: newEmployee.username, 
-                password: passwordPlaintext 
+                activation_token: activation_token 
             });
         }
         
@@ -109,7 +107,6 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
 
         // Replace hashed password with random generated password before sending response
         const employee = getEmployee.toJSON();
-        employee.password = passwordPlaintext;
 
         res.send(employee);
 
@@ -314,34 +311,35 @@ router.post('/changePassword', requireAccess(ViewType.GENERAL), async function(r
  *  - /api/employee/resetPassword
  * */ 
 router.post('/resetPassword', async function(req, res, next) {
-    const { username, email } = req.body;
+    const { email } = req.body;
 
-    // Validation
-    if (username == null || email == null) {
-        res.status(400).send("'username' and 'email' are required.", )
+    try {
+        assertNotNull(req.body, ['email'])
+    } catch(err) {
+        res.status(400).send(err);
         return;
     }
 
     try {
         // Retrieve the employee
-        const employee = await Employee.findOne({ where: { username, email } });
+        const employee = await Employee.findOne({ where: { email } });
         if (employee == null) {
-            res.status(400).send(`Invalid username and/or email.`);
+            res.status(400).send(`This email is not registered.`);
             return;
         }
 
-        // Randomly generate 8 character password
-        const newPassword = crypto.createHash('sha1').update(Math.random().toString()).digest('hex').substring(0,6);
+        // Generate activation token
+        const activation_token = crypto.createHash('sha1').update(Math.random().toString()).digest('hex');
 
         // Update the employee object
-        employee.password = await hashPassword(newPassword);
+        employee.activation_token = activation_token;
         await employee.save();
 
         // Send new password to user's email
-        await sendEmailTo(employee.email, 'resetPassword', { 
+        sendEmailTo(employee.email, 'resetPassword', { 
             subject: "Reset Password", 
             name: employee.name, 
-            newPassword 
+            activation_token: activation_token, 
         })
 
         // Record to admin logs
@@ -414,6 +412,58 @@ router.put('/profile', requireAccess(ViewType.GENERAL), async function(req, res,
         // Catch and return any uncaught exceptions while inserting into database
         console.log(err);
         res.status(500).send(err);
+    }
+
+});
+
+/**
+ *  GET method: Get employees by activation code only
+ *  This route has no role access
+ * */ 
+router.get('/activateAccount', async function(req, res, next) {
+    const { activation_token } = req.query;
+
+    try {
+        assertNotNull(req.query, ['activation_token'])
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        const employees = await Employee.findAll({ where: { activation_token }});
+        res.send(employees);
+      
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+
+});
+
+/**
+ *  POST method: Set the password of an account with the password
+ *  This route has no role access
+ * */ 
+router.post('/activateAccount', async function(req, res, next) {
+    const { activation_token, password } = req.body
+
+    try {
+        assertNotNull(req.body, ['activation_token', 'password'])
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        const employees = await Employee.update({ password: await hashPassword(password), activation_token: null }, { where: { activation_token }});
+        res.send(employees);
+      
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
     }
 
 });

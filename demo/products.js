@@ -1,5 +1,10 @@
 module.exports = [
     {
+        "min_inventory_level": "150",
+        "name": "\u9648\u71d5 Kanika Premium Quality Unagi Kabayaki 200g",
+        "unit": "200g"
+    },
+    {
         "min_inventory_level": "180",
         "name": "\u5218\u6167 HinoAso Natural Mineral Water 2000ml",
         "unit": "2000ml"
@@ -33,11 +38,6 @@ module.exports = [
         "min_inventory_level": "200",
         "name": "\u83ab\u6768 100 Plus Original Isotonic Drink 325ml",
         "unit": "325ml"
-    },
-    {
-        "min_inventory_level": "150",
-        "name": "\u9648\u71d5 Kanika Premium Quality Unagi Kabayaki 200g",
-        "unit": "200g"
     },
     {
         "min_inventory_level": "220",

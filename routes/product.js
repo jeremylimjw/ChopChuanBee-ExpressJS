@@ -5,10 +5,13 @@ const { Product } = require('../models/Product');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');
-const { SupplierMenu, GUEST_ID } = require('../models/Supplier');
+const { SupplierMenu, GUEST_ID, Supplier } = require('../models/Supplier');
 const { sequelize } = require('../db');
 const { InventoryMovement } = require('../models/InventoryMovement');
 const { PurchaseOrderItem, PurchaseOrder } = require('../models/PurchaseOrder');
+const { SalesOrderItem, SalesOrder,  validateOrderItems, validateAndBuildNewInventories } = require('../models/SalesOrder');
+const { Customer } = require('../models/Customer');
+const MovementType = require('../common/MovementTypeEnum');
 
 
 router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, res, next) {
@@ -19,20 +22,19 @@ router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, re
       `
         SELECT 
           p.id, p.name, p.min_inventory_level, p.deactivated_date, p.description, p.unit, p.created_at, 
-          COALESCE(poi.total_quantity, 0) total_quantity
+          COALESCE(im.total_quantity, 0) total_quantity
         FROM products p
           LEFT OUTER JOIN 
             (
-              SELECT poi.product_id, SUM(im.quantity) total_quantity FROM inventory_movements im
-                LEFT JOIN purchase_order_items poi ON im.purchase_order_item_id = poi.id
-                GROUP BY poi.product_id
-            ) poi ON p.id = poi.product_id
+              SELECT product_id, SUM(quantity) total_quantity FROM inventory_movements im
+                GROUP BY product_id
+            ) im ON p.id = im.product_id
             WHERE TRUE
             ${ id != null ? `AND p.id = '${id}'` : ''}
             ${ name != null ? `AND LOWER(p.name) LIKE '%${name.toLowerCase()}%'` : ''}
             ${ status === 'true' ? `AND p.deactivated_date IS NULL` : '' }
             ${ status === 'false' ? `AND p.deactivated_date IS NOT NULL` : '' }
-          ORDER BY p.created_at DESC
+          ORDER BY (total_quantity - p.min_inventory_level) DESC
       `,
       { 
         bind: [],
@@ -296,9 +298,55 @@ router.get('/inventoryMovement', requireAccess(ViewType.GENERAL), async function
   }
   
   try {
-    const results = await InventoryMovement.findAll({ include: [
-        { model: PurchaseOrderItem, where: { product_id: product_id }, include: [{ model: PurchaseOrder, attributes: ['id'] }] }
-        // TODO: Add sales order item
+    const results = await InventoryMovement.findAll({ where: { product_id: product_id },
+      include: [
+        { model: PurchaseOrderItem, include: [{ model: PurchaseOrder, include: [Supplier]}] }, 
+        { model: SalesOrderItem, include: [{ model: SalesOrder, include: [Customer]}] }
+      ],
+      order: [['created_at', 'DESC']]
+    });
+    res.send(results);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+// Record a damaged inventory
+router.post('/inventoryMovement', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { product_id, quantity } = req.body;
+
+  const movement = {
+    id: null, // sales_order_item_id
+    product_id: product_id,
+    unit_price: 0,
+    quantity: quantity,
+    movement_type_id: MovementType.DAMAGED.id,
+  }
+  
+  try {
+    assertNotNull(req.body, ['product_id', 'quantity']);
+
+    // Validate available stock
+    await validateOrderItems([movement]);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+  
+  try {
+    const movements = await validateAndBuildNewInventories(null, [movement]);
+
+    await InventoryMovement.bulkCreate(movements);
+
+    const results = await InventoryMovement.findAll({ where: { product_id: product_id },
+      include: [
+        { model: PurchaseOrderItem, include: [{ model: PurchaseOrder, include: [Supplier]}] }, 
+        { model: SalesOrderItem, include: [{ model: SalesOrder, include: [Customer]}] }
       ],
       order: [['created_at', 'DESC']]
     });

@@ -50,15 +50,8 @@ module.exports = (params) => `
         <div class="container">
             <p class="greeting">Hello ${params.name},</p>
             <p class="subtitle">Your new account has been created</p>
-            <p class="greeting">Username</p>
-            <div class="content">
-                <p>${params.username}</p>
-            </div>
-            <p class="greeting">Password</p>
-            <div class="content">
-                <p>${params.password}</p>
-            </div>
-            <p class="tips">Please change your password immediately after logging in.</p>
+            <p class="subtitle"><a href="${process.env.REACT_URL}/activate?token=${params.activation_token}">Click here to activate your account</a></p>
+            
             <p class="tips">This is a system generated message, please do not reply to this email.</p>
         </div>
     </div>

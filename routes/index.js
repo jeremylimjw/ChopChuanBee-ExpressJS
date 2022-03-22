@@ -6,6 +6,7 @@ router.use("/auth", require("./auth"));
 router.use("/customer", require("./customer"));
 router.use("/supplier", require("./supplier"));
 router.use("/purchaseOrder", require("./purchaseOrder"));
+router.use("/salesOrder", require("./salesOrder"));
 router.use("/product", require("./product"));
 router.use("/employee", require("./employee"));
 router.use("/employee", require("./accessRight"));
@@ -16,4 +17,9 @@ router.use("/accounting", require("./accounting"));
 router.use("/external", require("./external"));
 router.use("/chargedUnder", require("./chargedUnder"));
 router.use("/analytics", require("./analytics"));
+router.use("/inventoryMovements", require("./inventoryMovements"));
+router.use("/deliveryOrder", require("./deliveryOrder"));
+router.use("/itinerary", require("./itinerary"));
+router.use("/dispatch", require("./dispatch"));
+
 module.exports = router;

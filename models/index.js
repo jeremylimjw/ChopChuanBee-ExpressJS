@@ -199,15 +199,29 @@ async function syncAssociations() {
     POStatus.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_status_id' }});
     SalesOrder.belongsTo(POStatus, { foreignKey: { allowNull: false, name: 'sales_order_status_id' }});
 
-    const { DeliveryOrder } = require('../models/DeliveryOrder');
+    const { DeliveryOrder, DeliveryStatus } = require('../models/DeliveryOrder');
 
     // 1-1 association
-    SalesOrder.hasOne(DeliveryOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
-    DeliveryOrder.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
- 
+    SalesOrder.hasOne(DeliveryOrder, { foreignKey: { name: 'sales_order_id' }});
+    DeliveryOrder.belongsTo(SalesOrder, { foreignKey: { name: 'sales_order_id' }});
+
+    // 1-1 association
+    DeliveryStatus.hasOne(DeliveryOrder, { foreignKey: { allowNull: false, name: 'delivery_status_id' }});
+    DeliveryOrder.belongsTo(DeliveryStatus, { foreignKey: { allowNull: false, name: 'delivery_status_id' }});
+
+    const { Itinerary } = require('../models/Itinerary');
+
+    // 1-M association
+    Employee.hasMany(Itinerary, { foreignKey: { allowNull: false, name: 'driver_id' }});
+    Itinerary.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
+
+    // 1-M association
+    Itinerary.hasMany(DeliveryOrder, { foreignKey: { name: 'itinerary_id' }});
+    DeliveryOrder.belongsTo(Itinerary, { foreignKey: { name: 'itinerary_id' }});
     
     await sequelize.sync(); // This will create tables if not exists
     // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+    // await sequelize.sync({ alter: true }); // ONLY USE THIS FOR TESTING. This checks what is the current state of the table in the database (which columns it has, what are their data types, etc), and then performs the necessary changes in the table to make it match the model.
     
 }
 

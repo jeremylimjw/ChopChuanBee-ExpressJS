@@ -11,6 +11,7 @@ const PaymentMethodType = require('../common/PaymentMethodType');
 const AccountingTypeEnum = require('../common/AccountingTypeEnum');
 const MovementTypeEnum = require('../common/MovementTypeEnum');
 const { insertDemoData } = require('../demo');
+const DeliveryStatusEnum = require('../common/DeliveryStatusEnum');
 
 const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, process.env.PGPASSWORD, {
   host: process.env.PGHOST,
@@ -38,7 +39,6 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       console.log("First run detected, running data init");
 
       const View = require('../models/View');
-      const { ChargedUnder } = require('../models/Customer');
       const { LeaveType, LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
       const { LeaveStatus } = require('../models/LeaveApplication');
       const { ProductCategory } = require('../models/Product');
@@ -59,6 +59,9 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
 
       const { MovementType } = require('../models/MovementType');
       await MovementType.bulkCreate(Object.keys(MovementTypeEnum).map(key => MovementTypeEnum[key]));
+      
+      const { DeliveryStatus } = require('../models/DeliveryOrder');
+      await DeliveryStatus.bulkCreate(Object.keys(DeliveryStatusEnum).map(key => DeliveryStatusEnum[key]));
       
       const employees = await Employee.bulkCreate([
         { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },

@@ -341,8 +341,7 @@ router.post('/inventoryMovement', requireAccess(ViewType.GENERAL), async functio
   try {
     const movements = await validateAndBuildNewInventories(null, [movement]);
 
-    const newMovements = await InventoryMovement.bulkCreate(movements);
-    console.log(newMovements)
+    await InventoryMovement.bulkCreate(movements);
 
     const results = await InventoryMovement.findAll({ where: { product_id: product_id },
       include: [

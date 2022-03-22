@@ -1,11 +1,12 @@
 var express = require('express');
 const { requireAccess } = require('../auth');
 var router = express.Router();
-const { Customer, CustomerMenu } = require('../models/Customer');
+const { Customer, CustomerMenu, ChargedUnder } = require('../models/Customer');
 const ViewType = require('../common/ViewType');
 const Log = require('../models/Log');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const { Product } = require('../models/Product');
+const { sequelize } = require('../db');
 
 /**
  * Customer route
@@ -15,15 +16,44 @@ const { Product } = require('../models/Product');
 
 /**
  *  GET method: Get customers
- *  - e.g. /api/customer OR /api/customer?id=123
  *  - requireAccess(ViewType.CRM, false) because this is only reading data
  * */ 
 router.get('/', requireAccess(ViewType.CRM, false), async function(req, res, next) {
-  const predicate = parseRequest(req.query);
+  const { id, company_name, p1_name, status } = req.query;
   
-  try {
-    const customers = await Customer.findAll(predicate);
-    res.send(customers);
+  try { // join charged under
+    const results = await sequelize.query(
+      `
+      SELECT *, COALESCE(sq.ar, 0) ar FROM customers c
+        LEFT OUTER JOIN 
+        (
+          SELECT so.customer_id, SUM(amount) ar FROM payments p
+          LEFT JOIN sales_orders so ON so.id = p.sales_order_id
+          AND so.payment_term_id = 2
+          AND so.sales_order_status_id IN (2,3,5)
+          GROUP BY so.customer_id
+        ) sq ON sq.customer_id = c.id
+        WHERE TRUE 
+        ${id ? `AND c.id = '${id}'` : ''}
+        ${ company_name != null ? `AND LOWER(c.company_name) LIKE '%${company_name.toLowerCase()}%'` : ''}
+        ${ p1_name != null ? `AND LOWER(c.p1_name) LIKE '%${p1_name.toLowerCase()}%'` : ''}
+        ${ status === 'true' ? `AND c.deactivated_date IS NULL` : '' }
+        ${ status === 'false' ? `AND c.deactivated_date IS NOT NULL` : '' }
+        ORDER BY c.created_at DESC
+      `,
+      { 
+        bind: [],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+    
+    const joinedResults = [];
+    for (let customer of results) {
+      const cu = await ChargedUnder.findByPk(customer.charged_under_id);
+      joinedResults.push({...customer, charged_under: cu });
+    }
+
+    res.send(joinedResults);
     
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database
@@ -179,7 +209,7 @@ router.post('/activate', requireAccess(ViewType.CRM, true), async function(req, 
       await Log.create({ 
         employee_id: user.id, 
         view_id: ViewType.CRM.id,
-        text: `${user.name} activated ${customer.name}'s record`, 
+        text: `${user.name} activated ${customer.company_name}'s record`, 
       });
 
       res.send({ id: customer.id, deactivated_date: null });
@@ -227,6 +257,74 @@ router.put('/menu', requireAccess(ViewType.CRM, true), async function(req, res, 
     res.send({ id: customer_id });
 
   } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+router.get('/latestPrice', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { customer_id } = req.query;
+
+  if (customer_id == null) {
+    res.status(400).send("'customer_id' is required.");
+    return;
+  }
+  
+  try {
+    const results = await sequelize.query(
+      `
+        SELECT DISTINCT ON (soi.product_id) 
+        soi.product_id, soi.unit_price
+          FROM sales_order_items soi
+          LEFT JOIN sales_orders so ON so.id = soi.sales_order_id
+          WHERE so.sales_order_status_id IN (2,3,5)
+          AND so.customer_id = '${customer_id}'
+          ORDER BY soi.product_id, soi.created_at DESC
+      `,
+      { 
+        bind: [],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+
+    res.send(results);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+router.get('/ar', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { customer_id } = req.query;
+
+  if (customer_id == null) {
+    res.status(400).send("'customer_id' is required.");
+    return;
+  }
+  
+  try {
+    const results = await sequelize.query(
+      `
+        SELECT SUM(amount) total FROM payments p
+          LEFT JOIN sales_orders so ON so.id = p.sales_order_id
+          WHERE so.customer_id = '${customer_id}'
+          AND so.payment_term_id = 2
+          AND so.purchase_order_status_id IN (2,3,5)
+      `,
+      { 
+        bind: [],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+
+    res.send(results);
+    
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
     console.log(err);
     res.status(500).send(err);
   }

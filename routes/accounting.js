@@ -480,7 +480,7 @@ router.post('/income_statement/activate', requireAccess(ViewType.ACCOUNTING, tru
 
 router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
 
-  const {start_date, end_date , charged_under_name } = req.query;
+  const {start_date, end_date , charged_under_id } = req.query;
 
   const input_tax = await sequelize.query(
       `SELECT subquery.id as order_id, c.id as customer_id, c.company_name, cu.name as charged_under_name, subquery.created_at as transaction_date, ((total*(1+subquery.gst_rate/100))+subquery.offset) AS total_transaction_amount, (subquery.gst_rate) AS gst_rate, ((subquery.gst_rate/100)*((total*(1+subquery.gst_rate/100))+subquery.offset)/(1+subquery.gst_rate/100)) AS gst_amount  
@@ -491,7 +491,7 @@ router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async functio
       ) AS subquery JOIN customers c ON subquery.customer_id = c.id  
        JOIN charged_unders cu ON c.charged_under_id = cu.id
        WHERE  subquery.created_at BETWEEN '${start_date}' AND '${end_date}'
-       AND cu.name = '${charged_under_name}'
+       AND cu.id = '${charged_under_id}'
        AND subquery.gst_rate > 0
        `,
     { 
@@ -521,7 +521,7 @@ router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async functio
 
 router.get('/output_tax', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
 
-  const {start_date,end_date, charged_under_name } = req.query;
+  const {start_date,end_date, charged_under_id } = req.query;
 
   const output_tax = await sequelize.query(
       `SELECT subquery.id as order_id, subquery.supplier_id as supplier_id, cu.name as charged_under_name, s.company_name, subquery.created_at as transaction_date, ((total*(1+subquery.gst_rate/100))+subquery.offset) AS total_transaction_amount, (subquery.gst_rate) AS gst_rate, ((subquery.gst_rate/100)*((total*(1+subquery.gst_rate/100))+subquery.offset)/(1+subquery.gst_rate/100)) AS gst_amount  
@@ -532,7 +532,7 @@ router.get('/output_tax', requireAccess(ViewType.ACCOUNTING, true), async functi
       ) AS subquery JOIN suppliers s ON subquery.supplier_id = s.id  
       JOIN charged_unders cu ON subquery.charged_under_id = cu.id
        WHERE subquery.created_at BETWEEN '${start_date}' AND '${end_date}'
-       AND cu.name = '${charged_under_name}'
+       AND cu.id = '${charged_under_id}'
        AND subquery.gst_rate > 0`,
     { 
       raw: true, 

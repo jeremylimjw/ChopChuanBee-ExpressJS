@@ -3,12 +3,9 @@ const { sequelize } = require('../db');
 
 const DeliveryOrder = sequelize.define('delivery_order', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
-    },
-    deliver_by: {
-        type: DataTypes.DATE,
+        defaultValue: DataTypes.UUIDV4
     },
     address: {
         type: DataTypes.STRING,
@@ -20,11 +17,11 @@ const DeliveryOrder = sequelize.define('delivery_order', {
     },
     longitude: {
         type: DataTypes.DECIMAL,
-        defaultValue: 0,
+        allowNull: false
     },
     latitude: {
         type: DataTypes.DECIMAL,
-        defaultValue: 0,
+        allowNull: false
     },
     deliver_at: {
         type: DataTypes.DATE,
@@ -34,4 +31,5 @@ const DeliveryOrder = sequelize.define('delivery_order', {
     updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
     createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
 });
-module.exports = DeliveryOrder;
+
+module.exports = { DeliveryOrder };

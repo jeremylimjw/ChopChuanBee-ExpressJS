@@ -13,7 +13,7 @@ const { Customer, CustomerMenu, ChargedUnder } = require('./Customer');
 const { Supplier, SupplierMenu } = require('./Supplier');
 const { LeaveAccount, LeaveType } = require('./LeaveAccount');
 const { LeaveApplication, LeaveStatus } = require('./LeaveApplication');
-
+const {DeliveryOrder} = require('./DeliveryOrder');
 module.exports = {
     // Update this when got new models. This is needed for dynamic query associations
     getModel: (name) => {
@@ -124,12 +124,22 @@ async function syncAssociations() {
     const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
 
     // 1-M association
+    PaymentMethod.hasMany(PurchaseOrder, { foreignKey: { name: 'payment_method_id' }});
+    PurchaseOrder.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
+
+    // 1-M association
+    Product.hasMany(InventoryMovement, { foreignKey: { allowNull: false, name: 'product_id' }});
+    InventoryMovement.belongsTo(Product, { foreignKey: { allowNull: false, name: 'product_id' }});
+
+    // 1-M association
     PurchaseOrderItem.hasMany(InventoryMovement, { foreignKey: { name: 'purchase_order_item_id' }});
     InventoryMovement.belongsTo(PurchaseOrderItem, { foreignKey: { name: 'purchase_order_item_id' }});
 
+    // 1-M association
     PurchaseOrder.hasMany(Payment, { foreignKey: { name: 'purchase_order_id' }});
     Payment.belongsTo(PurchaseOrder, { foreignKey: { name: 'purchase_order_id' }});
 
+    // 1-M association
     PaymentMethod.hasMany(Payment, { foreignKey: { name: 'payment_method_id' }});
     Payment.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
 
@@ -171,21 +181,37 @@ async function syncAssociations() {
     SalesOrder.hasMany(Payment, { foreignKey: { name: 'sales_order_id' }});
     Payment.belongsTo(SalesOrder, { foreignKey: { name: 'sales_order_id' }});
 
-    const DeliveryOrder = require('../models/DeliveryOrder');
+    const {DeliveryOrder} = require('../models/DeliveryOrder');
 
     //Rename employee id to driver id to be more clear.
     Employee.hasMany(DeliveryOrder, { foreignKey: { allowNull: false, name: 'driver_id' }});
     DeliveryOrder.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
 
-    //DeliveryOrder.hasOne(SalesOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
-    //SalesOrder.belongsTo(DeliveryOrder, { foreignKey: { allowNull: false, name: 'delivery_order_id' }});
-  
+ 
+
+
+    // 1-M association
+    PaymentMethod.hasMany(SalesOrder, { foreignKey: { name: 'payment_method_id' }});
+    SalesOrder.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
+
+
+    // 1-M association
+    ChargedUnder.hasMany(SalesOrder, { foreignKey: { name: 'charged_under_id' }});
+    SalesOrder.belongsTo(ChargedUnder, { foreignKey: { name: 'charged_under_id' }});
+
+    // 1-M association
+    POStatus.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_status_id' }});
+    SalesOrder.belongsTo(POStatus, { foreignKey: { allowNull: false, name: 'sales_order_status_id' }});
+
+    // 1-1 association
+    SalesOrder.hasOne(DeliveryOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+    DeliveryOrder.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
+ 
     const SOFP = require('../models/SOFP');
     const IncomeStatement = require('../models/IncomeStatement');
-    
-    // await sequelize.sync(); // This will create tables if not exists
+
+    // await sequelize.sync(); // This will create tables if not exists 
      await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
-    
     
 }
 

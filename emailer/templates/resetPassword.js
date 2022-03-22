@@ -49,12 +49,9 @@ module.exports = (params) => `
     <div class="wrapper">
         <div class="container">
             <p class="greeting">Hello ${params.name},</p>
-            <p class="subtitle">Here is your new password that you requested</p>
-            <div class="content">
-                <p>${params.newPassword}</p>
-            </div>
-            <p class="tips">You are receiving this email because you have requested to reset your password.</p>
-            <p class="tips">If you did not request this change, please contact your administrator.</p>
+            <p class="subtitle">You are receiving this email because you have requested to reset your password.</p>
+            <p class="subtitle"><a href="${process.env.REACT_URL}/activate?token=${params.activation_token}">Click here to set a new password</a></p>
+            <p class="tips">However, if you did not request this change, you can safely ignore this message.</p>
             <p class="tips">This is a system generated message, please do not reply to this email.</p>
         </div>
     </div>

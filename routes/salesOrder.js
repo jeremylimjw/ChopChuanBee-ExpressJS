@@ -7,15 +7,15 @@ const { Product } = require('../models/Product');
 const { Payment, PaymentMethod } = require('../models/Payment');
 const { InventoryMovement } = require('../models/InventoryMovement');
 const { parseRequest, assertNotNull } = require('../common/helpers');
+const PaymentTermType = require('../common/PaymentTermType');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const { ChargedUnder, Customer } = require('../models/Customer');
 const { SalesOrder, SalesOrderItem, updateSalesOrder, buildNewPayment, buildRefundPayment, validateOrderItems, validateAndBuildNewInventories, buildDeliveryOrder, buildRefundInventories } = require('../models/SalesOrder');
-const { DeliveryOrder } = require('../models/DeliveryOrder');
+const { DeliveryOrder, generateAndSaveQRCode } = require('../models/DeliveryOrder');
 const { Sequelize } = require('sequelize');
 
 
-router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
-  // const predicate = parseRequest(req.query);
+router.get('/', requireAccess(ViewType.CRM, false), async function(req, res, next) {
   const { id, sales_order_status_id, payment_term_id, customer_id, customer_name, start_date, end_date } = req.query;
   
   // Build associations to return
@@ -62,7 +62,7 @@ router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
 });
 
 
-router.post('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.post('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   // Validation here
   try {
     assertNotNull(req.body, ['customer_id', 'sales_order_status_id', 'sales_order_items'])
@@ -92,12 +92,19 @@ router.post('/', requireAccess(ViewType.GENERAL), async function(req, res, next)
 });
 
 
-router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
-  const { id, sales_order_items, sales_order_status_id } = req.body;
+// 'Save for later' use case
+router.put('/', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { id, has_delivery, sales_order_status_id } = req.body;
 
+  let deliveryOrder;
   // Validation here
   try {
     assertNotNull(req.body, ['id'])
+
+    // Validate delivery postal code if delivery is opted for
+    if (has_delivery) {
+      deliveryOrder = await buildDeliveryOrder(req.body);
+    }
   } catch(err) {
     res.status(400).send(err);
     return;
@@ -105,6 +112,31 @@ router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
 
   try {
     await updateSalesOrder(req.body);
+    
+    // Create Delivery Orders only when saving SO in other statuses other than PENDING
+    if (sales_order_status_id !== PurchaseOrderStatusType.PENDING.id) {
+      // Update associated delivery order
+      if (has_delivery) {
+        // If have existing then do update, else create a new do
+        const exists = await DeliveryOrder.findAll({ where: { sales_order_id: id }});
+        if (exists.length > 0) {
+          await DeliveryOrder.update({
+            address: deliveryOrder.address,
+            postal_code: deliveryOrder.postal_code,
+            longitude: deliveryOrder.longitude,
+            latitude: deliveryOrder.latitude,
+            remarks: deliveryOrder.remarks,
+          }, { where: { sales_order_id: id }})
+        } else {
+          const newDeliveryOrder = await DeliveryOrder.create(deliveryOrder);
+
+          // Create QR Code
+          await generateAndSaveQRCode(newDeliveryOrder);
+        }
+      } else {
+        await DeliveryOrder.destroy({ where: { sales_order_id: id }})
+      }
+    }
     
     // Record to admin logs
     const user = res.locals.user;
@@ -125,7 +157,8 @@ router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) 
 });
 
 
-router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+// Confirm sales order use case
+router.post('/confirm', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { id } = req.body;
 
   // Validation here
@@ -144,7 +177,12 @@ router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res
     total = total * (1+salesOrder.gst_rate/100) + (+salesOrder.offset);
     total = Math.floor(total*100)/100; // Truncate trailing decimals 
 
-    const payment = buildNewPayment(salesOrder.id, total, salesOrder.payment_term_id, salesOrder.payment_method_id);
+    // Build initial payment
+    // NOTE: buildNewPayment() always attaches the payment_method_id. For initial credit SO, set it to null.
+    let payment = buildNewPayment(salesOrder.id, total, salesOrder.payment_term_id, salesOrder.payment_method_id);
+    if (salesOrder.payment_term_id === PaymentTermType.CREDIT.id) {
+      payment.payment_method_id = null;
+    }
 
     // Calculate inventory movements to add
     let inventoryMovements;
@@ -171,9 +209,13 @@ router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res
     await Payment.create(payment);
     // Create inventory Movements
     await InventoryMovement.bulkCreate(inventoryMovements);
+
     // Create delivery order
     if (deliveryOrder) {
-      await DeliveryOrder.create(deliveryOrder);
+      const newDeliveryOrder = await DeliveryOrder.create(deliveryOrder);
+
+      // Create QR Code
+      await generateAndSaveQRCode(newDeliveryOrder);
     }
 
     // Record to admin logs
@@ -204,7 +246,7 @@ router.post('/confirm', requireAccess(ViewType.GENERAL), async function(req, res
 
 
 // cancel sales order
-router.post('/cancel', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.post('/cancel', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { id } = req.body;
 
   // Validation here
@@ -233,6 +275,9 @@ router.post('/cancel', requireAccess(ViewType.GENERAL), async function(req, res,
       top_up: Math.abs(x.inventory_movements.reduce((prev, current) => prev + current.quantity, 0)), // sum will be in negative, Math.abs() to flip to positive
     }))
     const inventoryMovements = await buildRefundInventories(movements);
+
+    // Delete any delivery orders
+    await DeliveryOrder.destroy({ where: { sales_order_id: id }});
 
     // Create payment
     await Payment.create(payment);
@@ -270,7 +315,7 @@ router.post('/cancel', requireAccess(ViewType.GENERAL), async function(req, res,
 
 
 // Handles new payment or refund payment
-router.post('/payment', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.post('/payment', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { sales_order_id, amount, type, payment_method_id } = req.body;
 
   // Validation here
@@ -310,7 +355,7 @@ router.post('/payment', requireAccess(ViewType.GENERAL), async function(req, res
 
 
 // For sales refund
-router.post('/inventory/refund', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+router.post('/inventory/refund', requireAccess(ViewType.CRM, true), async function(req, res, next) {
   const { inventory_movements } = req.body;
 
   // Validation here

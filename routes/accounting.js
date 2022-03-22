@@ -11,7 +11,7 @@ const { sequelize } = require('../db');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 
 //sofp statement of financial position 
-router.get('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+router.get('/SOFP', requireAccess(ViewType.ACCOUNTING, false), async function(req, res, next) {
     const predicate = parseRequest(req.query);
   
   try {
@@ -27,7 +27,7 @@ router.get('/SOFP', requireAccess(ViewType.ACCOUNTING, true), async function(req
 });
 
 //incomeStatement  
-router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+router.get('/income_statement', requireAccess(ViewType.ACCOUNTING, false), async function(req, res, next) {
     
     const {name,start_date,end_date, id , status } = req.query;
     let queryString ='';
@@ -478,7 +478,7 @@ router.post('/income_statement/activate', requireAccess(ViewType.ACCOUNTING, tru
 });
 
 
-router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, false), async function(req, res, next) {
 
   const {start_date, end_date , charged_under_id } = req.query;
 
@@ -509,6 +509,14 @@ router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async functio
   input_tax.push(total_input_tax_obj);
 
   try {
+
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.ACCOUNTING.id,
+      text: `${user.name} generated a Input Tax.`, 
+    });
+
     res.send(input_tax);
     
   } catch(err) {
@@ -519,7 +527,7 @@ router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, true), async functio
 
 });
 
-router.get('/output_tax', requireAccess(ViewType.ACCOUNTING, true), async function(req, res, next) {
+router.get('/output_tax', requireAccess(ViewType.ACCOUNTING, false), async function(req, res, next) {
 
   const {start_date,end_date, charged_under_id } = req.query;
 
@@ -549,7 +557,13 @@ router.get('/output_tax', requireAccess(ViewType.ACCOUNTING, true), async functi
   output_tax.push(total_output_tax_obj);
 
   try {
-    
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.ACCOUNTING.id,
+      text: `${user.name} generated a Output Tax.`, 
+    });
+
     res.send(output_tax);
     
   } catch(err) {

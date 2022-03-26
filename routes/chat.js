@@ -23,6 +23,7 @@ router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res,
     }
     
     try {
+        // Get all channel IDs associated to the user
         const results = await Channel.findAll({ 
             include: [
                 { model: Participant, include: [Employee], where: { employee_id: employee_id } },
@@ -30,8 +31,43 @@ router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res,
                 Employee
             ] 
         })
+        
+        const user = res.locals.user;
 
-        res.send(results);
+        // Add unread_count and last_text
+        const channels = [];
+        for (let result of results) {
+            const channel = await Channel.findByPk(result.id, { 
+                include: [
+                    { model: Participant, include: [Employee] },
+                    { model: Text, include: [Employee] },
+                    Employee
+                ] 
+            })
+
+            const sender = channel.participants.filter(x => x.employee_id === user.id)[0];
+            const unread_count = channel.texts.reduce((prev, current) => {
+                if (current.created_at > sender?.last_read || sender?.last_read == null) {
+                    prev++;
+                }
+            }, 0)
+
+            channels.push({
+                ...channel.toJSON(),
+                last_text: channel.texts.length > 0 ? channel.texts[channel.texts.length-1] : null,
+                unread_count: unread_count,
+            });
+
+        }
+
+        // Sort by last text date or channel created date, in DESC order
+        channels.sort((a, b) => {
+            const comparatorA = a.last_text?.created_at || a.created_at;
+            const comparatorB = b.last_text?.created_at || b.created_at;
+            return comparatorB - comparatorA;
+        })
+
+        res.send(channels);
         
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database

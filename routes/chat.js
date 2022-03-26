@@ -12,8 +12,15 @@ const { getSocket } = require('../socket');
 const { Employee } = require('../models/Employee');
 
 
-router.get('/channel', async function(req, res, next) {
+router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res, next) {
     const { employee_id } = req.query;
+    
+    try {
+        assertNotNull(req.query, ['employee_id'])
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
     
     try {
         const results = await Channel.findAll({ 

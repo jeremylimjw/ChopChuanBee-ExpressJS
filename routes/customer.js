@@ -376,9 +376,9 @@ router.get('/SORA', requireAccess(ViewType.GENERAL), async function(req, res, ne
       view_id: ViewType.CRM.id,
       text: `${user.name} viewed ${customer.company_name}'s Statement of Account Receivable`, 
     });
-
+    results.push(customer);
     res.send(results);
-  
+    console.log(results);
   
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database

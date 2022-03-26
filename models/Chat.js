@@ -7,10 +7,7 @@ const Channel = sequelize.define('channel', {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
     },
-    title: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
+    title: DataTypes.STRING,
 }, {
     updatedAt: 'updated_at', // Standardize 'updatedAt' column name to 'updated_at'
     createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'

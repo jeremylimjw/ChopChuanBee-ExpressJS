@@ -19,5 +19,6 @@ router.use("/inventoryMovements", require("./inventoryMovements"));
 router.use("/deliveryOrder", require("./deliveryOrder"));
 router.use("/itinerary", require("./itinerary"));
 router.use("/dispatch", require("./dispatch"));
+router.use("/chat", require("./chat"));
 
 module.exports = router;

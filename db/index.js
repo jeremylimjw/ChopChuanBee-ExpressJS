@@ -78,6 +78,12 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       await insertDemoData();
 
     }
+
+    // Initatize web socket only after DB connection is established
+    const server = require('../bin/www');
+    const { init } = require('../socket');
+    await init(server);
+    console.log('Web socket initialized')
   
   } catch (err) {
     console.log("Connection to database failed.");

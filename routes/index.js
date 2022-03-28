@@ -13,8 +13,13 @@ router.use("/employee", require("./accessRight"));
 router.use("/employee/leave", require("./leaveAccount"));
 router.use("/employee/leave/application", require("./leaveApplication"));
 router.use("/log", require("./log"));
+router.use("/accounting", require("./accounting"));
 router.use("/external", require("./external"));
 router.use("/chargedUnder", require("./chargedUnder"));
+router.use("/analytics", require("./analytics"));
 router.use("/inventoryMovements", require("./inventoryMovements"));
+router.use("/deliveryOrder", require("./deliveryOrder"));
+router.use("/itinerary", require("./itinerary"));
+router.use("/dispatch", require("./dispatch"));
 
 module.exports = router;

@@ -27,7 +27,6 @@ const Supplier = sequelize.define('supplier', {
     type: DataTypes.STRING,
     allowNull: false
   },
-
   description: {
     type: DataTypes.STRING,
   },

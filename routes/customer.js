@@ -299,4 +299,59 @@ router.get('/latestPrice', requireAccess(ViewType.GENERAL), async function(req, 
 });
 
 
+router.get('/SORA', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+  const { customer_id } = req.query;
+
+  if (customer_id == null) {
+    res.status(400).send("'customer_id' is required.");
+    return;
+  }
+  
+  try {
+    const results = await sequelize.query(
+      `
+      WITH subquery1 as ( 
+        SELECT so.id as so_id, c.company_name as customer_name, so.created_at, sum(si.unit_price * si.quantity) as total, min(so.offset) as min_offset, min(so.gst_rate) as gst
+        FROM sales_orders so JOIN sales_order_items si ON so.id = si.sales_order_id 
+        JOIN customers c ON so.customer_id = c.id 
+        WHERE so.payment_term_id = 2 
+        AND so.sales_order_status_id = 2
+        AND so.customer_id = '${customer_id}'
+        GROUP BY so.id, c.company_name 
+
+      ), subquery2 as ( 
+          SELECT sales_order_id AS so_id, sum(amount) AS paid 
+          FROM payments 
+          WHERE payment_method_id IS NOT NULL 
+          GROUP BY sales_order_id 
+      ) 
+      SELECT customer_name , so_id, created_at, ROUND((total*(1+(gst/100)) + min_offset),2) as charges, ROUND(COALESCE(paid,0),2) AS amount_paid,   ROUND(((total*(1+(gst/100)) + min_offset) -COALESCE(paid,0)),2) as balance 
+      FROM subquery1 sq LEFT OUTER JOIN subquery2 sq2 USING (so_id)
+      `,
+      { 
+        bind: [],
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+
+    // Record to admin logs
+    const user = res.locals.user;
+    const customer = await Customer.findByPk(customer_id);
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.CRM.id,
+      text: `${user.name} generated ${customer.company_name}'s Statement of Account Receivable`, 
+    });
+    
+    res.send(results);
+  
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
 module.exports = router;

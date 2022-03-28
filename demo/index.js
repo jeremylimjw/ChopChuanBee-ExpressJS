@@ -39,5 +39,8 @@ module.exports.insertDemoData = async () => {
     await Employee.bulkCreate(employeesData.map(x => ({...x, leave_accounts: STANDARD_LEAVE_ACCOUNTS })), { include: [AccessRight, LeaveAccount] })
     await ChargedUnder.bulkCreate(chargedUndersData);
 
+    const { initAnalytics } = require('./analytics');
+    await initAnalytics();
+
     console.log('Demo data initiated')
 }

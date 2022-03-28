@@ -13,7 +13,8 @@ const { Customer, CustomerMenu, ChargedUnder } = require('./Customer');
 const { Supplier, SupplierMenu } = require('./Supplier');
 const { LeaveAccount, LeaveType } = require('./LeaveAccount');
 const { LeaveApplication, LeaveStatus } = require('./LeaveApplication');
-const {DeliveryOrder} = require('./DeliveryOrder');
+const { DeliveryOrder } = require('./DeliveryOrder');
+
 module.exports = {
     // Update this when got new models. This is needed for dynamic query associations
     getModel: (name) => {
@@ -181,7 +182,6 @@ async function syncAssociations() {
     PaymentMethod.hasMany(SalesOrder, { foreignKey: { name: 'payment_method_id' }});
     SalesOrder.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});
 
-
     // 1-M association
     ChargedUnder.hasMany(SalesOrder, { foreignKey: { name: 'charged_under_id' }});
     SalesOrder.belongsTo(ChargedUnder, { foreignKey: { name: 'charged_under_id' }});
@@ -209,10 +209,6 @@ async function syncAssociations() {
     // 1-M association
     Itinerary.hasMany(DeliveryOrder, { foreignKey: { name: 'itinerary_id' }});
     DeliveryOrder.belongsTo(Itinerary, { foreignKey: { name: 'itinerary_id' }});
-
-    const { Expenses, ExpensesType } = require('../models/Expenses');
-    ExpensesType.hasMany(Expenses, { foreignKey: { allowNull: false, name: 'expenses_type_id' }}); // Foreign key defaults to chargedUnderId, change to standardize
-    Expenses.belongsTo(ExpensesType, { foreignKey: { allowNull: false, name: 'expenses_type_id' }});
   
     const SOFP = require('../models/SOFP');
     const IncomeStatement = require('../models/IncomeStatement');

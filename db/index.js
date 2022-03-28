@@ -55,8 +55,6 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
       await DeliveryStatus.bulkCreate(Object.keys(DeliveryStatusEnum).map(key => DeliveryStatusEnum[key]));
 
-      const { Supplier } = require('../models/Supplier');
-
       const { PaymentTerm, POStatus } = require('../models/PurchaseOrder');
 
       await PaymentTerm.bulkCreate(Object.keys(PaymentTermType).map(key => PaymentTermType[key]));
@@ -69,7 +67,6 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const { MovementType } = require('../models/MovementType');
       await MovementType.bulkCreate(Object.keys(MovementTypeEnum).map(key => MovementTypeEnum[key]));
       
-      
       const employees = await Employee.bulkCreate([
         { name: "Admin", username: "admin", password: await hashPassword('password'), email: "admin@gmail.com", role_id: RoleType.ADMIN.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
         { name: "Alice", username: "alice", password: await hashPassword('password'), email: "alice@gmail.com", role_id: RoleType.STAFF.id, leave_accounts: STANDARD_LEAVE_ACCOUNTS },
@@ -78,7 +75,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       // Give view access to all views for Alice
       await AccessRight.bulkCreate(Object.keys(ViewType).map(key => ({ employee_id: employees[1].id, view_id: ViewType[key].id, has_write_access: false })))
 
-      const { GUEST_ID } = require('../models/Supplier');
+      const { Supplier, GUEST_ID } = require('../models/Supplier');
       await Supplier.create({ id: GUEST_ID, company_name: 'Guest', s1_name: 'Guest', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA' });
 
       // Comment this out if u don't want large dataset to init

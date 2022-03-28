@@ -9,7 +9,7 @@ const { sequelize } = require('../db');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const { Product } = require('../models/Product');
 
-//Read supplier (find 1 or find all depending if ID was given)
+
 router.get('/', requireAccess(ViewType.SCM, false), async function(req, res, next) {
   const { id, company_name, s1_name, status } = req.query;
   

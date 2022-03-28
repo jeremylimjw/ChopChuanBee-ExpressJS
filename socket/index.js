@@ -1,4 +1,5 @@
 const socketio = require('socket.io');
+const { Participant } = require('../models/Chat');
 
 let io;
 
@@ -15,6 +16,7 @@ async function init(server) {
     });
 
     io.on('connection', socket => {
+        console.log(socket.handshake.query.name, 'connected')
         const userId = socket.handshake.query.id;
 
         socket.join(userId);
@@ -23,26 +25,6 @@ async function init(server) {
 
         subscribersOf[userId]?.forEach(id => socket.broadcast.to(id).emit("online", { _id: userId, lastSeen: "Online" }));
         subscribers[userId] = new Set();
-
-        
-        socket.on('new_channel', data => {
-            console.log('new_channel', data)
-            // if (data.participants) {
-            //     Object.keys(data.participants).forEach(id => {
-            //         if (id !== userId) {
-            //             socket.broadcast.to(id).emit("new_channel", data);
-            //         }
-            //     })
-            // }
-        });
-        
-        
-        socket.on('message', data => {
-            console.log('message', data)
-            // data.participants?.forEach(id => {
-            //     socket.broadcast.to(id).emit("message", data);
-            // })
-        });
 
 
         socket.on('get_last_seens', data => {
@@ -62,22 +44,38 @@ async function init(server) {
         })
 
 
-        socket.on('update_last_received', data => {
-            // data.participants.forEach(id => {
-            //     socket.broadcast.to(id).emit("update_last_received", { userId: userId, channelId: data.channelId, now: data.now });
-            // })
+        socket.on('update_last_read', async data => {
+            console.log('update_last_read', data)
+            const { employee_id, channel_id, timestamp } = data;
+            const participants = await Participant.findAll({ where: { channel_id: channel_id }})
+
+            for (let participant of participants) {
+                socket.broadcast.to(participant.employee_id).emit("last_read", { 
+                    channel_id: channel_id,
+                    employee_id: employee_id,
+                    timestamp: timestamp,
+                });
+            }
         })
 
 
-        socket.on('update_last_read', data => {
-            // data.participants.forEach(id => {
-            //     socket.broadcast.to(id).emit("update_last_read", { userId: userId, channelId: data.channelId, now: data.now });
-            // })
+        socket.on('update_last_received', async data => {
+            console.log('update_last_received', data)
+            const { employee_id, channel_id, timestamp } = data;
+            const participants = await Participant.findAll({ where: { channel_id: channel_id }})
+
+            for (let participant of participants) {
+                socket.broadcast.to(participant.employee_id).emit("last_received", { 
+                    channel_id: channel_id,
+                    employee_id: employee_id,
+                    timestamp: timestamp,
+                });
+            }
         })
 
 
         socket.on('disconnect', () => { 
-            console.log('disconnect')
+            console.log(socket.handshake.query.name, 'disconnect')
             // lastSeens[userId] = new Date();
             
             // subscribers[userId]?.forEach(id => {

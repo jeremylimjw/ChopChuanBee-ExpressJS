@@ -12,6 +12,7 @@ const { getSocket } = require('../socket');
 const { Employee } = require('../models/Employee');
 
 
+// Get all channels for a user
 router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res, next) {
     const { employee_id } = req.query;
     
@@ -24,20 +25,21 @@ router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res,
     
     try {
         // Get all channel IDs associated to the user
-        const results = await Channel.findAll({ 
-            include: [
-                { model: Participant, include: [Employee], where: { employee_id: employee_id } },
-                { model: Text, include: [Employee] },
-                Employee
-            ] 
-        })
+        const participants = await Participant.findAll({ where: { employee_id: employee_id }});
         
         const user = res.locals.user;
 
         // Add unread_count and last_text
         const channels = [];
-        for (let result of results) {
-            const channel = await Channel.findByPk(result.id, { 
+        for (let participant of participants) { // Iterate through the associated channels
+
+            // Update the user's last received
+            const now = new Date();
+            participant.last_received = now;
+            await participant.save();
+
+            // Get the full channel document
+            const channel = await Channel.findByPk(participant.channel_id, { 
                 include: [
                     { model: Participant, include: [Employee] },
                     { model: Text, include: [Employee] },
@@ -47,9 +49,10 @@ router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res,
 
             const sender = channel.participants.filter(x => x.employee_id === user.id)[0];
             const unread_count = channel.texts.reduce((prev, current) => {
-                if (current.created_at > sender?.last_read || sender?.last_read == null) {
-                    prev++;
+                if (current.created_at > sender?.last_read) {
+                    return prev+1;
                 }
+                return prev;
             }, 0)
 
             channels.push({
@@ -57,6 +60,18 @@ router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res,
                 last_text: channel.texts.length > 0 ? channel.texts[channel.texts.length-1] : null,
                 unread_count: unread_count,
             });
+
+            // Broadcast to participants the user's updated last received
+            const io = getSocket();
+            for (let participant of channel.participants) {
+                if (participant.employee_id !== user.id) { // Except sender
+                    io.to(participant.employee_id).emit('last_received', { 
+                        employee_id: user.id,
+                        channel_id: channel.id,
+                        timestamp: now,
+                    })
+                }
+            }
 
         }
 
@@ -78,6 +93,57 @@ router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res,
 });
 
 
+// Get a single channel
+router.get('/channel/id', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+    const { channel_id, textLimit } = req.query;
+    
+    try {
+        assertNotNull(req.query, ['channel_id'])
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        const user = res.locals.user;
+
+        // Update the user's last received and last read
+        const now = new Date();
+        await Participant.update({ last_read: now, last_received: now }, { where: { employee_id: user.id, channel_id: channel_id }})
+
+        // Get the full channel document
+        const channel = await Channel.findByPk(channel_id, { 
+            include: [
+                { model: Participant, include: [Employee] },
+                { model: Text, include: [Employee], order: [['created_at', 'desc']], limit: +textLimit || 20 },
+                Employee
+            ] 
+        })
+
+        // Broadcast to participants the user's last read
+        const io = getSocket();
+        for (let participant of channel.participants) {
+            if (participant.employee_id !== user.id) { // Except sender
+                io.to(participant.employee_id).emit('last_read', { 
+                    employee_id: user.id,
+                    channel_id: channel.id,
+                    timestamp: now,
+                })
+            }
+        }
+
+        res.send(channel.toJSON());
+        
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+// Create new channel
 router.post('/channel', requireAccess(ViewType.GENERAL), async function(req, res, next) {
     const channel = req.body;
     
@@ -95,13 +161,17 @@ router.post('/channel', requireAccess(ViewType.GENERAL), async function(req, res
 
         const newChannel = await Channel.create(channel, { include: [Participant] });
 
-        const getChannel = await Channel.findByPk(newChannel.id, { include: [
-            { model: Participant, include: [Employee] },
-            { model: Text, include: [Employee] },
-            Employee] })
+        const getChannel = await Channel.findByPk(newChannel.id, { 
+            include: [
+                { model: Participant, include: [Employee] },
+                { model: Text, include: [Employee] },
+                Employee
+            ] 
+        })
 
+        // Broadcast to participants the new channel
         for (let participant of newChannel.participants) {
-            if (participant.employee_id !== user.id) {
+            if (participant.employee_id !== user.id) { // Except sender
                 io.to(participant.employee_id).emit('new_channel', { newChannel: getChannel.toJSON() })
             }
         }
@@ -117,41 +187,79 @@ router.post('/channel', requireAccess(ViewType.GENERAL), async function(req, res
 });
 
 
-router.put('/', requireAccess(ViewType.ADMIN, true), async function(req, res, next) {
-//   const { id, name } = req.body;
 
-//   try {
-//     assertNotNull(req.body, ['id', 'name'])
-//   } catch(err) {
-//     res.status(400).send(err);
-//     return;
-//   }
+// Get texts
+router.get('/text', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+    const { channel_id, offset, limit } = req.query;
+    
+    try {
+        assertNotNull(req.query, ['channel_id'])
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        const user = res.locals.user;
 
-//   try {
-//     const result = await ChargedUnder.update(req.body, { where: { id: id } });
+        const texts = await Text.findAll({ 
+            where: { channel_id: channel_id }, 
+            include: [Employee],
+            order: [['created_at', 'desc']],
+            limit: +limit || 20,
+            offset: +offset || 0,
+        })
 
-//     // If 'id' is not found return 400 Bad Request, if found then return the 'id'
-//     if (result[0] === 0) {
-//       res.status(400).send(`Charged Under id ${id} not found.`)
+        res.send(texts);
+        
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
 
-//     } else {
-//       // Record to admin logs
-//       const user = res.locals.user;
-//       await Log.create({ 
-//         employee_id: user.id, 
-//         view_id: ViewType.ADMIN.id,
-//         text: `${user.name} updated Charged Under ${name}'s record`, 
-//       });
-
-//       res.send({ id: id });
-//     }
+});
 
 
-//   } catch(err) {
-//     // Catch and return any uncaught exceptions while inserting into database
-//     console.log(err);
-//     res.status(500).send(err);
-//   }
+// Create new text
+router.post('/text', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+    const text = req.body;
+    
+    try {
+        assertNotNull(text, ['channel_id', 'employee_id', 'text'])
+
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+
+    try {
+        const user = res.locals.user;
+        const io = getSocket();
+
+        const createdText = await Text.create(text);
+        const newText = await Text.findByPk(createdText.id, { include: [Employee] });
+
+        const channel = await Channel.findByPk(newText.channel_id, { include: [Participant] });
+
+        // Broadcast to participants of the channel
+        for (let participant of channel.participants) {
+            if (participant.employee_id !== user.id) {
+                io.to(participant.employee_id).emit('message', { newText: newText })
+            }
+        }
+
+        // Update user's last received and last seen
+        const now = new Date();
+        await Participant.update({ last_read: now, last_received: now }, { where: { employee_id: text.employee_id, channel_id: text.channel_id }});
+
+        res.send(newText);
+
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
 
 });
 

@@ -320,7 +320,7 @@ router.get('/ar', requireAccess(ViewType.GENERAL), async function(req, res, next
         type: sequelize.QueryTypes.SELECT 
       }
     );
-    console.log(results);
+
     res.send(results);
     
   } catch(err) {
@@ -352,15 +352,14 @@ router.get('/SORA', requireAccess(ViewType.GENERAL), async function(req, res, ne
         AND so.customer_id = '${customer_id}'
         GROUP BY so.id, c.company_name 
 
-    ), subquery2 as ( 
-        SELECT sales_order_id AS so_id, sum(amount) AS paid 
-        FROM payments 
-        WHERE payment_method_id IS NOT NULL 
-        GROUP BY sales_order_id 
-    ) 
-    SELECT customer_name , so_id, created_at,   ROUND((total*(1+(gst/100)) + min_offset),2) as charges, ROUND(COALESCE(paid,0),2) AS amount_paid,   ROUND(((total*(1+(gst/100)) + min_offset) -COALESCE(paid,0)),2) as balance 
-    FROM subquery1 sq LEFT OUTER JOIN subquery2 sq2 USING (so_id)
-   
+      ), subquery2 as ( 
+          SELECT sales_order_id AS so_id, sum(amount) AS paid 
+          FROM payments 
+          WHERE payment_method_id IS NOT NULL 
+          GROUP BY sales_order_id 
+      ) 
+      SELECT customer_name , so_id, created_at, ROUND((total*(1+(gst/100)) + min_offset),2) as charges, ROUND(COALESCE(paid,0),2) AS amount_paid,   ROUND(((total*(1+(gst/100)) + min_offset) -COALESCE(paid,0)),2) as balance 
+      FROM subquery1 sq LEFT OUTER JOIN subquery2 sq2 USING (so_id)
       `,
       { 
         bind: [],
@@ -374,11 +373,10 @@ router.get('/SORA', requireAccess(ViewType.GENERAL), async function(req, res, ne
     await Log.create({ 
       employee_id: user.id, 
       view_id: ViewType.CRM.id,
-      text: `${user.name} viewed ${customer.company_name}'s Statement of Account Receivable`, 
+      text: `${user.name} generated ${customer.company_name}'s Statement of Account Receivable`, 
     });
-    results.push(customer);
+    
     res.send(results);
-    console.log(results);
   
   } catch(err) {
     // Catch and return any uncaught exceptions while inserting into database

@@ -160,8 +160,8 @@ async function syncAssociations() {
     
     const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
 
-    PaymentTerm.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
-    SalesOrder.belongsTo(PaymentTerm, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
+    PaymentTerm.hasMany(SalesOrder, { foreignKey: { name: 'payment_term_id' }});
+    SalesOrder.belongsTo(PaymentTerm, { foreignKey: { name: 'payment_term_id' }});
 
     SalesOrder.hasMany(SalesOrderItem, { foreignKey: { allowNull: false, name: 'sales_order_id' }});
     SalesOrderItem.belongsTo(SalesOrder, { foreignKey: { allowNull: false, name: 'sales_order_id' }});

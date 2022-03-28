@@ -296,7 +296,7 @@ router.post('/cancel', requireAccess(ViewType.CRM, true), async function(req, re
     // Create payment
     await Payment.create(payment);
     // Create inventory movements
-    await InventoryMovement.bulkCreate(inventoryMovements);
+    await InventoryMovement.bulkCreate(inventoryMovements.filter(x => x.quantity > 0));
     // Update sales order status
     salesOrder.sales_order_status_id = PurchaseOrderStatusType.CANCELLED.id;
     await salesOrder.save();

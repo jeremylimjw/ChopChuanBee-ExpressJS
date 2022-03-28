@@ -487,12 +487,12 @@ router.get('/input_tax', requireAccess(ViewType.ACCOUNTING, false), async functi
 
   const input_tax = await sequelize.query(
       `SELECT subquery.id as order_id, c.id as customer_id, c.company_name, cu.name as charged_under_name, subquery.created_at as transaction_date, ((total*(1+subquery.gst_rate/100))+subquery.offset) AS total_transaction_amount, (subquery.gst_rate) AS gst_rate, ((subquery.gst_rate/100)*((total*(1+subquery.gst_rate/100))+subquery.offset)/(1+subquery.gst_rate/100)) AS gst_amount  
-      FROM ( 
-          SELECT so.id, so.created_at, so.customer_id, SUM(si.unit_price * si.quantity) AS total, MIN(so.gst_rate) AS gst_rate, MIN(so.offset) AS offset 
+      FROM (
+          SELECT so.id, so.charged_under_id, so.created_at, so.customer_id, SUM(si.unit_price * si.quantity) AS total, MIN(so.gst_rate) AS gst_rate, MIN(so.offset) AS offset
           FROM sales_orders so JOIN sales_order_items si ON so.id = si.sales_order_id  
-          GROUP BY so.id   
+          GROUP BY so.id  
       ) AS subquery JOIN customers c ON subquery.customer_id = c.id  
-       JOIN charged_unders cu ON c.charged_under_id = cu.id
+       JOIN charged_unders cu ON subquery.charged_under_id = cu.id
        WHERE  subquery.created_at BETWEEN '${start_date}' AND '${end_date}'
        AND cu.id = '${charged_under_id}'
        AND subquery.gst_rate > 0

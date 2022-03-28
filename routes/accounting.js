@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 const { requireAccess } = require('../auth');
-const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
 const SOFP = require('../models/SOFP');
 const IncomeStatement = require('../models/IncomeStatement');
 const ViewType = require('../common/ViewType');

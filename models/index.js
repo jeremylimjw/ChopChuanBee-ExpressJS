@@ -159,12 +159,6 @@ async function syncAssociations() {
     
     const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
 
-    // // 1-M association
-    // SalesOrder.hasMany(Payment, { foreignKey: { name: 'sales_order_id' }});
-    // Payment.belongsTo(SalesOrder, { foreignKey: { name: 'sales_order_id' }});
-
-    // const { SalesOrder, SalesOrderItem } = require('../models/SalesOrder');
-
     PaymentTerm.hasMany(SalesOrder, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
     SalesOrder.belongsTo(PaymentTerm, { foreignKey: { allowNull: false, name: 'payment_term_id' }});
 
@@ -182,16 +176,7 @@ async function syncAssociations() {
 
     SalesOrder.hasMany(Payment, { foreignKey: { name: 'sales_order_id' }});
     Payment.belongsTo(SalesOrder, { foreignKey: { name: 'sales_order_id' }});
-
-    // const {DeliveryOrder} = require('../models/DeliveryOrder');
-
-    // //Rename employee id to driver id to be more clear.
-    // Employee.hasMany(DeliveryOrder, { foreignKey: { allowNull: false, name: 'driver_id' }});
-    // DeliveryOrder.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'driver_id' }});
-
  
-
-
     // 1-M association
     PaymentMethod.hasMany(SalesOrder, { foreignKey: { name: 'payment_method_id' }});
     SalesOrder.belongsTo(PaymentMethod, { foreignKey: { name: 'payment_method_id' }});

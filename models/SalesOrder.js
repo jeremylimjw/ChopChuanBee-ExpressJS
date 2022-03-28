@@ -77,6 +77,7 @@ function buildNewPayment(salesOrderId, amount, paymentTermId, paymentMethodId) {
 
   if (paymentTermId === PaymentTermType.CREDIT.id) {
     payment.accounting_type_id = AccountingTypeEnum.RECEIVABLE.id;
+    payment.amount = -amount;
   }
 
   return payment;

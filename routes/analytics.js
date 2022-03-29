@@ -647,6 +647,7 @@ router.get('/Product_Analytics', requireAccess(ViewType.ANALYTICS, true), async 
           )
       SELECT
           t1.product_name,
+          t2.id AS product_UUID,
           t1.quantity_sold * -1 AS quantity_sold,
           t1.average_cogs,
           t1.average_selling_price,

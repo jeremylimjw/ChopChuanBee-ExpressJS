@@ -9,6 +9,8 @@ const { InventoryMovement } = require('../models/InventoryMovement');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const PaymentTermType = require('../common/PaymentTermType');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
+const MovementType = require('../common/MovementTypeEnum');
+const AccountingTypeEnum = require('../common/AccountingTypeEnum');
 const { ChargedUnder, Customer } = require('../models/Customer');
 const { SalesOrder, SalesOrderItem, updateSalesOrder, buildNewPayment, buildRefundPayment, validateOrderItems, validateAndBuildNewInventories, buildDeliveryOrder, buildRefundInventories } = require('../models/SalesOrder');
 const { DeliveryOrder, generateAndSaveQRCode } = require('../models/DeliveryOrder');
@@ -178,10 +180,22 @@ router.post('/confirm', requireAccess(ViewType.CRM, true), async function(req, r
     total = Math.floor(total*100)/100; // Truncate trailing decimals 
 
     // Build initial payment
-    // NOTE: buildNewPayment() always attaches the payment_method_id. For initial credit SO, set it to null.
-    let payment = buildNewPayment(salesOrder.id, total, salesOrder.payment_term_id, salesOrder.payment_method_id);
-    if (salesOrder.payment_term_id === PaymentTermType.CREDIT.id) {
-      payment.payment_method_id = null;
+    let payment;
+    if (salesOrder.payment_term_id === PaymentTermType.CASH.id)  {
+      payment = {
+        sales_order_id: salesOrder.id, 
+        movement_type_id: MovementType.SALE.id,
+        amount: total,
+        payment_method_id: salesOrder.payment_method_id,
+      }
+    }
+    else if (salesOrder.payment_term_id === PaymentTermType.CREDIT.id) {
+      payment = {
+        sales_order_id: salesOrder.id, 
+        movement_type_id: MovementType.SALE.id,
+        amount: -total,
+        accounting_type_id: AccountingTypeEnum.RECEIVABLE.id,
+      }
     }
 
     // Calculate inventory movements to add
@@ -282,7 +296,7 @@ router.post('/cancel', requireAccess(ViewType.CRM, true), async function(req, re
     // Create payment
     await Payment.create(payment);
     // Create inventory movements
-    await InventoryMovement.bulkCreate(inventoryMovements);
+    await InventoryMovement.bulkCreate(inventoryMovements.filter(x => x.quantity > 0));
     // Update sales order status
     salesOrder.sales_order_status_id = PurchaseOrderStatusType.CANCELLED.id;
     await salesOrder.save();

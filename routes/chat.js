@@ -1,14 +1,12 @@
 var express = require('express');
 const { requireAccess } = require('../auth');
 var router = express.Router();
-const { ChargedUnder } = require('../models/Customer');
 const ViewType = require('../common/ViewType');
-const { parseRequest, assertNotNull } = require('../common/helpers');
-const { Sequelize } = require('sequelize');
-const Log = require('../models/Log');
+const { assertNotNull } = require('../common/helpers');
 const { Channel, Participant, Text } = require('../models/Chat');
+const { Sequelize } = require('sequelize');
 
-const { getSocket } = require('../socket');
+const { getSocket, getLastSeens, subscribeTo } = require('../socket');
 const { Employee } = require('../models/Employee');
 
 
@@ -42,13 +40,19 @@ router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res,
             const channel = await Channel.findByPk(participant.channel_id, { 
                 include: [
                     { model: Participant, include: [Employee] },
-                    { model: Text, include: [Employee] },
                     Employee
                 ] 
             })
 
+            // Pull texts to aggregate unread count and last text
+            const texts = await Text.findAll({ 
+                where: { channel_id: participant.channel_id }, 
+                include: [Employee],
+                order: [['created_at', 'DESC']]
+            })
+
             const sender = channel.participants.filter(x => x.employee_id === user.id)[0];
-            const unread_count = channel.texts.reduce((prev, current) => {
+            const unread_count = texts.reduce((prev, current) => {
                 if (current.created_at > sender?.last_read) {
                     return prev+1;
                 }
@@ -57,7 +61,7 @@ router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res,
 
             channels.push({
                 ...channel.toJSON(),
-                last_text: channel.texts.length > 0 ? channel.texts[channel.texts.length-1] : null,
+                last_text: texts.length > 0 ? texts[0] : null,
                 unread_count: unread_count,
             });
 
@@ -81,6 +85,13 @@ router.get('/channel', requireAccess(ViewType.GENERAL), async function(req, res,
             const comparatorB = b.last_text?.created_at || b.created_at;
             return comparatorB - comparatorA;
         })
+
+        // Subscribe to their last seens
+        for (let channel of channels) {
+            subscribeTo(user.id, channel.participants);
+        }
+
+        // return last seens here also, new route or append?
 
         res.send(channels);
         
@@ -115,7 +126,7 @@ router.get('/channel/id', requireAccess(ViewType.GENERAL), async function(req, r
         const channel = await Channel.findByPk(channel_id, { 
             include: [
                 { model: Participant, include: [Employee] },
-                { model: Text, include: [Employee], order: [['created_at', 'desc']], limit: +textLimit || 20 },
+                { model: Text, include: [Employee], order: [['created_at', 'DESC']], limit: +textLimit || 20 },
                 Employee
             ] 
         })
@@ -130,6 +141,9 @@ router.get('/channel/id', requireAccess(ViewType.GENERAL), async function(req, r
                     timestamp: now,
                 })
             }
+            
+            // Subscribe to their last seens and get last seens
+            subscribeTo(participant.employee_id, channel.participants);
         }
 
         res.send(channel.toJSON());
@@ -205,7 +219,7 @@ router.get('/text', requireAccess(ViewType.GENERAL), async function(req, res, ne
         const texts = await Text.findAll({ 
             where: { channel_id: channel_id }, 
             include: [Employee],
-            order: [['created_at', 'desc']],
+            order: [['created_at', 'DESC']],
             limit: +limit || 20,
             offset: +offset || 0,
         })
@@ -255,6 +269,42 @@ router.post('/text', requireAccess(ViewType.GENERAL), async function(req, res, n
 
         res.send(newText);
 
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+
+// Get last seens
+router.get('/lastSeen', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+    const { channel_ids } = req.query;
+    
+    try {
+        assertNotNull(req.query, ['channel_ids'])
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+    
+    try {
+        const user = res.locals.user;
+
+        const participants = await Participant.findAll({ where: { channel_id: { [Sequelize.Op.in]: channel_ids } } });
+        const lastSeens = getLastSeens();
+        
+        const results = {};
+        for (let participant of participants) {
+            if (user.id !== participant.employee_id) {
+                results[participant.employee_id] = lastSeens[participant.employee_id];
+            }
+        }
+
+        res.send(results);
+        
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database
         console.log(err);

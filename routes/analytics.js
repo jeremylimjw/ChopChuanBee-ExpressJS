@@ -15,7 +15,7 @@ router.get('/COGS_table', requireAccess(ViewType.ANALYTICS, true), async functio
     const {start_date ,end_date } = req.query;
     try {
         const cogsTable = await sequelize.query(
-            `SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitcost.total*-1) AS value
+            `SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitcost.total*-1),0) AS value
             FROM (SELECT (quantity * unit_cost) AS total, created_at, movement_type_id FROM inventory_movements) qty_unitcost
             WHERE movement_type_id = 2
             AND created_at::DATE >= '${start_date}'
@@ -51,7 +51,7 @@ router.get('/COGS_table_CurrentMonth', requireAccess(ViewType.ANALYTICS, true), 
 
     try {
         const cogsTable = await sequelize.query(
-            `SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitcost.total*-1) AS value
+            `SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitcost.total*-1),0) AS value
               FROM (SELECT (quantity * unit_cost) AS total, created_at, movement_type_id
                   FROM inventory_movements) qty_unitcost
               WHERE movement_type_id = 2
@@ -88,7 +88,7 @@ router.get('/COGS_table_previousmonth', requireAccess(ViewType.ANALYTICS, true),
     try {
         const cogsTable = await sequelize.query(
             `
-            SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitcost.total*-1) AS value
+            SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitcost.total*-1),0) AS value
             FROM (SELECT (quantity * unit_cost) AS total, created_at, movement_type_id
                 FROM inventory_movements) qty_unitcost
             WHERE movement_type_id = 2
@@ -126,7 +126,7 @@ router.get('/COGS_table_today', requireAccess(ViewType.ANALYTICS, true), async f
     try {
         const cogsTable = await sequelize.query(
             `
-            SELECT SUM(qty_unitcost.total*-1) AS value
+            SELECT coalesce(SUM(qty_unitcost.total*-1),0) AS value
             FROM (SELECT (quantity * unit_cost) AS total, created_at, movement_type_id
                 FROM inventory_movements) qty_unitcost
             WHERE movement_type_id = 2
@@ -161,7 +161,7 @@ router.get('/Revenue_table', requireAccess(ViewType.ANALYTICS, true), async func
   const {start_date ,end_date } = req.query;
   try {
       const revenueTable = await sequelize.query(
-          `SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitprice.total) AS value
+          `SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.total),0) AS value
           FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id FROM inventory_movements) qty_unitprice
           WHERE movement_type_id = 2
           AND created_at::DATE >= '${start_date}'
@@ -194,11 +194,10 @@ router.get('/Revenue_table', requireAccess(ViewType.ANALYTICS, true), async func
 //1. Profits Dashboard: Revenue
 // returns by selected month
 router.get('/Revenue_table_currentmonth', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
-  const {start_date ,end_date } = req.query;
   try {
       const revenueTable = await sequelize.query(
           `
-          SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitprice.total) AS value
+          SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.total),0) AS value
           FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id
               FROM inventory_movements) qty_unitprice
           WHERE movement_type_id = 2
@@ -232,11 +231,10 @@ router.get('/Revenue_table_currentmonth', requireAccess(ViewType.ANALYTICS, true
 //1. Profits Dashboard: Revenue
 // returns by selected month
 router.get('/Revenue_table_previousmonth', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
-  const {start_date ,end_date } = req.query;
   try {
       const revenueTable = await sequelize.query(
           `
-          SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitprice.total) AS value
+          SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.total),0) AS value
           FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id
               FROM inventory_movements) qty_unitprice
           WHERE movement_type_id = 2
@@ -270,11 +268,10 @@ router.get('/Revenue_table_previousmonth', requireAccess(ViewType.ANALYTICS, tru
 //1. Profits Dashboard: Revenue
 // returns by selected month
 router.get('/Revenue_table_today', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
-  const {start_date ,end_date } = req.query;
   try {
       const revenueTable = await sequelize.query(
           `
-          SELECT SUM(qty_unitprice.total) AS value
+          SELECT coalesce(SUM(qty_unitprice.total),0) AS value
           FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id
               FROM inventory_movements) qty_unitprice
           WHERE movement_type_id = 2
@@ -326,7 +323,7 @@ router.get('/Profits_table', requireAccess(ViewType.ANALYTICS, true), async func
             GROUP BY date
             ORDER BY date ASC
             )
-            SELECT revenue.date AS date, revenue.rev + cost.cost_of_goods_sold AS value
+            SELECT revenue.date AS date, coalesce(revenue.rev + cost.cost_of_goods_sold,0) AS value
             FROM revenue NATURAL JOIN cost
             ORDER BY date ASC;`,
           {
@@ -352,6 +349,171 @@ router.get('/Profits_table', requireAccess(ViewType.ANALYTICS, true), async func
     }
 });
 
+//1. Profits Dashboard: Profits
+// returns by selected months
+router.get('/Profits_table_currentmonth', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  try {
+      const profitsTable = await sequelize.query(
+          `
+          WITH
+              revenue
+              AS
+              (
+
+                  SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.total),0) AS rev
+                  FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id
+                      FROM inventory_movements) qty_unitprice
+                  WHERE movement_type_id = 2
+                  GROUP BY date
+                  ORDER BY date DESC
+
+              ),
+              cost
+              AS
+              (
+
+                  SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitcost.total*-1),0) AS cost
+                  FROM (SELECT (quantity * unit_cost) AS total, created_at, movement_type_id
+                      FROM inventory_movements) qty_unitcost
+                  WHERE movement_type_id = 2
+                  GROUP BY date
+                  ORDER BY date DESC
+              )
+          SELECT revenue.date AS date, revenue.rev - cost.cost AS value
+          FROM revenue NATURAL JOIN cost 
+          ORDER BY date DESC
+          LIMIT 1;
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Profits Dashboard (Profits_currentmonth) `, 
+      });
+  
+      res.send(profitsTable);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+router.get('/Profits_table_previousmonth', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  try {
+      const profitsTable = await sequelize.query(
+          `
+            WITH
+                revenue
+            AS
+            (
+
+                    SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.total),0) AS rev
+            FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id
+                FROM inventory_movements) qty_unitprice
+            WHERE movement_type_id = 2
+            GROUP BY date
+            ORDER BY date DESC
+
+            ),
+                cost
+                AS
+            (
+
+                    SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitcost.total*-1),0) AS cost
+            FROM (SELECT (quantity * unit_cost) AS total, created_at, movement_type_id
+                FROM inventory_movements) qty_unitcost
+            WHERE movement_type_id = 2
+            GROUP BY date
+            ORDER BY date DESC
+            )
+            SELECT revenue.date AS date, revenue.rev - cost.cost AS value
+            FROM revenue NATURAL JOIN cost 
+            ORDER BY date DESC
+            LIMIT 1
+            OFFSET
+            1;
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Profits Dashboard (Profits _previousmonth) `, 
+      });
+  
+      res.send(profitsTable);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+router.get('/Profits_table_today', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  try {
+      const profitsTable = await sequelize.query(
+          `
+            WITH
+                revenue
+                AS
+                (
+                    SELECT coalesce(SUM(qty_unitprice.total), 0) AS revenue
+                    FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id
+                        FROM inventory_movements) qty_unitprice
+                    WHERE movement_type_id = 2
+                        AND CAST(created_at AS DATE) = CAST(CURRENT_TIMESTAMP AS DATE)
+
+                ),
+                cost
+                AS
+                (
+                    SELECT coalesce(SUM(qty_unitcost.total*-1),0 ) AS cost
+                    FROM (SELECT (quantity * unit_cost) AS total, created_at, movement_type_id
+                        FROM inventory_movements) qty_unitcost
+                    WHERE movement_type_id = 2
+                        AND CAST(created_at AS DATE) = CAST(CURRENT_TIMESTAMP AS DATE)
+                )
+            SELECT revenue.revenue AS revenue, cost.cost AS cost, revenue.revenue - cost.cost AS profits
+            FROM revenue NATURAL JOIN cost         
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Profits Dashboard (Profits_today ) `, 
+      });
+  
+      res.send(profitsTable);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
 
 //2. Profits for each Customer
 // returns all the customers

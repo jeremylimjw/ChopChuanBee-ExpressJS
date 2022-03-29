@@ -897,12 +897,23 @@ router.get('/Unsettled_AP', requireAccess(ViewType.ANALYTICS, true), async funct
    
     try {
         const unsettled_AP = await sequelize.query(
-            `SELECT pos.id, pos.supplier_invoice_id, SUM(pmt.amount) 
+            `
+            SELECT 
+            pos.id, 
+            pos.supplier_invoice_id, 
+            SUM(pmt.amount), 
+            suppliers.company_name AS Company_Name , 
+            suppliers.s1_name AS Contact_Person_Name, 
+            suppliers.s1_phone_number AS Contact_Number,
+            suppliers.company_email AS Email,
+            suppliers.id AS Supplier_UUID
             FROM payments pmt INNER JOIN purchase_orders pos ON pmt.purchase_order_id = pos.id
-            WHERE pmt.accounting_type_id = 1 
-            GROUP BY pos.id
+            INNER JOIN suppliers ON suppliers.id = pos.supplier_id
+            WHERE pmt.accounting_type_id = 1
+            GROUP BY pos.id, Supplier_UUID, Contact_Person_Name, Company_Name, Contact_Number, Email
             ORDER BY SUM(pmt.amount) DESC
-            LIMIT 10`,
+            LIMIT 10
+            `,
             {
                 raw: true,
                 type: sequelize.QueryTypes.SELECT
@@ -933,12 +944,22 @@ router.get('/Unsettled_AR', requireAccess(ViewType.ANALYTICS, true), async funct
    
   try {
       const unsettled_AR = await sequelize.query(
-          `SELECT s.id, SUM(pmt.amount) 
+          `
+          SELECT 
+          s.id, 
+          SUM(pmt.amount),
+          customers.company_name AS Company_Name , 
+          customers.p1_name AS Contact_Person_Name, 
+          customers.p1_phone_number AS Contact_Number,
+          customers.company_email AS Email,
+          customers.id AS Customer_UUID
           FROM payments pmt INNER JOIN sales_orders s ON pmt.sales_order_id = s.id
+          INNER JOIN customers ON customers.id = s.customer_id
           WHERE pmt.accounting_type_id = 2
-          GROUP BY s.id
+          GROUP BY s.id, Customer_UUID , Contact_Person_Name, Company_Name, Contact_Number, Email
           ORDER BY SUM(pmt.amount) DESC
-          LIMIT 10`,
+          LIMIT 10;          
+          `,
           {
               raw: true,
               type: sequelize.QueryTypes.SELECT

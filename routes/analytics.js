@@ -817,15 +817,22 @@ router.get('/Customer_AR', requireAccess(ViewType.ANALYTICS, true), async functi
    
   try {
       const customer_ar = await sequelize.query(
-          `SELECT cust.company_name, cust.p1_name, SUM(pmt.amount) AS total_AR_amount
+          `
+          SELECT 
+          SUM(pmt.amount) AS total_AR_amount,
+          cust.p1_name AS Contact_Person_Name, 
+          cust.p1_phone_number AS Contact_Number,
+          cust.company_email AS Email,
+          cust.id AS Customer_UUID
           FROM 
-              payments pmt INNER JOIN sales_orders so ON pmt.sales_order_id = so.id
-              INNER JOIN customers cust ON  so.customer_id = cust.id
+          payments pmt INNER JOIN sales_orders so ON pmt.sales_order_id = so.id
+          INNER JOIN customers cust ON  so.customer_id = cust.id
           WHERE 
-              pmt.accounting_type_id = 2 
-          GROUP BY cust.id
+          pmt.accounting_type_id = 2 
+          GROUP BY Customer_UUID, Email, Contact_Number, Contact_Person_Name
           ORDER BY total_AR_amount
-          LIMIT 10`,
+          LIMIT 10;
+          `,
           {
               raw: true,
               type: sequelize.QueryTypes.SELECT
@@ -857,15 +864,22 @@ router.get('/Supplier_AP', requireAccess(ViewType.ANALYTICS, true), async functi
    
   try {
       const customer_ar = await sequelize.query(
-          `SELECT supp.company_name, supp.s1_name, SUM(pmt.amount) AS total_AP_amount
+          `
+          SELECT 
+          SUM(pmt.amount) AS total_AP_amount,
+          supp.s1_name AS Contact_Person_Name, 
+          supp.s1_phone_number AS Contact_Number,
+          supp.company_email AS Email,
+          supp.id AS Supplier_UUID
           FROM 
-              payments pmt INNER JOIN purchase_orders pos ON pmt.purchase_order_id = pos.id
-              INNER JOIN suppliers supp ON  pos.supplier_id = supp.id
+          payments pmt INNER JOIN purchase_orders pos ON pmt.purchase_order_id = pos.id
+          INNER JOIN suppliers supp ON  pos.supplier_id = supp.id
           WHERE 
-              pmt.accounting_type_id = 1 
-          GROUP BY supp.id
+          pmt.accounting_type_id = 1 
+          GROUP BY Supplier_UUID, Email, Contact_Number, Contact_Person_Name
           ORDER BY total_AP_amount DESC
-          LIMIT 10`,
+          LIMIT 10
+          `,
           {
               raw: true,
               type: sequelize.QueryTypes.SELECT

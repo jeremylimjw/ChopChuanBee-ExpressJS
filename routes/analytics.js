@@ -126,12 +126,11 @@ router.get('/COGS_table_today', requireAccess(ViewType.ANALYTICS, true), async f
     try {
         const cogsTable = await sequelize.query(
             `
-            SELECT created_at AS date, SUM(qty_unitcost.total*-1) AS value
+            SELECT SUM(qty_unitcost.total*-1) AS value
             FROM (SELECT (quantity * unit_cost) AS total, created_at, movement_type_id
                 FROM inventory_movements) qty_unitcost
             WHERE movement_type_id = 2
-                AND created_at = CURRENT_DATE
-            GROUP BY created_at;
+                AND CAST(created_at AS DATE) = CAST(CURRENT_TIMESTAMP AS DATE)
             `,
             {
                 raw: true,
@@ -181,6 +180,118 @@ router.get('/Revenue_table', requireAccess(ViewType.ANALYTICS, true), async func
         employee_id: user.id, 
         view_id: ViewType.ANALYTICS.id,
         text: `${user.name} viewed the Profits Dashboard (Revenue) `, 
+      });
+  
+      res.send(revenueTable);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+//1. Profits Dashboard: Revenue
+// returns by selected month
+router.get('/Revenue_table_currentmonth', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query;
+  try {
+      const revenueTable = await sequelize.query(
+          `
+          SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitprice.total) AS value
+          FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id
+              FROM inventory_movements) qty_unitprice
+          WHERE movement_type_id = 2
+          GROUP BY date
+          ORDER BY date DESC
+          LIMIT 1;
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Profits Dashboard (Revenue_current month) `, 
+      });
+  
+      res.send(revenueTable);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+//1. Profits Dashboard: Revenue
+// returns by selected month
+router.get('/Revenue_table_previousmonth', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query;
+  try {
+      const revenueTable = await sequelize.query(
+          `
+          SELECT to_char(created_at, 'YYYY-MM') AS date, SUM(qty_unitprice.total) AS value
+          FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id
+              FROM inventory_movements) qty_unitprice
+          WHERE movement_type_id = 2
+          GROUP BY date
+          ORDER BY date DESC
+          LIMIT 1 OFFSET 1;
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Profits Dashboard (Revenue_previous month) `, 
+      });
+  
+      res.send(revenueTable);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+//1. Profits Dashboard: Revenue
+// returns by selected month
+router.get('/Revenue_table_today', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query;
+  try {
+      const revenueTable = await sequelize.query(
+          `
+          SELECT SUM(qty_unitprice.total) AS value
+          FROM (select (quantity * unit_price*-1) AS total, created_at, movement_type_id
+              FROM inventory_movements) qty_unitprice
+          WHERE movement_type_id = 2
+              AND CAST(created_at AS DATE) = CAST(CURRENT_TIMESTAMP AS DATE)
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Profits Dashboard (Revenue_today) `, 
       });
   
       res.send(revenueTable);

@@ -689,18 +689,20 @@ router.get('/Supplier_Returned_Goods', requireAccess(ViewType.ANALYTICS, true), 
   try {
       const returned_goods = await sequelize.query(
           `
-          SELECT 
-            pdt.name,
-            SUM(ims.quantity * -1) AS quantity_returned,
-            SUM(ims.quantity * ims.unit_cost * -1) AS supplier_returned_goods_total_value
-          FROM inventory_movements ims
-            INNER JOIN purchase_order_items poitems ON ims.purchase_order_item_id = poitems.id
-            INNER JOIN products pdt ON poitems.product_id = pdt.id
-          WHERE movement_type_id = 3
-            AND ims.created_at::DATE >= '${start_date}'
-            AND ims.created_at::DATE <= '${end_date}'
-          GROUP BY pdt.id
-          ORDER BY supplier_returned_goods_total_value DESC;
+           SELECT
+                pdt.name AS Product_Name,
+                pdt.id AS Product_UUID,
+                pdt.description AS Product_Description,
+                SUM(ims.quantity * -1) AS quantity_returned,
+                SUM(ims.quantity * ims.unit_cost * -1) AS supplier_returned_goods_total_value
+            FROM inventory_movements ims
+                INNER JOIN purchase_order_items poitems ON ims.purchase_order_item_id = poitems.id
+                INNER JOIN products pdt ON poitems.product_id = pdt.id
+            WHERE movement_type_id = 3
+                AND ims.created_at::DATE >= '${start_date}'
+                AND ims.created_at::DATE <= '${end_date}'
+            GROUP BY pdt.id
+            ORDER BY supplier_returned_goods_total_value DESC;
       
           `,
           {
@@ -735,6 +737,8 @@ router.get('/Customer_Returned_Goods', requireAccess(ViewType.ANALYTICS, true), 
           `
           SELECT 
             pdt.name,
+            pdt.id AS Product_UUID,
+            pdt.description AS Product_Description,
             SUM(ims.quantity) AS quantity_returned,
             SUM(ims.quantity * ims.unit_cost) AS customer_returned_goods_total_value
           FROM inventory_movements ims
@@ -779,6 +783,8 @@ router.get('/Damaged_Goods', requireAccess(ViewType.ANALYTICS, true), async func
           `
           SELECT
           pdt.name,
+          pdt.id AS Product_UUID,
+          pdt.description AS Product_Description,
           SUM(ims.quantity * -1) AS quantity_returned,
           SUM(ims.quantity * ims.unit_cost * -1) AS total_damaged_inventory_value
           FROM inventory_movements ims

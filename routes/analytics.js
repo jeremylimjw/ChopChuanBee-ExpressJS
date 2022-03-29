@@ -1009,6 +1009,69 @@ router.get('/Unsettled_AR', requireAccess(ViewType.ANALYTICS, true), async funct
 });
 
 
+//6. AR Table for Test
+// returns list of customers 
+router.get('/Aging_AR_Table_Test', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+   
+  try {
+      const AR_table = await sequelize.query(
+          `
+
+          WITH
+          AR_Aging_Table
+          AS
+          (
+              SELECT
+                  cust.id AS customer_id,
+                  cust.company_name AS company_name,
+                  cust.p1_name AS p1_name,
+                  SUM(pmt.amount*-1) AS amount_due,
+                  so.created_at AS created_date,
+                  so.id AS invoice_id
+              FROM
+                  payments pmt INNER JOIN sales_orders so ON pmt.sales_order_id = so.id
+                  INNER JOIN customers cust ON  so.customer_id = cust.id
+              WHERE pmt.accounting_type_id = 2
+              GROUP BY  cust.id, so.id, company_name, p1_name
+  
+          )
+      SELECT customer_id, company_name, p1_name, SUM(a) AS over_less_than_60, SUM(b) AS overdue_61_to_180_days, SUM(c) AS  overdue_181_to_270_days, SUM(d) AS overdue_more_than_271_days
+      FROM (
+                  SELECT customer_id, company_name, p1_name, invoice_id,
+              DATE_PART('day', '2021-12-31' - created_date) AS days_past_due,
+              SUM(CASE WHEN DATE_PART('day', '2021-12-31' - created_date) <= 60 THEN amount_due ELSE 0 END) AS a,
+              SUM(CASE WHEN DATE_PART('day', '2021-12-31' - created_date) <= 180 THEN amount_due ELSE 0 END) AS b,
+              SUM(CASE WHEN DATE_PART('day', '2021-12-31' - created_date) <= 270 THEN amount_due ELSE 0 END) AS c,
+              SUM(CASE WHEN DATE_PART('day', '2021-12-31' - created_date) <= 9223372036854775807 THEN amount_due ELSE 0 END) AS d
+          FROM AR_Aging_Table
+          GROUP BY customer_id, invoice_id, created_date, company_name, p1_name
+              ) AS AR_table
+      GROUP BY customer_id, company_name, p1_name;
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )    
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the AR Aging Table (Test) `, 
+      });
+      res.send(AR_table)
+  
+      
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
 //6. AR Table for Demo
 // returns list of customers 
 router.get('/Aging_AR_Table_Demo', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {

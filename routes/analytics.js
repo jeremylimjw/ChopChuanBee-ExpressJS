@@ -832,6 +832,7 @@ router.get('/Customer_AR', requireAccess(ViewType.ANALYTICS, true), async functi
           SUM(pmt.amount) AS total_AR_amount,
           cust.p1_name AS Contact_Person_Name, 
           cust.p1_phone_number AS Contact_Number,
+          cust.company_name AS Company_Name,
           cust.company_email AS Email,
           cust.id AS Customer_UUID
           FROM 
@@ -839,7 +840,7 @@ router.get('/Customer_AR', requireAccess(ViewType.ANALYTICS, true), async functi
           INNER JOIN customers cust ON  so.customer_id = cust.id
           WHERE 
           pmt.accounting_type_id = 2 
-          GROUP BY Customer_UUID, Email, Contact_Number, Contact_Person_Name
+          GROUP BY Customer_UUID, Email, Contact_Number, Contact_Person_Name, Company_Name
           ORDER BY total_AR_amount
           LIMIT 10;
           `,
@@ -879,6 +880,7 @@ router.get('/Supplier_AP', requireAccess(ViewType.ANALYTICS, true), async functi
           SUM(pmt.amount) AS total_AP_amount,
           supp.s1_name AS Contact_Person_Name, 
           supp.s1_phone_number AS Contact_Number,
+          supp.company_name AS Company_Name,
           supp.company_email AS Email,
           supp.id AS Supplier_UUID
           FROM 
@@ -886,7 +888,7 @@ router.get('/Supplier_AP', requireAccess(ViewType.ANALYTICS, true), async functi
           INNER JOIN suppliers supp ON  pos.supplier_id = supp.id
           WHERE 
           pmt.accounting_type_id = 1 
-          GROUP BY Supplier_UUID, Email, Contact_Number, Contact_Person_Name
+          GROUP BY Supplier_UUID, Email, Contact_Number, Contact_Person_Name, Company_Name
           ORDER BY total_AP_amount DESC
           LIMIT 10
           `,

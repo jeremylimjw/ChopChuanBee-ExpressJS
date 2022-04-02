@@ -189,6 +189,8 @@ router.post('/channel', requireAccess(ViewType.GENERAL), async function(req, res
                 io.to(participant.employee_id).emit('new_channel', { newChannel: getChannel.toJSON() })
             }
         }
+        
+        subscribeTo(user.id, newChannel.participants);
 
         res.send(getChannel.toJSON());
 
@@ -234,6 +236,54 @@ router.delete('/channel', requireAccess(ViewType.GENERAL), async function(req, r
         await Channel.destroy({ where: { id: channel_id } });
 
         res.send({ id: channel_id });
+
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+// Add participant
+router.post('/channel/participant', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+    const { channel_id, employee_id } = req.body
+    
+    try {
+        assertNotNull(req.body, ['channel_id', 'employee_id'])
+
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+
+    try {
+        const user = res.locals.user;
+        const io = getSocket();
+
+        const channel = await Channel.findByPk(channel_id, { 
+            include: [
+                { model: Participant, include: [Employee] },
+                Employee
+            ] 
+        })
+
+        await Participant.create({ channel_id: channel_id, employee_id: employee_id });
+        const getParticipant = await Participant.findAll({ where: { channel_id: channel_id, employee_id: employee_id }, include: [Employee] });
+
+        // Broadcast to participants the channel
+        for (let participant of channel.participants) {
+            if (participant.employee_id !== user.id) { // Except sender
+                io.to(participant.employee_id).emit('add_channel_participant', {
+                    newParticipant: getParticipant[0]
+                })
+            }
+        }
+
+        subscribeTo(user.id, channel.participants);
+
+        res.send(getParticipant[0].toJSON());
 
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database

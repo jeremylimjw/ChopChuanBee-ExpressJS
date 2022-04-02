@@ -224,7 +224,7 @@ router.delete('/channel', requireAccess(ViewType.GENERAL), async function(req, r
             ] 
         })
 
-        // Broadcast to participants the new channel
+        // Broadcast to participants the channel
         for (let participant of channel.participants) {
             if (participant.employee_id !== user.id) { // Except sender
                 io.to(participant.employee_id).emit('remove_channel', { channel_id: channel.id })
@@ -234,6 +234,52 @@ router.delete('/channel', requireAccess(ViewType.GENERAL), async function(req, r
         await Channel.destroy({ where: { id: channel_id } });
 
         res.send({ id: channel_id });
+
+    } catch(err) {
+        // Catch and return any uncaught exceptions while inserting into database
+        console.log(err);
+        res.status(500).send(err);
+    }
+
+});
+
+
+// Delete participant
+router.delete('/channel/participant', requireAccess(ViewType.GENERAL), async function(req, res, next) {
+    const { channel_id, employee_id } = req.query
+    
+    try {
+        assertNotNull(req.query, ['channel_id', 'employee_id'])
+
+    } catch(err) {
+        res.status(400).send(err);
+        return;
+    }
+
+    try {
+        const user = res.locals.user;
+        const io = getSocket();
+
+        const channel = await Channel.findByPk(channel_id, { 
+            include: [
+                { model: Participant, include: [Employee] },
+                Employee
+            ] 
+        })
+
+        // Broadcast to participants the channel
+        for (let participant of channel.participants) {
+            if (participant.employee_id !== user.id) { // Except sender
+                io.to(participant.employee_id).emit('remove_channel_participant', { 
+                    channel_id: channel.id, 
+                    employee_id: employee_id 
+                })
+            }
+        }
+
+        await Participant.destroy({ where: { channel_id: channel_id, employee_id: employee_id } });
+
+        res.send({ channel_id: channel_id, employee_id: employee_id });
 
     } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database

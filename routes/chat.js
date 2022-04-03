@@ -343,7 +343,7 @@ router.delete('/channel/participant', requireAccess(ViewType.GENERAL), async fun
 
 // Get texts
 router.get('/text', requireAccess(ViewType.GENERAL), async function(req, res, next) {
-    const { channel_id, offset, limit } = req.query;
+    const { channel_id, cutoff_id, limit } = req.query;
     
     try {
         assertNotNull(req.query, ['channel_id'])
@@ -353,15 +353,18 @@ router.get('/text', requireAccess(ViewType.GENERAL), async function(req, res, ne
     }
     
     try {
-        const user = res.locals.user;
-
-        const texts = await Text.findAll({ 
+        const predicate = { 
             where: { channel_id: channel_id }, 
             include: [Employee],
             order: [['created_at', 'DESC']],
             limit: +limit || 20,
-            offset: +offset || 0,
-        })
+        }
+
+        if (cutoff_id != null) {
+            predicate.where.id = { [Sequelize.Op.between]: [(+cutoff_id)-(+limit || 20), (+cutoff_id)-1]} // -1 cos its inclusive
+        }
+
+        const texts = await Text.findAll(predicate);
 
         res.send(texts);
         
@@ -432,7 +435,7 @@ router.get('/lastSeen', requireAccess(ViewType.GENERAL), async function(req, res
     try {
         const user = res.locals.user;
 
-        const participants = await Participant.findAll({ where: { channel_id: { [Sequelize.Op.in]: channel_ids } } });
+        const participants = await Participant.findAll({ where: { channel_id: { [Sequelize.Op.in]: JSON.parse(channel_ids) } } });
         const lastSeens = getLastSeens();
         
         const results = {};

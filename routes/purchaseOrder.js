@@ -12,6 +12,7 @@ const { parseRequest, assertNotNull } = require('../common/helpers');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const { ChargedUnder } = require('../models/Customer');
 const { Sequelize } = require('sequelize');
+const { sendEmailTo } = require('../emailer');
 
 
 router.get('/', requireAccess(ViewType.GENERAL, false), async function(req, res, next) {
@@ -217,6 +218,40 @@ router.post('/inventory', requireAccess(ViewType.SCM, true), async function(req,
     await Log.bulkCreate(logs);
 
     res.send(newInventoryMovements)
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+// Send email to supplier
+router.post('/sendEmail', requireAccess(ViewType.SCM, true), async function(req, res, next) {
+  const { id, document } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['id', 'document']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const purchaseOrder = await PurchaseOrder.findByPk(id, { include: [Supplier] });
+
+    // sendEmailTo(purchaseOrder.supplier.company_email, "purchaseOrder", { 
+    //   document: Buffer.from(document), 
+    //   supplier: purchaseOrder.supplier 
+    // })
+
+    // TODO: update status
+    purchaseOrder.purchase_order_status_id = PurchaseOrderStatusType.SENT_EMAIL.id;
+    await purchaseOrder.save();
+
+    res.send({ id: id })
 
   } catch(err) {
     console.log(err);

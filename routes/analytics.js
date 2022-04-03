@@ -523,42 +523,47 @@ router.get('/Customer_Profits', requireAccess(ViewType.ANALYTICS, true), async f
   try {
       const profitsTable = await sequelize.query(
           `      
-                  WITH
-                  invoiceProfits
-                  AS
-                  (
-                      SELECT
-                          SUM(ims.rev) AS revenue,
-                          SUM(ims.cogs) AS cost_of_goods_sold,
-                          created_at,
-                          sales_order_item_id
-                      FROM
-                          (
-                                        SELECT (quantity*unit_price*-1) AS rev,
-                              (quantity * unit_cost) AS cogs,
-                              created_at, sales_order_item_id,
-                              movement_type_id
-                          FROM inventory_movements
-                                    ) ims
-                      WHERE movement_type_id = 2
-                          AND created_at::DATE >= '${start_date}'
-                          AND created_at::DATE <= '${end_date}'
-                      GROUP BY sales_order_item_id, created_at
-                  )
+       
+
+          WITH
+          invoiceProfits
+          AS
+          (
               SELECT
-                  so.id AS sales_order_id,
-                  c.id,
-                  c.company_name,
-                  c.p1_name,
-                  to_char(invoiceProfits.created_at, 'DD-MM-YYYY') AS transaction_date,
-                  invoiceProfits.revenue AS total_revenue,
-                  invoiceProfits.cost_of_goods_sold*-1 AS total_COGS,
-                  invoiceProfits.revenue +  invoiceProfits.cost_of_goods_sold AS total_profits
-              FROM invoiceProfits
-                  INNER JOIN sales_order_items poitems ON invoiceProfits.sales_order_item_id = poitems.id
-                  INNER JOIN sales_orders so ON so.id = poitems.sales_order_id
-                  INNER JOIN customers c ON so.customer_id = c.id
-              WHERE c.id = '${customer_id}';
+                  SUM(ims.rev) AS revenue,
+                  SUM(ims.cogs) AS cost_of_goods_sold,
+                  created_at,
+                  sales_order_item_id
+              FROM
+                  (
+                      SELECT (quantity*unit_price*-1) AS rev,
+                      (quantity * unit_cost) AS cogs,
+                      created_at, sales_order_item_id,
+                      movement_type_id
+                  FROM inventory_movements
+                                          ) ims
+              WHERE movement_type_id = 2
+              -- AND created_at::DATE >= '${start_date}'
+              -- AND created_at::DATE <= '${end_date}'
+              GROUP BY sales_order_item_id, created_at
+          )
+      SELECT
+          so.id AS sales_order_id,
+          c.id,
+          c.company_name,
+          c.p1_name,
+          to_char(invoiceProfits.created_at, 'DD-MM-YYYY') AS transaction_date,
+          SUM(invoiceProfits.revenue) AS total_revenue,
+          SUM(invoiceProfits.cost_of_goods_sold*-1) AS total_COGS,
+          SUM(invoiceProfits.revenue +  invoiceProfits.cost_of_goods_sold) AS total_profits
+      FROM invoiceProfits
+          INNER JOIN sales_order_items poitems ON invoiceProfits.sales_order_item_id = poitems.id
+          INNER JOIN sales_orders so ON so.id = poitems.sales_order_id
+          INNER JOIN customers c ON so.customer_id = c.id
+      WHERE c.id = '${customer_id}'
+      GROUP BY so.id, c.id, c.company_name, c.p1_name, transaction_date;
+
+
             `,
           {
               raw: true,

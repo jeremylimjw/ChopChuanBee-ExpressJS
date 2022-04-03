@@ -543,8 +543,8 @@ router.get('/Customer_Profits', requireAccess(ViewType.ANALYTICS, true), async f
                   FROM inventory_movements
                                           ) ims
               WHERE movement_type_id = 2
-              -- AND created_at::DATE >= '${start_date}'
-              -- AND created_at::DATE <= '${end_date}'
+              AND created_at::DATE >= '${start_date}'
+              AND created_at::DATE <= '${end_date}'
               GROUP BY sales_order_item_id, created_at
           )
       SELECT

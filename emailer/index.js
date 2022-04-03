@@ -21,6 +21,18 @@ function sendEmailTo(email, templateName, params) {
       }
     });
 
+  } else if (templateName === 'salesOrder') {
+      return transporter.sendMail({
+        from: process.env.EMAIL_USERNAME,
+        to: email,
+        subject: "Chop Chuan Bee Sales Order",
+        text: `Dear ${params?.customer?.company_name}, \n\nPlease refer to the attached pdf regarding your sales order invoice.\n\nBest Regards,\nChop Chuan Bee`,
+        attachments: {
+          filename: 'SO.pdf',
+          content: params.document,
+        }
+      });
+
   } else {
     return transporter.sendMail({
       from: process.env.EMAIL_USERNAME,

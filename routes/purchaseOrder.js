@@ -242,12 +242,11 @@ router.post('/sendEmail', requireAccess(ViewType.SCM, true), async function(req,
   try {
     const purchaseOrder = await PurchaseOrder.findByPk(id, { include: [Supplier] });
 
-    // sendEmailTo(purchaseOrder.supplier.company_email, "purchaseOrder", { 
-    //   document: Buffer.from(document), 
-    //   supplier: purchaseOrder.supplier 
-    // })
+    sendEmailTo(purchaseOrder.supplier.company_email, "purchaseOrder", { 
+      document: Buffer.from(document), 
+      supplier: purchaseOrder.supplier 
+    })
 
-    // TODO: update status
     purchaseOrder.purchase_order_status_id = PurchaseOrderStatusType.SENT_EMAIL.id;
     await purchaseOrder.save();
 

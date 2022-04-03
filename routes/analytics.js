@@ -1184,7 +1184,7 @@ router.get('/Damaged_Goods_Qn_Desc', requireAccess(ViewType.ANALYTICS, true), as
           AND ims.created_at::DATE >= '${start_date}'
           AND ims.created_at::DATE <= '${end_date}'
           GROUP BY pdt.id
-          ORDER BY quantity_returned DESC;
+          ORDER BY quantity_damaged DESC;
       
           `,
           {

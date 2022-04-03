@@ -728,6 +728,98 @@ router.get('/Supplier_Returned_Goods', requireAccess(ViewType.ANALYTICS, true), 
     }
 });
 
+//4. Returned goods for supplier
+// order by quantity descending
+router.get('/Supplier_Returned_Goods_Qn_Desc', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query;
+  try {
+      const returned_goods = await sequelize.query(
+          `
+           SELECT
+                pdt.name AS Product_Name,
+                pdt.id AS Product_UUID,
+                pdt.description AS Product_Description,
+                SUM(ims.quantity * -1) AS quantity_returned,
+                SUM(ims.quantity * ims.unit_cost * -1) AS supplier_returned_goods_total_value
+            FROM inventory_movements ims
+                INNER JOIN purchase_order_items poitems ON ims.purchase_order_item_id = poitems.id
+                INNER JOIN products pdt ON poitems.product_id = pdt.id
+            WHERE movement_type_id = 3
+                AND ims.created_at::DATE >= '${start_date}'
+                AND ims.created_at::DATE <= '${end_date}'
+            GROUP BY pdt.id
+            ORDER BY quantity_returned DESC;
+      
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Returned Goods Dashboard`, 
+      });
+  
+      res.send(returned_goods);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+//4. Returned goods for customer
+// returns list of products that have been returned for customer
+router.get('/Customer_Returned_Goods_Qn_Desc', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query;
+  try {
+      const returned_goods = await sequelize.query(
+          `
+          SELECT 
+            pdt.name,
+            pdt.id AS Product_UUID,
+            pdt.description AS Product_Description,
+            SUM(ims.quantity) AS quantity_returned,
+            SUM(ims.quantity * ims.unit_cost) AS customer_returned_goods_total_value
+          FROM inventory_movements ims
+            INNER JOIN sales_order_items soitems ON ims.sales_order_item_id = soitems.id
+            INNER JOIN products pdt ON soitems.product_id = pdt.id
+          WHERE movement_type_id = 3
+            AND ims.created_at::DATE >= '${start_date}'
+            AND ims.created_at::DATE <= '${end_date}'
+          GROUP BY pdt.id
+          ORDER BY quantity_returned DESC;
+      
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Customer Returned Goods Dashboard (Qn desc)`, 
+      });
+  
+      res.send(returned_goods);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
 //4. Returned goods for customer
 // returns list of products that have been returned for customer
 router.get('/Customer_Returned_Goods', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
@@ -766,6 +858,55 @@ router.get('/Customer_Returned_Goods', requireAccess(ViewType.ANALYTICS, true), 
       });
   
       res.send(returned_goods);
+  
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+});
+
+
+
+
+//4. Damaged Inventory
+// returns list of products that have been damaged  
+router.get('/Damaged_Goods_Qn_Desc', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query;
+  try {
+      const damaged_goods = await sequelize.query(
+          `
+          SELECT
+          pdt.name,
+          pdt.id AS Product_UUID,
+          pdt.description AS Product_Description,
+          SUM(ims.quantity * -1) AS quantity_returned,
+          SUM(ims.quantity * ims.unit_cost * -1) AS total_damaged_inventory_value
+          FROM inventory_movements ims
+          INNER JOIN sales_order_items soitems ON ims.sales_order_item_id = soitems.id
+          INNER JOIN products pdt ON soitems.product_id = pdt.id
+          WHERE movement_type_id = 4
+          AND ims.created_at::DATE >= '${start_date}'
+          AND ims.created_at::DATE <= '${end_date}'
+          GROUP BY pdt.id
+          ORDER BY quantity_returned DESC;
+      
+          `,
+          {
+              raw: true,
+              type: sequelize.QueryTypes.SELECT
+          }
+      )
+
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the Damaged Goods Dashboard (qn desc)`, 
+      });
+  
+      res.send(damaged_goods);
   
     } catch(err) {
       // Catch and return any uncaught exceptions while inserting into database

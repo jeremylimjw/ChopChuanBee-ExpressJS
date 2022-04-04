@@ -209,6 +209,28 @@ async function syncAssociations() {
     // 1-M association
     Itinerary.hasMany(DeliveryOrder, { foreignKey: { name: 'itinerary_id' }});
     DeliveryOrder.belongsTo(Itinerary, { foreignKey: { name: 'itinerary_id' }});
+
+    const { Channel, Text, Participant } = require('../models/Chat');
+
+    // 1-M association
+    Employee.hasMany(Text, { foreignKey: { allowNull: false, name: 'employee_id' }});
+    Text.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'employee_id' }});
+
+    // 1-M association
+    Employee.hasMany(Channel, { foreignKey: { allowNull: false, name: 'owner_id' }});
+    Channel.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'owner_id' }});
+
+    // M-M association
+    Employee.belongsToMany(Channel, { through: Participant, foreignKey: { allowNull: false, name: 'employee_id' } });
+    Channel.belongsToMany(Employee, { through: Participant, foreignKey: { allowNull: false, name: 'channel_id' } });
+    Employee.hasMany(Participant, { foreignKey: { allowNull: false, name: 'employee_id' }});
+    Participant.belongsTo(Employee, { foreignKey: { allowNull: false, name: 'employee_id' }});
+    Channel.hasMany(Participant, { foreignKey: { allowNull: false, name: 'channel_id' }});
+    Participant.belongsTo(Channel, { foreignKey: { allowNull: false, name: 'channel_id' }});
+
+    // 1-M association
+    Channel.hasMany(Text, { foreignKey: { allowNull: false, name: 'channel_id' }});
+    Text.belongsTo(Channel, { foreignKey: { allowNull: false, name: 'channel_id' }});
   
     const SOFP = require('../models/SOFP');
     const IncomeStatement = require('../models/IncomeStatement');

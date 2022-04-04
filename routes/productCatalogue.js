@@ -14,8 +14,8 @@ router.get('/', requireAccess(ViewType.CATALOGUE, false), async function(req, re
     const predicate = parseRequest(req.query);
     
     try {
-        const product_catelogue_item = await ProductCatalogueItem.findAll(predicate);
-        res.send(product_catelogue_item);
+        const product_catalogue_item = await ProductCatalogueItem.findAll(predicate);
+        res.send(product_catalogue_item);
         
       } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database
@@ -28,7 +28,7 @@ router.get('/', requireAccess(ViewType.CATALOGUE, false), async function(req, re
 //create 
 router.post('/', requireAccess(ViewType.CATALOGUE, true), async function(req, res, next) { 
 
-  const {name, description, id, product_id } = req.body;
+  const {name, description, image, menu_category_id, product_id } = req.body;
     
   try {
     assertNotNull(req.body, ['name'])
@@ -38,7 +38,7 @@ router.post('/', requireAccess(ViewType.CATALOGUE, true), async function(req, re
   }
   
   try {
-    const newProductCatalogueItem = await ProductCatalogueItem.create({ name, description, menu_category_id : id, product_id :product_id});
+    const newProductCatalogueItem = await ProductCatalogueItem.create({ name, description, image, menu_category_id, product_id });
  
     // Record to admin logs
     const user = res.locals.user;
@@ -58,7 +58,7 @@ router.post('/', requireAccess(ViewType.CATALOGUE, true), async function(req, re
 });
 
 router.put('/', requireAccess(ViewType.CATALOGUE, true), async function(req, res, next) {
-  const { id, name, description, menu_cateogry_id } = req.body;
+  const { id, name, description, image, menu_category_id, product_id } = req.body;
 
   try {
     assertNotNull(req.body, ['id', 'name'])
@@ -69,7 +69,7 @@ router.put('/', requireAccess(ViewType.CATALOGUE, true), async function(req, res
 
   try {
     const result = await ProductCatalogueItem.update(
-      { name, description, menu_cateogry_id },
+      { name, description, image, menu_category_id, product_id },
       { where: { id: id } }
     );
 
@@ -133,7 +133,7 @@ router.delete('/', requireAccess(ViewType.CATALOGUE, true), async function(req, 
 
 
 
-router.get('/menu_item', requireAccess(ViewType.CATALOGUE, false), async function(req, res, next) {
+router.get('/menu_category', requireAccess(ViewType.CATALOGUE, false), async function(req, res, next) {
   const predicate = parseRequest(req.query);
   
   try {
@@ -149,7 +149,7 @@ router.get('/menu_item', requireAccess(ViewType.CATALOGUE, false), async functio
 
 });
 
-router.post('/menu_item', requireAccess(ViewType.CATALOGUE, true), async function(req, res, next) { 
+router.post('/menu_category', requireAccess(ViewType.CATALOGUE, true), async function(req, res, next) { 
 
   const {name } = req.body;
     
@@ -181,7 +181,7 @@ router.post('/menu_item', requireAccess(ViewType.CATALOGUE, true), async functio
 });
 
 
-router.delete('/menu_item', requireAccess(ViewType.CATALOGUE, true), async function(req, res, next) {
+router.delete('/menu_category', requireAccess(ViewType.CATALOGUE, true), async function(req, res, next) {
   const { id } = req.query;
   
   // Validation

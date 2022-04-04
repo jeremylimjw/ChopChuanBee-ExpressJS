@@ -21,6 +21,6 @@ router.use("/inventoryMovements", require("./inventoryMovements"));
 router.use("/deliveryOrder", require("./deliveryOrder"));
 router.use("/itinerary", require("./itinerary"));
 router.use("/dispatch", require("./dispatch"));
-router.use("/productCategory", require("./productCategory"));
+router.use("/productCatalogue", require("./productCatalogue"));
 
 module.exports = router;

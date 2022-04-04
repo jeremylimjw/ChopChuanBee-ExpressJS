@@ -11,7 +11,7 @@ const ProductCatalogueItem = sequelize.define('product_catalogue_item', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    // pictures: DataTypes.STRING,
+    image: DataTypes.TEXT,
     description: DataTypes.STRING,
 }, {
     updatedAt: 'updated_at',

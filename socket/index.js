@@ -21,9 +21,7 @@ async function init(server) {
     io.on('connection', socket => {
         const userId = socket.handshake.query.id;
 
-        // ALICE : c8a38325-a7f1-4b0d-ac23-a1dee5515d30
-        // ADMIN: 930da5b9-9796-4e4e-afab-b7cf90863604
-        console.log(socket.handshake.query.name, 'connected', userId)
+        // console.log(socket.handshake.query.name, 'connected', userId)
 
         socket.join(userId);
         
@@ -67,7 +65,8 @@ async function init(server) {
 
 
         socket.on('disconnect', () => { 
-            console.log(socket.handshake.query.name, 'disconnect')
+            // console.log(socket.handshake.query.name, 'disconnect')
+            
             // Update last seen timestamp
             lastSeens[userId] = new Date();
 

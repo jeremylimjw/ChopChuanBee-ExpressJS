@@ -262,15 +262,15 @@ router.post('/channel/participant', requireAccess(ViewType.GENERAL), async funct
         const user = res.locals.user;
         const io = getSocket();
 
+        await Participant.create({ channel_id: channel_id, employee_id: employee_id });
+        const getParticipant = await Participant.findAll({ where: { channel_id: channel_id, employee_id: employee_id }, include: [Employee] });
+
         const channel = await Channel.findByPk(channel_id, { 
             include: [
                 { model: Participant, include: [Employee] },
                 Employee
             ] 
         })
-
-        await Participant.create({ channel_id: channel_id, employee_id: employee_id });
-        const getParticipant = await Participant.findAll({ where: { channel_id: channel_id, employee_id: employee_id }, include: [Employee] });
 
         // Broadcast to participants the channel
         for (let participant of channel.participants) {

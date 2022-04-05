@@ -81,8 +81,6 @@ router.post('/sofp', requireAccess(ViewType.ACCOUNTING, true), async function(re
     const inv_at_hand = parseFloat(inventory[0].inv_at_hand) || 0;
 
     const newSOFP = await SOFP.create({ name, cash_sales_of_goods: cash_business, account_receivable: ar, inventory: inv_at_hand, account_payable: ap, end_date, remarks });
-      console.log(ap);
-      console.log(ar);
     // Record to admin logs
     const user = res.locals.user;
     await Log.create({ 
@@ -341,7 +339,6 @@ router.post('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async
     const customer_sales_return_converted = parseFloat(customer_sales_return[0].sales) || 0;
     const damaged_inventory = parseFloat(damage[0].damaged_inventory) || 0;
     const newIncomeStatement = await IncomeStatement.create({name,revenue:revenue_converted, less_cost_of_goods_sold:COGS_converted, less_customer_sales_return:customer_sales_return_converted, damaged_inventory : damaged_inventory, start_date, end_date , remarks});
-    console.log(customer_sales_return_converted);
     // Record to admin logs
     const user = res.locals.user;
     await Log.create({ 

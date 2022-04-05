@@ -22,9 +22,9 @@ const { assertNotNull, parseRequest } = require('../common/helpers');
 /**
  *  GET method: Get employees
  *  - e.g. /api/employee OR /api/employee?id=123
- *  - requireAccess(ViewType.HR, false)
+ *  - requireAccess(ViewType.GENERAL) because chat system needs anyone to get employee
  * */ 
-router.get('/', requireAccess(ViewType.HR, false), async function(req, res, next) {
+router.get('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
     const predicate = parseRequest(req.query);
     
     try {

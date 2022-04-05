@@ -31,9 +31,9 @@ router.post('/sofp', requireAccess(ViewType.ACCOUNTING, true), async function(re
 
   try {
     const account_receivable = await sequelize.query(
-      `SELECT sum(amount) as AR
+      `SELECT sum(amount)*-1 as AR
       FROM payments
-      WHERE accounting_type_id = 1 
+      WHERE accounting_type_id = 2 
       AND created_at <= '${end_date}'`,
       { 
           raw: true, 
@@ -44,7 +44,7 @@ router.post('/sofp', requireAccess(ViewType.ACCOUNTING, true), async function(re
     const account_payable = await sequelize.query(
       `SELECT sum(amount) as AP
       FROM payments
-      WHERE accounting_type_id = 2 
+      WHERE accounting_type_id = 1 
       AND created_at <= '${end_date}'`,
       { 
         raw: true, 
@@ -77,11 +77,12 @@ router.post('/sofp', requireAccess(ViewType.ACCOUNTING, true), async function(re
       
     const cash_business = parseFloat(cash_sales_of_goods[0].cash_sales_of_goods) || 0;
     const ar = parseFloat(account_receivable[0].ar) || 0;
-    const ap = parseFloat(account_payable[0].ap) || 0;
+    const ap = (parseFloat(account_payable[0].ap) || 0);
     const inv_at_hand = parseFloat(inventory[0].inv_at_hand) || 0;
 
     const newSOFP = await SOFP.create({ name, cash_sales_of_goods: cash_business, account_receivable: ar, inventory: inv_at_hand, account_payable: ap, end_date, remarks });
-  
+      console.log(ap);
+      console.log(ar);
     // Record to admin logs
     const user = res.locals.user;
     await Log.create({ 
@@ -311,9 +312,21 @@ router.post('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async
       }
     );
 
+    const damage = await sequelize.query(
+      `SELECT (sum(qty_unitcost.total)*-1) as damaged_inventory
+        FROM (select (quantity * unit_cost) as total, created_at, movement_type_id FROM inventory_movements) qty_unitcost
+        WHERE movement_type_id = 4
+        AND created_at >= '${start_date}'
+        AND created_at <= '${end_date}'`,
+      { 
+        raw: true, 
+        type: sequelize.QueryTypes.SELECT 
+      }
+    );
+
     const customer_sales_return = await sequelize.query(
-      `SELECT sum(qty_unitcost.total *-1) as sales
-        FROM (select (quantity * (unit_price - unit_cost)) as total, created_at, movement_type_id FROM inventory_movements) qty_unitcost
+      `SELECT sum(qty_unitcost.total) as sales
+        FROM (select (quantity * (unit_price - unit_cost)) as total, created_at, movement_type_id FROM inventory_movements WHERE unit_price IS NOT NULL) qty_unitcost
         WHERE movement_type_id = 3
         AND created_at >= '${start_date}'
         AND created_at <= '${end_date}'`,
@@ -326,9 +339,9 @@ router.post('/income_statement', requireAccess(ViewType.ACCOUNTING, true), async
     const revenue_converted = parseFloat(revenue[0].revenue)|| 0;
     const COGS_converted = parseFloat(COGS[0].cost_of_goods_sold)|| 0;
     const customer_sales_return_converted = parseFloat(customer_sales_return[0].sales) || 0;
-    
-    const newIncomeStatement = await IncomeStatement.create({name,revenue:revenue_converted, less_cost_of_goods_sold:COGS_converted, less_customer_sales_return:customer_sales_return_converted,  start_date, end_date , remarks});
-    
+    const damaged_inventory = parseFloat(damage[0].damaged_inventory) || 0;
+    const newIncomeStatement = await IncomeStatement.create({name,revenue:revenue_converted, less_cost_of_goods_sold:COGS_converted, less_customer_sales_return:customer_sales_return_converted, damaged_inventory : damaged_inventory, start_date, end_date , remarks});
+    console.log(customer_sales_return_converted);
     // Record to admin logs
     const user = res.locals.user;
     await Log.create({ 

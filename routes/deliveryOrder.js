@@ -14,7 +14,7 @@ const { Product } = require('../models/Product');
 
 
 router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res, next) {
-    const { id, customer_company_name, customer_p1_name, delivery_status_id } = req.query;
+    const { id, customer_company_name, customer_p1_name, delivery_status_id, sales_order_id } = req.query;
     
     try {
         const results = await sequelize.query(
@@ -30,6 +30,7 @@ router.get('/', requireAccess(ViewType.DISPATCH, false), async function(req, res
                 ${delivery_status_id ? `AND d.delivery_status_id = ${delivery_status_id}` : ""}
                 ${customer_company_name ? `AND LOWER(c.company_name) LIKE '%${customer_company_name.toLowerCase()}%'` : ""}
                 ${customer_p1_name ? `AND LOWER(c.p1_name) LIKE '%${customer_p1_name.toLowerCase()}%'` : ""}
+                ${sales_order_id ? `AND d.sales_order_id = ${sales_order_id}` : ""}
             ORDER BY d.created_at DESC
             `,
             { 

@@ -1636,5 +1636,97 @@ router.get('/Aging_AR_Table', requireAccess(ViewType.ANALYTICS, true), async fun
     }
 });
 
+router.get('/POtable', requireAccess(ViewType.ANALYTICS, false), async function(req, res, next) {
+  const { id, purchase_order_status_id, payment_term_id, supplier_id, supplier_name, start_date, end_date } = req.query;
+  
+  // Build associations to return
+  const supplierInc = { model: Supplier };
+  const include = [
+    { model: PurchaseOrderItem, include: [InventoryMovement, Product] }, 
+    { model: Payment, include: [PaymentMethod] },
+    ChargedUnder,
+    supplierInc,
+  ];
+
+  // Build query
+  const where = {};
+  if (id != null)
+    where.id = id;
+  if (purchase_order_status_id != null)
+    where.purchase_order_status_id = purchase_order_status_id;
+  if (payment_term_id != null)
+    where.payment_term_id = payment_term_id;
+  if (supplier_id != null)
+    where.supplier_id = supplier_id;
+  if (supplier_name != null)
+    supplierInc.where = { company_name: { [Sequelize.Op.iLike]: `%${supplier_name}%` } };
+  if (start_date != null && end_date != null)
+    where.created_at = { [Sequelize.Op.between]: [start_date, end_date] };
+
+  // Build order
+  const order = [
+    ['created_at', 'DESC'],
+    [Payment, 'created_at', 'ASC'], 
+    [PurchaseOrderItem, InventoryMovement, 'created_at', 'ASC']
+  ];
+
+  try {
+    const purchaseOrders = await PurchaseOrder.findAll({ where: where, include: include, order: order });
+
+    res.send(purchaseOrders);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+router.get('/SOtable', requireAccess(ViewType.ANALYTICS, false), async function(req, res, next) {
+  const { id, sales_order_status_id, payment_term_id, customer_id, customer_name, start_date, end_date } = req.query;
+  
+  // Build associations to return
+  const customerInc = { model: Customer };
+  const include = [
+    { model: SalesOrderItem, include: [InventoryMovement, Product] }, 
+    { model: Payment, include: [PaymentMethod] },
+    ChargedUnder,
+    customerInc,
+  ];
+
+  // Build query
+  const where = {};
+  if (id != null)
+    where.id = id;
+  if (sales_order_status_id != null)
+    where.sales_order_status_id = sales_order_status_id;
+  if (payment_term_id != null)
+    where.payment_term_id = payment_term_id;
+  if (customer_id != null)
+    where.customer_id = customer_id;
+  if (customer_name != null)
+  customerInc.where = { company_name: { [Sequelize.Op.iLike]: `%${customer_name}%` } };
+  if (start_date != null && end_date != null)
+    where.created_at = { [Sequelize.Op.between]: [start_date, end_date] };
+
+  // Build order
+  const order = [
+    ['created_at', 'DESC'],
+    [Payment, 'created_at', 'ASC'], 
+    [SalesOrderItem, InventoryMovement, 'created_at', 'ASC']
+  ];
+
+  try {
+    const results = await SalesOrder.findAll({ where: where, include: include, order: order });
+
+    res.send(results);
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
 
 module.exports = router; 

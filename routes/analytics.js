@@ -1728,5 +1728,293 @@ router.get('/SOtable', requireAccess(ViewType.ANALYTICS, false), async function(
 
 });
 
+//Sales breakdown
+router.get('/sales_breakdown', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query; 
+  try {
+    const sales_table = await sequelize.query(`
+    WITH gross_sales_revenue AS (
+      SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.gross_sales_revenue),0) AS gross_revenue
+      FROM ( SELECT (quantity * unit_price*-1) AS gross_sales_revenue, created_at, movement_type_id
+             FROM inventory_movements) qty_unitprice
+             WHERE movement_type_id = 2
+             AND created_at::DATE >= '${start_date}'
+             AND created_at::DATE <= '${end_date}'
+             GROUP BY date
+             ORDER BY date ASC ),
+    sales_return AS (
+      SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.sales_return),0) AS total_sales_return
+      FROM ( SELECT (quantity * unit_price) AS sales_return, created_at, movement_type_id
+             FROM inventory_movements
+             WHERE unit_price IS NOT NULL ) qty_unitprice
+      WHERE movement_type_id = 3
+      AND created_at::DATE >= '${start_date}'
+      AND created_at::DATE <= '${end_date}'
+      GROUP BY date
+      ORDER BY date ASC ),
+    cash_gross_sales_revenue AS (
+      SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.gross_sales_revenue),0) AS cash_revenue
+      FROM ( SELECT (inventory_movements.quantity * inventory_movements.unit_price*-1) AS gross_sales_revenue, inventory_movements.created_at, inventory_movements.movement_type_id
+             FROM inventory_movements
+             JOIN sales_order_items ON inventory_movements.sales_order_item_id = sales_order_items.id
+             JOIN sales_orders ON sales_order_items.sales_order_id = sales_orders.id
+             WHERE sales_orders.payment_term_id = 1 ) qty_unitprice
+      WHERE movement_type_id = 2
+      AND created_at::DATE >= '${start_date}'
+      AND created_at::DATE <= '${end_date}'
+      GROUP BY date
+      ORDER BY date ASC ),
+    cash_sales_return AS (
+      SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.gross_sales_revenue),0) AS cash_returns
+      FROM ( SELECT (inventory_movements.quantity * inventory_movements.unit_price) AS gross_sales_revenue, inventory_movements.created_at, inventory_movements.movement_type_id
+             FROM inventory_movements
+             JOIN sales_order_items ON inventory_movements.sales_order_item_id = sales_order_items.id
+             JOIN sales_orders ON sales_order_items.sales_order_id = sales_orders.id
+             WHERE sales_orders.payment_term_id = 1) qty_unitprice
+      WHERE movement_type_id = 3
+      AND created_at::DATE >= '${start_date}'
+      AND created_at::DATE <= '${end_date}'
+      GROUP BY date
+      ORDER BY date ASC ),
+    credit_gross_sales_revenue AS (
+      SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.gross_sales_revenue),0) AS credit_revenue
+      FROM ( SELECT (inventory_movements.quantity * inventory_movements.unit_price*-1) AS gross_sales_revenue, inventory_movements.created_at, inventory_movements.movement_type_id
+             FROM inventory_movements
+             JOIN sales_order_items ON inventory_movements.sales_order_item_id = sales_order_items.id
+             JOIN sales_orders ON sales_order_items.sales_order_id = sales_orders.id
+             WHERE sales_orders.payment_term_id = 2) qty_unitprice
+      WHERE movement_type_id = 2
+      AND created_at::DATE >= '${start_date}'
+      AND created_at::DATE <= '${end_date}'
+      GROUP BY date
+      ORDER BY date ASC ), 
+    credit_sales_return AS (
+      SELECT to_char(created_at, 'YYYY-MM') AS date, coalesce(SUM(qty_unitprice.gross_sales_revenue),0) AS credit_returns
+      FROM ( SELECT (inventory_movements.quantity * inventory_movements.unit_price) AS gross_sales_revenue, inventory_movements.created_at, inventory_movements.movement_type_id
+             FROM inventory_movements
+             JOIN sales_order_items ON inventory_movements.sales_order_item_id = sales_order_items.id
+             JOIN sales_orders ON sales_order_items.sales_order_id = sales_orders.id
+             WHERE sales_orders.payment_term_id = 2 ) qty_unitprice
+      WHERE movement_type_id = 3
+      AND created_at::DATE >= '${start_date}'
+      AND created_at::DATE <= '${end_date}'
+      GROUP BY date
+      ORDER BY date )
+    SELECT gross_sales_revenue.date AS period, coalesce(gross_revenue,0) - coalesce(total_sales_return,0) AS Total_revenue, coalesce(cash_revenue,0) - coalesce(cash_returns,0) AS Cash_Revenue, coalesce(credit_revenue,0) - coalesce(credit_returns,0) AS Credit_Revenue
+    FROM gross_sales_revenue
+    LEFT OUTER JOIN sales_return ON gross_sales_revenue.date = sales_return.date
+    LEFT OUTER JOIN cash_gross_sales_revenue ON cash_gross_sales_revenue.date=  gross_sales_revenue.date
+    LEFT OUTER JOIN cash_sales_return ON cash_sales_return.date=  gross_sales_revenue.date
+    LEFT OUTER JOIN credit_gross_sales_revenue ON credit_gross_sales_revenue.date=  gross_sales_revenue.date
+    LEFT OUTER JOIN credit_sales_return ON credit_sales_return.date =  gross_sales_revenue.date`,
+    {
+      raw: true,
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    // Record to admin logs
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.ANALYTICS.id,
+      text: `${user.name} viewed the Sales Breakdown Chart`, 
+    });
+    res.send(sales_table)
+  
+  } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+  }
+});
+
+// Minimum Inventory (Limit 10)
+router.get('/minimum_inventory_10', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+
+  try {
+    const inv_table = await sequelize.query(`
+      SELECT products.name, SUM(COALESCE(quantity,0)) AS current_inventory_level, MIN(min_inventory_level), (SUM(COALESCE(quantity::decimal,0.00))/MIN(min_inventory_level::decimal) ) AS ratio
+      FROM products
+      LEFT JOIN inventory_movements ON inventory_movements.product_id = products.id
+      GROUP BY products.name
+      ORDER BY ratio
+      LIMIT 10`,
+      {
+        raw: true,
+        type: sequelize.QueryTypes.SELECT
+      });
+  
+    // Record to admin logs
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.ANALYTICS.id,
+      text: `${user.name} viewed the minimum inventory Chart`, 
+    });
+    
+    res.send(inv_table);
+    
+  } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+  };
+});
+
+// Minimum Inventory (All)
+router.get('/minimum_inventory_all', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  try {
+    const inv_table = await sequelize.query(`
+      SELECT products.name, SUM(COALESCE(quantity,0)) AS current_inventory_level, MIN(min_inventory_level), (SUM(COALESCE(quantity::decimal,0.00))/MIN(min_inventory_level::decimal) ) AS ratio
+      FROM products
+      LEFT JOIN inventory_movements ON inventory_movements.product_id = products.id
+      GROUP BY products.name
+      ORDER BY ratio`,
+      {
+        raw: true,
+        type: sequelize.QueryTypes.SELECT
+      });   
+  
+    // Record to admin logs
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.ANALYTICS.id,
+      text: `${user.name} viewed the minimum inventory Chart`, 
+    });
+    res.send(inv_table);
+
+  } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+  };
+});
+
+// Cash Flow
+router.get('/cash_flow', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query; 
+  try {
+    const cash_table = await sequelize.query(`
+      WITH cash_out AS (
+        SELECT to_char(sales_orders.created_at, 'YYYY-MM') AS date,
+          SUM(amount) AS cash_outflow
+        FROM sales_orders JOIN payments ON payments.sales_order_id = sales_orders.id
+        WHERE payments.payment_method_id IS NOT NULL
+        AND sales_orders.created_at::DATE >= '${start_date}'
+        AND sales_orders.created_at::DATE <= '${end_date}'
+        GROUP BY date
+        ORDER BY date ),
+      cash_in AS (
+        SELECT to_char(purchase_orders.created_at, 'YYYY-MM') AS date,
+          SUM(amount) AS cash_inflow
+        FROM purchase_orders JOIN payments ON payments.purchase_order_id = purchase_orders.id
+        WHERE payments.payment_method_id IS NOT NULL
+        AND purchase_orders.created_at::DATE >= '${start_date}'
+        AND purchase_orders.created_at::DATE <= '${end_date}'
+        GROUP BY date
+        ORDER BY date )
+      SELECT cash_out.date AS period, coalesce(cash_inflow,0) AS cash_inflow, coalesce(cash_outflow,0) AS cash_outflow, coalesce(cash_inflow,0) + coalesce(cash_outflow,0) AS net_cash_flow
+      FROM cash_in FULL OUTER JOIN cash_out ON cash_in.date = cash_out.date`,
+      {
+        raw: true,
+        type: sequelize.QueryTypes.SELECT
+      });
+  
+      // Record to admin logs
+      const user = res.locals.user;
+      await Log.create({ 
+        employee_id: user.id, 
+        view_id: ViewType.ANALYTICS.id,
+        text: `${user.name} viewed the cash flow chart`, 
+      });
+      res.send(cash_table);
+    
+  } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+  };
+});
+
+// AP/AR Summary Table
+router.get('/summary_table', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
+  const {start_date ,end_date } = req.query; 
+  try {
+    const summary_table = await sequelize.query(`
+      WITH AR_Settlement AS (
+        SELECT date_trunc('month', sales_orders.created_at) AS month, SUM(amount) AS AR_Settled
+        FROM sales_orders JOIN payments ON payments.sales_order_id = sales_orders.id
+        WHERE payments.payment_method_id IS NOT NULL 
+        AND sales_orders.payment_term_id = 2
+        AND sales_orders.created_at::DATE >= '${start_date}'
+        AND sales_orders.created_at::DATE <= '${end_date}'
+        GROUP BY month
+        ORDER BY month ),
+      AP_Settlement AS (
+        SELECT date_trunc('month', purchase_orders.created_at) AS month, SUM(amount*-1) AS AP_Settled
+        FROM purchase_orders JOIN payments ON payments.purchase_order_id = purchase_orders.id
+        WHERE payments.payment_method_id IS NOT NULL 
+        AND purchase_orders.payment_term_id = 2
+        AND purchase_orders.created_at::DATE >= '${start_date}'
+        AND purchase_orders.created_at::DATE <= '${end_date}'
+        GROUP BY month
+        ORDER BY month ),  
+      AR AS (
+        SELECT date_trunc('month', sales_orders.created_at) AS month, SUM(amount*-1) AS AR_amount
+        FROM sales_orders JOIN payments ON payments.sales_order_id = sales_orders.id
+        WHERE payments.payment_method_id IS NULL 
+        AND sales_orders.payment_term_id = 2
+        AND sales_orders.created_at::DATE >= '${start_date}'
+        AND sales_orders.created_at::DATE <= '${end_date}'
+        GROUP BY month
+        ORDER BY month ), 
+      AP AS (
+        SELECT date_trunc('month', purchase_orders.created_at) AS month, SUM(amount) AS AP_amount
+        FROM purchase_orders JOIN payments ON payments.purchase_order_id = purchase_orders.id
+        WHERE payments.payment_method_id IS NULL 
+        AND purchase_orders.payment_term_id = 2
+        AND purchase_orders.created_at::DATE >= '${start_date}'
+        AND purchase_orders.created_at::DATE <= '${end_date}'
+        GROUP BY month
+        ORDER BY month )
+      SELECT final_ar_table.all_months, COALESCE(Balance_AR,0) AS Balance_AR, COALESCE(AR_Settled,0) AS AR_Settled, COALESCE(Balance_AP,0) AS Balance_AP, COALESCE(AP_Settled,0) AS AP_Settled
+      FROM (SELECT all_months, SUM(AR_amount) over (ORDER BY all_months ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS Balance_AR
+            FROM AR RIGHT OUTER JOIN (SELECT month AS all_months FROM
+              (SELECT month FROM AP UNION 
+               SELECT month FROM AR UNION 
+               SELECT month FROM AR_Settlement UNION 
+               SELECT month FROM AP_Settlement) AS all_months_table) AS all_months_table
+            ON all_months_table.all_months = AR.month) AS final_ar_table INNER JOIN (
+               SELECT all_months, SUM(AP_amount) over (ORDER BY all_months ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS Balance_AP
+               FROM AP RIGHT OUTER JOIN (SELECT month AS all_months FROM 
+                (SELECT month FROM AP UNION 
+                 SELECT month FROM AR UNION 
+                 SELECT month FROM AR_Settlement UNION 
+                 SELECT month FROM AP_Settlement) AS all_months_table) AS all_months_table
+               ON all_months_table.all_months = AP.month) AS final_ap_table
+               ON final_ar_table.all_months = final_ap_table.all_months
+      LEFT OUTER JOIN AR_Settlement ON final_ar_table.all_months = AR_Settlement.month
+      LEFT OUTER JOIN AP_Settlement ON final_ar_table.all_months = AP_Settlement.month`,
+    {
+      raw: true,
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    // Record to admin logs
+    const user = res.locals.user;
+    await Log.create({ 
+      employee_id: user.id, 
+      view_id: ViewType.ANALYTICS.id,
+      text: `${user.name} viewed the AP/AR summary table`, 
+    });
+    res.send(summary_table);
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  };
+
+});
 
 module.exports = router; 

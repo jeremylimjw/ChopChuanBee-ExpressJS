@@ -2,12 +2,18 @@ var express = require('express');
 var router = express.Router();
 const { Sequelize } = require('sequelize');
 const { sequelize } = require('../db');
+const { Supplier } = require('../models/Supplier');
 const { requireAccess } = require('../auth');
+const { Product } = require('../models/Product');
+const { PurchaseOrder, PurchaseOrderItem, PaymentTerm, POStatus } = require('../models/PurchaseOrder');
 const { Payment, PaymentMethod, AccountingType } = require('../models/Payment');
 const ViewType = require('../common/ViewType');
+const { InventoryMovement } = require('../models/InventoryMovement');
 const Log = require('../models/Log');
+const { ChargedUnder, Customer } = require('../models/Customer');
 const { parseRequest, assertNotNull } = require('../common/helpers');
-
+const { SalesOrder, SalesOrderItem, updateSalesOrder, buildNewPayment, buildRefundPayment, validateOrderItems, validateAndBuildNewInventories, buildDeliveryOrder, buildRefundInventories } = require('../models/SalesOrder');
+const { DeliveryOrder, generateAndSaveQRCode } = require('../models/DeliveryOrder');
 
 //1. Profits Dashboard: COGS
 // returns by selected month

@@ -21,7 +21,7 @@ router.get('/', requireAccess(ViewType.CATALOGUE, false), async function(req, re
           if(prod_catalogue_item.menu_category_id != null) {
             const newmenu = await MenuCategory.findByPk(prod_catalogue_item.menu_category_id);
             item['menu_category_name'] = newmenu.name;
-            console.log(item);
+            // console.log(item);
           } else {
             item['menu_category_name'] = null;
           }

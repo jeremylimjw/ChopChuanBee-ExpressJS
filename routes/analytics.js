@@ -1902,26 +1902,32 @@ router.get('/cash_flow', requireAccess(ViewType.ANALYTICS, true), async function
   const {start_date ,end_date } = req.query; 
   try {
     const cash_table = await sequelize.query(`
-      WITH cash_out AS (
+      WITH cash_in AS (
         SELECT to_char(sales_orders.created_at, 'YYYY-MM') AS date,
-          SUM(amount) AS cash_outflow
+          SUM(amount) AS cash_inflow
         FROM sales_orders JOIN payments ON payments.sales_order_id = sales_orders.id
         WHERE payments.payment_method_id IS NOT NULL
         AND sales_orders.created_at::DATE >= '${start_date}'
         AND sales_orders.created_at::DATE <= '${end_date}'
         GROUP BY date
         ORDER BY date ),
-      cash_in AS (
+      cash_out AS (
         SELECT to_char(purchase_orders.created_at, 'YYYY-MM') AS date,
-          SUM(amount) AS cash_inflow
+          SUM(amount) AS cash_outflow
         FROM purchase_orders JOIN payments ON payments.purchase_order_id = purchase_orders.id
         WHERE payments.payment_method_id IS NOT NULL
         AND purchase_orders.created_at::DATE >= '${start_date}'
         AND purchase_orders.created_at::DATE <= '${end_date}'
         GROUP BY date
         ORDER BY date )
-      SELECT cash_out.date AS period, coalesce(cash_inflow,0) AS cash_inflow, coalesce(cash_outflow,0) AS cash_outflow, coalesce(cash_inflow,0) + coalesce(cash_outflow,0) AS net_cash_flow
-      FROM cash_in FULL OUTER JOIN cash_out ON cash_in.date = cash_out.date`,
+      SELECT all_months_table.all_months AS period, coalesce(cash_inflow,0) AS cash_inflow, coalesce(cash_outflow,0) AS cash_outflow, coalesce(cash_inflow,0) + coalesce(cash_outflow,0) AS net_cash_flow
+      FROM (SELECT date AS all_months FROM (
+        SELECT date FROM cash_out
+        UNION
+        SELECT date FROM cash_in
+      ) AS all_months_table) AS all_months_table
+      LEFT OUTER JOIN cash_in ON cash_in.date = all_months_table.all_months
+      LEFT OUTER JOIN cash_out ON cash_out.date = all_months_table.all_months`,
       {
         raw: true,
         type: sequelize.QueryTypes.SELECT

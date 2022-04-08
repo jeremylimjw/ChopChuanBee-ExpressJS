@@ -14,16 +14,34 @@ router.get('/', requireAccess(ViewType.CATALOGUE, false), async function(req, re
     const predicate = parseRequest(req.query);
     
     try {
-        const product_catalogue_item = await ProductCatalogueItem.findAll(predicate);
-        res.send(product_catalogue_item);
-        
+        let new_product_catalogue_items = [];
+        const product_catalogue_items = await ProductCatalogueItem.findAll(predicate);
+        for ( let prod_catalogue_item of product_catalogue_items ) {
+          let item = prod_catalogue_item.toJSON();
+          if(prod_catalogue_item.menu_category_id != null) {
+            const newmenu = await MenuCategory.findByPk(prod_catalogue_item.menu_category_id);
+            item['menu_category_name'] = newmenu.name;
+            console.log(item);
+          } else {
+            item['menu_category_name'] = null;
+          }
+          if(prod_catalogue_item.product_id != null) {
+            const newprod = await Product.findByPk(prod_catalogue_item.product_id);
+            item['product_name'] = newprod.name;
+            console.log(item);
+          } else {
+            item['product_name'] = null;
+          }
+
+          new_product_catalogue_items.push(item);
+        }
+        res.send(new_product_catalogue_items);    
       } catch(err) {
         // Catch and return any uncaught exceptions while inserting into database
         console.log(err);
         res.status(500).send(err);
       }
     
-
 });
 //create 
 router.post('/', requireAccess(ViewType.CATALOGUE, true), async function(req, res, next) { 
@@ -146,7 +164,28 @@ router.get('/menu_category', requireAccess(ViewType.CATALOGUE, false), async fun
       res.status(500).send(err);
     }
   
+});
 
+router.get('/all_menu_category', requireAccess(ViewType.CATALOGUE, false), async function(req, res, next) {
+  const predicate = parseRequest(req.query);
+  
+  try {
+      let newMenu = [];
+      const menu_categories = await MenuCategory.findAll(predicate);
+      for ( let menu_category of menu_categories ) {
+        let item = menu_category.toJSON();
+        const product_items = await ProductCatalogueItem.findAll({ where: { menu_category_id: menu_category.id }})
+        item['attachedMenuItems'] = product_items;
+        newMenu.push(item);
+      }
+      res.send(newMenu);
+      
+    } catch(err) {
+      // Catch and return any uncaught exceptions while inserting into database
+      console.log(err);
+      res.status(500).send(err);
+    }
+  
 });
 
 router.post('/menu_category', requireAccess(ViewType.CATALOGUE, true), async function(req, res, next) { 

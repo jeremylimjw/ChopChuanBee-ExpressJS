@@ -1137,8 +1137,7 @@ router.get('/Damaged_Goods_Unique', requireAccess(ViewType.ANALYTICS, true), asy
           SUM(ims.quantity * -1) AS quantity_damaged,
           SUM(ims.quantity * ims.unit_cost * -1) AS total_damaged_inventory_value
       FROM inventory_movements ims
-          INNER JOIN sales_order_items soitems ON ims.sales_order_item_id = soitems.id
-          INNER JOIN products pdt ON soitems.product_id = pdt.id
+          INNER JOIN products pdt ON ims.product_id = pdt.id
       WHERE movement_type_id = 4
           AND ims.created_at::DATE >= '${start_date}'
           AND ims.created_at::DATE <= '${end_date}'
@@ -1184,8 +1183,7 @@ router.get('/Damaged_Goods_Qn_Desc', requireAccess(ViewType.ANALYTICS, true), as
           SUM(ims.quantity * -1) AS quantity_damaged,
           SUM(ims.quantity * ims.unit_cost * -1) AS total_damaged_inventory_value
           FROM inventory_movements ims
-          INNER JOIN sales_order_items soitems ON ims.sales_order_item_id = soitems.id
-          INNER JOIN products pdt ON soitems.product_id = pdt.id
+          INNER JOIN products pdt ON ims.product_id = pdt.id
           WHERE movement_type_id = 4
           AND ims.created_at::DATE >= '${start_date}'
           AND ims.created_at::DATE <= '${end_date}'
@@ -1230,8 +1228,7 @@ router.get('/Damaged_Goods', requireAccess(ViewType.ANALYTICS, true), async func
           SUM(ims.quantity * -1) AS quantity_damaged,
           SUM(ims.quantity * ims.unit_cost * -1) AS total_damaged_inventory_value
           FROM inventory_movements ims
-          INNER JOIN sales_order_items soitems ON ims.sales_order_item_id = soitems.id
-          INNER JOIN products pdt ON soitems.product_id = pdt.id
+          INNER JOIN products pdt ON ims.product_id = pdt.id
           WHERE movement_type_id = 4
           AND ims.created_at::DATE >= '${start_date}'
           AND ims.created_at::DATE <= '${end_date}'
@@ -1955,39 +1952,31 @@ router.get('/summary_table', requireAccess(ViewType.ANALYTICS, true), async func
   try {
     const summary_table = await sequelize.query(`
       WITH AR_Settlement AS (
-        SELECT date_trunc('month', sales_orders.created_at) AS month, SUM(amount) AS AR_Settled
+        SELECT date_trunc('month', payments.created_at) AS month, SUM(amount) AS AR_Settled
         FROM sales_orders JOIN payments ON payments.sales_order_id = sales_orders.id
         WHERE payments.payment_method_id IS NOT NULL 
         AND sales_orders.payment_term_id = 2
-        AND sales_orders.created_at::DATE >= '${start_date}'
-        AND sales_orders.created_at::DATE <= '${end_date}'
         GROUP BY month
         ORDER BY month ),
       AP_Settlement AS (
-        SELECT date_trunc('month', purchase_orders.created_at) AS month, SUM(amount*-1) AS AP_Settled
+        SELECT date_trunc('month', payments.created_at) AS month, SUM(amount*-1) AS AP_Settled
         FROM purchase_orders JOIN payments ON payments.purchase_order_id = purchase_orders.id
         WHERE payments.payment_method_id IS NOT NULL 
         AND purchase_orders.payment_term_id = 2
-        AND purchase_orders.created_at::DATE >= '${start_date}'
-        AND purchase_orders.created_at::DATE <= '${end_date}'
         GROUP BY month
         ORDER BY month ),  
       AR AS (
-        SELECT date_trunc('month', sales_orders.created_at) AS month, SUM(amount*-1) AS AR_amount
+        SELECT date_trunc('month', payments.created_at) AS month, SUM(amount*-1) AS AR_amount
         FROM sales_orders JOIN payments ON payments.sales_order_id = sales_orders.id
         WHERE payments.payment_method_id IS NULL 
         AND sales_orders.payment_term_id = 2
-        AND sales_orders.created_at::DATE >= '${start_date}'
-        AND sales_orders.created_at::DATE <= '${end_date}'
         GROUP BY month
         ORDER BY month ), 
       AP AS (
-        SELECT date_trunc('month', purchase_orders.created_at) AS month, SUM(amount) AS AP_amount
+        SELECT date_trunc('month', payments.created_at) AS month, SUM(amount) AS AP_amount
         FROM purchase_orders JOIN payments ON payments.purchase_order_id = purchase_orders.id
         WHERE payments.payment_method_id IS NULL 
         AND purchase_orders.payment_term_id = 2
-        AND purchase_orders.created_at::DATE >= '${start_date}'
-        AND purchase_orders.created_at::DATE <= '${end_date}'
         GROUP BY month
         ORDER BY month )
       SELECT final_ar_table.all_months, COALESCE(Balance_AR,0) AS Balance_AR, COALESCE(AR_Settled,0) AS AR_Settled, COALESCE(Balance_AP,0) AS Balance_AP, COALESCE(AP_Settled,0) AS AP_Settled
@@ -2007,7 +1996,9 @@ router.get('/summary_table', requireAccess(ViewType.ANALYTICS, true), async func
                ON all_months_table.all_months = AP.month) AS final_ap_table
                ON final_ar_table.all_months = final_ap_table.all_months
       LEFT OUTER JOIN AR_Settlement ON final_ar_table.all_months = AR_Settlement.month
-      LEFT OUTER JOIN AP_Settlement ON final_ar_table.all_months = AP_Settlement.month`,
+      LEFT OUTER JOIN AP_Settlement ON final_ar_table.all_months = AP_Settlement.month
+      WHERE final_ar_table.all_months::DATE >= '${start_date}'
+      AND final_ar_table.all_months::DATE <= '${end_date}'`,
     {
       raw: true,
       type: sequelize.QueryTypes.SELECT

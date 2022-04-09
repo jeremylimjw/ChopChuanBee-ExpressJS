@@ -295,7 +295,7 @@ async function initAnalytics() {
 
     { amount: 660, purchase_order_id: 11, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-11-01'},
     { amount: -60, purchase_order_id: 11, payment_method_id:1, accounting_type_id: 1, movement_type_id:1, created_at: '2021-11-02' },
-    { amount: 100, purchase_order_id: 11, payment_method_id:1, movement_type_id:3 , created_at: '2021-11-03'}, //PO-11 supplier refund
+    { amount: 40, purchase_order_id: 11, payment_method_id:1, movement_type_id:3 , created_at: '2021-11-03'}, //PO-11 supplier refund
 
     { amount: 1188, purchase_order_id: 12, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-12-01'},
     { amount: -188, purchase_order_id: 12, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-12-02'},

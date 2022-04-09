@@ -8,39 +8,51 @@ const { Sequelize } = require('sequelize');
 const { sequelize } = require('../db');
 const { parseRequest, assertNotNull } = require('../common/helpers');
 const { Product } = require('../models/Product');
+const { sendEmailTo } = require('../emailer');
 
 
 router.get('/', requireAccess(ViewType.CATALOGUE, false), async function(req, res, next) {
-    const predicate = parseRequest(req.query);
-    
-    try {
-        let new_product_catalogue_items = [];
-        const product_catalogue_items = await ProductCatalogueItem.findAll(predicate);
-        for ( let prod_catalogue_item of product_catalogue_items ) {
-          let item = prod_catalogue_item.toJSON();
-          if(prod_catalogue_item.menu_category_id != null) {
-            const newmenu = await MenuCategory.findByPk(prod_catalogue_item.menu_category_id);
-            item['menu_category_name'] = newmenu.name;
-            // console.log(item);
-          } else {
-            item['menu_category_name'] = null;
-          }
-          if(prod_catalogue_item.product_id != null) {
-            const newprod = await Product.findByPk(prod_catalogue_item.product_id);
-            item['product_name'] = newprod.name;
-            console.log(item);
-          } else {
-            item['product_name'] = null;
-          }
+  const { short } = req.query;
+  delete req.query.short;
+  
+  const predicate = parseRequest(req.query);
+  
+  try {
+    let new_product_catalogue_items = [];
+    const product_catalogue_items = await ProductCatalogueItem.findAll(predicate);
 
-          new_product_catalogue_items.push(item);
-        }
-        res.send(new_product_catalogue_items);    
-      } catch(err) {
-        // Catch and return any uncaught exceptions while inserting into database
-        console.log(err);
-        res.status(500).send(err);
+    for ( let prod_catalogue_item of product_catalogue_items ) {
+
+      let item = prod_catalogue_item.toJSON();
+
+      if (short) {
+        delete item.image;
       }
+
+      if(prod_catalogue_item.menu_category_id != null) {
+        const newmenu = await MenuCategory.findByPk(prod_catalogue_item.menu_category_id);
+        item['menu_category_name'] = newmenu.name;
+      } else {
+        item['menu_category_name'] = null;
+      }
+
+      if(prod_catalogue_item.product_id != null) {
+        const newprod = await Product.findByPk(prod_catalogue_item.product_id);
+        item['product_name'] = newprod.name;
+      } else {
+        item['product_name'] = null;
+      }
+
+      new_product_catalogue_items.push(item);
+    }
+
+    res.send(new_product_catalogue_items);    
+
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
     
 });
 //create 
@@ -264,7 +276,9 @@ router.delete('/menu_category', requireAccess(ViewType.CATALOGUE, true), async f
 
 });
 
-router.post('/enquiry', requireAccess(ViewType.CATALOGUE, true), async function(req, res, next) { 
+
+// Send email regarding the customer's enquiry
+router.post('/enquiry', async function(req, res, next) { 
   const { name, email, phone, text } = req.body;
     
   try {
@@ -275,6 +289,8 @@ router.post('/enquiry', requireAccess(ViewType.CATALOGUE, true), async function(
   }
   
   try {
+    sendEmailTo(email, 'enquiry', { name, email, phone, text });
+    sendEmailTo(email, 'enquiryReply', { name, email, phone, text });
 
     res.send({});
 

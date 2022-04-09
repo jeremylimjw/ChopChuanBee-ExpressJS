@@ -166,7 +166,8 @@ router.get('/menu_category', requireAccess(ViewType.CATALOGUE, false), async fun
   
 });
 
-router.get('/all_menu_category', requireAccess(ViewType.CATALOGUE, false), async function(req, res, next) {
+// Removed require login as catalogue frontend dont have login
+router.get('/all_menu_category', async function(req, res, next) {
   const predicate = parseRequest(req.query);
   
   try {

@@ -11,6 +11,7 @@ module.exports.insertDemoData = async () => {
     const { AccessRight } = require('../models/AccessRight');
     const { LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
     const { InventoryMovement } = require('../models/InventoryMovement');
+    const { PurchaseOrder, PurchaseOrderItem } = require('../models/PurchaseOrder');
 
     const customersData = require('./customers');
     const productsData = require('./products');
@@ -21,13 +22,41 @@ module.exports.insertDemoData = async () => {
     const products = await Product.bulkCreate(productsData);
     const customers = await Customer.bulkCreate(customersData);
     const suppliers = await Supplier.bulkCreate(suppliersData);
+    const chargedUnders = await ChargedUnder.bulkCreate(chargedUndersData);
+
+    const po = await PurchaseOrder.create({ 
+        payment_term_id: 2, 
+        purchase_order_status_id: 2, 
+        supplier_id: suppliers[0].id, 
+        gst_rate: 0, 
+        offset: 0, 
+        charged_under_id: chargedUnders[0].id,
+        created_at: new Date(0), // prevent analytics from querying this
+    })
 
     let customerMenus = [];
     let supplierMenus = [];
 
     for (let i = 0; i < products.length; i++) {
         // Create Stocks
-       await InventoryMovement.create({ product_id: products[i].id, unit_cost: Math.random()*50, quantity: Math.ceil(Math.random()*3)*100, movement_type_id: MovementType.PURCHASE.id })
+        const unitCost = Math.random()*50;
+        const quantity = Math.ceil(Math.random()*3)*100;
+        await PurchaseOrderItem.create({
+            unit_cost: unitCost,
+            quantity: quantity,
+            purchase_order_id: po.id,
+            product_id: products[i].id,
+            inventory_movements: [
+                { 
+                    product_id: products[i].id, 
+                    unit_cost: unitCost, 
+                    quantity: quantity, 
+                    movement_type_id: MovementType.PURCHASE.id,
+                    created_at: new Date(0), // prevent analytics from querying this
+                }
+            ],
+            created_at: new Date(0), // prevent analytics from querying this
+        }, { include: InventoryMovement })
 
         // Create Customer Menu Items
         for (let customer of customers) {
@@ -59,8 +88,6 @@ module.exports.insertDemoData = async () => {
             await LeaveApplication.create({ leave_account_id: leaveAccount.id, start_date: start.toDate(), end_date: end.toDate(), num_days: numDays, paid: false, leave_status_id: Math.ceil(Math.random()*4) })
         }
     }
-
-    await ChargedUnder.bulkCreate(chargedUndersData);
 
     const { initAnalytics } = require('./analytics');
     await initAnalytics();

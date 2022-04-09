@@ -647,6 +647,20 @@ async function initAnalytics() {
   const so43 = sois[62];
   const so44 = sois[63];
 
+  // Remove all 0 items SOs/POs
+  const newPOs = await PurchaseOrder.findAll({ include: [PurchaseOrderItem], attributes: ['id']})
+  for (let po of newPOs) {
+    if (po.purchase_order_items.length === 0) {
+      await PurchaseOrder.destroy({ where: { id: po.id }})
+    }
+  }
+  const newSOs = await SalesOrder.findAll({ include: [SalesOrderItem], attributes: ['id']})
+  for (let so of newSOs) {
+    if (so.sales_order_items.length === 0) {
+      await SalesOrder.destroy({ where: { id: so.id }})
+    }
+  }
+
   //inventory movement
   await InventoryMovement.bulkCreate([
     { unit_cost: 1.1 , unit_price: 2.2,  quantity: -5 , sales_order_item_id: so1a.id, movement_type_id:2 , created_at: '2021-01-12' , product_id : so1a.product_id} ,//deliver 2 days later

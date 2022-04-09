@@ -22,5 +22,6 @@ router.use("/deliveryOrder", require("./deliveryOrder"));
 router.use("/itinerary", require("./itinerary"));
 router.use("/dispatch", require("./dispatch"));
 router.use("/productCatalogue", require("./productCatalogue"));
+router.use("/chat", require("./chat"));
 
 module.exports = router;

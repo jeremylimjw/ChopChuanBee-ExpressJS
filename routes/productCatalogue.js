@@ -264,6 +264,27 @@ router.delete('/menu_category', requireAccess(ViewType.CATALOGUE, true), async f
 
 });
 
+router.post('/enquiry', requireAccess(ViewType.CATALOGUE, true), async function(req, res, next) { 
+  const { name, email, phone, text } = req.body;
+    
+  try {
+    assertNotNull(req.body, ['name', 'email', 'text'])
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+  
+  try {
+
+    res.send({});
+
+  } catch(err) {
+    // Catch and return any uncaught exceptions while inserting into database
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
+
 
 
 module.exports = router; 

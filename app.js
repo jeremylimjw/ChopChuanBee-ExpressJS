@@ -7,7 +7,7 @@ var routes = require('./routes');
 
 var app = express();
 
-app.use(cors({ origin: [process.env.REACT_URL], credentials: true }));
+app.use(cors({ origin: [process.env.REACT_URL, REACT_CATALOGUE_URL], credentials: true }));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

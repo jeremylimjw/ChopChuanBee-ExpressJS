@@ -1,4 +1,5 @@
 const { ChargedUnder, Customer } = require("../models/Customer");
+const { DeliveryOrder, generateAndSaveQRCode } = require("../models/DeliveryOrder");
 const { InventoryMovement } = require("../models/InventoryMovement");
 const { Payment } = require("../models/Payment");
 const { Product } = require("../models/Product");
@@ -424,75 +425,93 @@ async function initAnalytics() {
   ]); 
 
   // Analytics - Sales Order
-  await SalesOrder.bulkCreate([
-    { payment_term_id: 1, customer_id: customer1.id, created_at: '2021-01-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id: ccb.id }, //cash
-    { payment_term_id: 1, customer_id: customer1.id, created_at: '2021-01-10', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 1, customer_id: customer2.id, created_at: '2021-02-10', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id }, 
-    { payment_term_id: 1, customer_id: customer2.id, created_at: '2021-02-10', gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id },
-    { payment_term_id: 1, customer_id: customer3.id, created_at: '2021-03-10', gst_rate: 9, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 1, customer_id: customer3.id, created_at: '2021-03-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id },
-    { payment_term_id: 1, customer_id: customer4.id, created_at:'2021-04-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 1, customer_id: customer4.id, created_at: '2021-04-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 1, customer_id: customer5.id, created_at: '2021-05-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 1, customer_id: customer5.id, created_at:'2021-05-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 1, customer_id: customer6.id, created_at: '2021-06-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 1, customer_id: customer6.id, created_at: '2021-06-10' , gst_rate :7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer7.id, created_at: '2021-07-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, // credit
-    { payment_term_id: 2, customer_id: customer7.id, created_at:'2021-07-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer8.id, created_at: '2021-08-10' , gst_rate : 7 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer8.id, created_at: '2021-08-10' , gst_rate :0 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer9.id, created_at: '2021-09-10' , gst_rate: 11, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id }, 
-    { payment_term_id: 2, customer_id: customer9.id, created_at: '2021-09-10'  , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer10.id, created_at: '2021-10-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer10.id, created_at: '2021-10-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer11.id, created_at: '2021-11-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer11.id, created_at: '2021-11-10' , gst_rate :0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer12.id, created_at: '2021-12-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer12.id, created_at: '2021-12-10' , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, //new pattern
-    { payment_term_id: 2, customer_id: customer13.id, created_at: '2021-02-10' , gst_rate: 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer13.id, created_at: '2021-02-10' , gst_rate : 7, offset: 1 ,sales_order_status_id : 2, charged_under_id : ccb.id }, 
-    { payment_term_id: 2, customer_id: customer14.id, created_at: '2021-04-10', gst_rate : 0, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer14.id, created_at:'2021-04-10' , gst_rate :7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer15.id, created_at: '2021-06-10', gst_rate : 7 , offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer15.id, created_at: '2021-06-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer16.id, created_at: '2021-08-10', gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer16.id, created_at:'2021-08-10' , gst_rate : 0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer17.id, created_at: '2021-10-10', gst_rate: 7  , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer17.id, created_at:'2021-10-10', gst_rate : 7 , offset: 1 ,sales_order_status_id : 2, charged_under_id : ccb.id },
-    { payment_term_id: 2, customer_id: customer18.id, created_at:'2021-12-10' , gst_rate :9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer18.id, created_at: '2021-12-10' , gst_rate :9 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer19.id, created_at:'2021-12-10' , gst_rate : 9 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer19.id, created_at: '2021-12-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer20.id, created_at: '2021-12-10'  , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer20.id, created_at: '2021-12-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
+  const SOs = await SalesOrder.bulkCreate([
+    { payment_term_id: 1, customer_id: customer1.id, created_at: '2021-01-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id: ccb.id, has_delivery: false }, //cash
+    { payment_term_id: 1, customer_id: customer1.id, created_at: '2021-01-10', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 1, customer_id: customer2.id, created_at: '2021-02-10', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false }, 
+    { payment_term_id: 1, customer_id: customer2.id, created_at: '2021-02-10', gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false },
+    { payment_term_id: 1, customer_id: customer3.id, created_at: '2021-03-10', gst_rate: 9, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 1, customer_id: customer3.id, created_at: '2021-03-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false },
+    { payment_term_id: 1, customer_id: customer4.id, created_at:'2021-04-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 1, customer_id: customer4.id, created_at: '2021-04-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 1, customer_id: customer5.id, created_at: '2021-05-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 1, customer_id: customer5.id, created_at:'2021-05-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 1, customer_id: customer6.id, created_at: '2021-06-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 1, customer_id: customer6.id, created_at: '2021-06-10' , gst_rate :7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer7.id, created_at: '2021-07-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, // credit
+    { payment_term_id: 2, customer_id: customer7.id, created_at:'2021-07-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer8.id, created_at: '2021-08-10' , gst_rate : 7 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer8.id, created_at: '2021-08-10' , gst_rate :0 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer9.id, created_at: '2021-09-10' , gst_rate: 11, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false }, 
+    { payment_term_id: 2, customer_id: customer9.id, created_at: '2021-09-10'  , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer10.id, created_at: '2021-10-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer10.id, created_at: '2021-10-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer11.id, created_at: '2021-11-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer11.id, created_at: '2021-11-10' , gst_rate :0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer12.id, created_at: '2021-12-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer12.id, created_at: '2021-12-10' , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, //new pattern
+    { payment_term_id: 2, customer_id: customer13.id, created_at: '2021-02-10' , gst_rate: 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer13.id, created_at: '2021-02-10' , gst_rate : 7, offset: 1 ,sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false }, 
+    { payment_term_id: 2, customer_id: customer14.id, created_at: '2021-04-10', gst_rate : 0, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer14.id, created_at:'2021-04-10' , gst_rate :7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer15.id, created_at: '2021-06-10', gst_rate : 7 , offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer15.id, created_at: '2021-06-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer16.id, created_at: '2021-08-10', gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer16.id, created_at:'2021-08-10' , gst_rate : 0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer17.id, created_at: '2021-10-10', gst_rate: 7  , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer17.id, created_at:'2021-10-10', gst_rate : 7 , offset: 1 ,sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false },
+    { payment_term_id: 2, customer_id: customer18.id, created_at:'2021-12-10' , gst_rate :9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer18.id, created_at: '2021-12-10' , gst_rate :9 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer19.id, created_at:'2021-12-10' , gst_rate : 9 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer19.id, created_at: '2021-12-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer20.id, created_at: '2021-12-10'  , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer20.id, created_at: '2021-12-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
 
 
     // For late payment (AR Aging Table) - January Sales transaction
-    { payment_term_id: 2, customer_id: customer1.id, created_at: '2022-03-25', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id: ccb.id }, //cash
-    { payment_term_id: 2, customer_id: customer2.id, created_at: '2022-03-25', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-03-25', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id }, 
-    { payment_term_id: 2, customer_id: customer4.id, created_at: '2022-03-25', gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id },
-    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-03-25', gst_rate: 9, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-03-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id },
-    { payment_term_id: 2, customer_id: customer1.id, created_at:'2022-02-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer2.id, created_at: '2022-02-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-02-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer4.id, created_at:'2022-02-25', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-02-25' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-02-25' , gst_rate :7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer1.id, created_at: '2022-01-25' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, // credit
-    { payment_term_id: 2, customer_id: customer2.id, created_at:'2022-01-25' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-01-25' , gst_rate : 7 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer4.id, created_at: '2022-01-25' , gst_rate :0 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-01-25' , gst_rate: 11, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id }, 
-    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-01-25'  , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer1.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer2.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer4.id, created_at: '2022-01-10' , gst_rate :0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-01-10' , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, //new pattern
+    { payment_term_id: 2, customer_id: customer1.id, created_at: '2022-03-25', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id: ccb.id, has_delivery: false }, //cash
+    { payment_term_id: 2, customer_id: customer2.id, created_at: '2022-03-25', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-03-25', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false }, 
+    { payment_term_id: 2, customer_id: customer4.id, created_at: '2022-03-25', gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false },
+    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-03-25', gst_rate: 9, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-03-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false },
+    { payment_term_id: 2, customer_id: customer1.id, created_at:'2022-02-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer2.id, created_at: '2022-02-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-02-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer4.id, created_at:'2022-02-25', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-02-25' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-02-25' , gst_rate :7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer1.id, created_at: '2022-01-25' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, // credit
+    { payment_term_id: 2, customer_id: customer2.id, created_at:'2022-01-25' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-01-25' , gst_rate : 7 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer4.id, created_at: '2022-01-25' , gst_rate :0 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-01-25' , gst_rate: 11, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false }, 
+    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-01-25'  , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer1.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer2.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer4.id, created_at: '2022-01-10' , gst_rate :0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-01-10' , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, //new pattern
   ]); 
+
+  // Create demo delivery orders
+  const demoDOs = require('./deliveries');
+  for (let salesOrder of SOs) {
+    // 80% of a DO
+    if (Math.random() < 0.8) {
+      const deliveryOrder = {...demoDOs[Math.floor(Math.random()*6)]}
+      salesOrder.has_delivery = true;
+      salesOrder.delivery_address = deliveryOrder.address;
+      salesOrder.delivery_postal_code = deliveryOrder.postal_code;
+      await salesOrder.save();
+  
+      deliveryOrder.sales_order_id = salesOrder.id;
+      deliveryOrder.delivery_status_id = Math.random() < 0.5 ? 1 : 3;
+      const newDO = await DeliveryOrder.create(deliveryOrder);
+      generateAndSaveQRCode(newDO);
+    }
+  }
 
   const sois = await SalesOrderItem.bulkCreate([
     { unit_price: 2.2,  quantity: 5 , sales_order_id: 1, product_id: product1.id, created_at: '2021-01-10' }, //quantity = product id * 10, unit_cost = product id

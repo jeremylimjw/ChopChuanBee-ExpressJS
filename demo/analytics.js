@@ -13,30 +13,30 @@ async function initAnalytics() {
   const ccb = chargedUnders[0];
   const cbfs = chargedUnders[1];
 
-  const heng = suppliers[0];
+  // const heng = suppliers[0];
 
-  await PurchaseOrder.bulkCreate([
-    { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: heng.id, charged_under_id : ccb.id },
-  ]); 
+  // await PurchaseOrder.bulkCreate([
+  //   { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: heng.id, charged_under_id : ccb.id },
+  // ]); 
 
-  const ikanBilis = products[0];
+  // const ikanBilis = products[0];
 
-  await PurchaseOrderItem.bulkCreate([
-    { unit_cost: 1,  quantity: 20, purchase_order_id: 1, product_id: ikanBilis.id }
-  ]); 
+  // await PurchaseOrderItem.bulkCreate([
+  //   { unit_cost: 1,  quantity: 20, purchase_order_id: 1, product_id: ikanBilis.id }
+  // ]); 
 
-  await Payment.bulkCreate([
-    { amount: 100, purchase_order_id: 1, accounting_type_id: 1, movement_type_id:1 },
-    { amount: -50, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 },
-  ]); 
+  // await Payment.bulkCreate([
+  //   { amount: 100, purchase_order_id: 1, accounting_type_id: 1, movement_type_id:1 },
+  //   { amount: -50, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 },
+  // ]); 
 
-  const lineItem = await PurchaseOrderItem.findOne({ where: { product_id: ikanBilis.id } });
+  // const lineItem = await PurchaseOrderItem.findOne({ where: { product_id: ikanBilis.id } });
   
-  await InventoryMovement.bulkCreate([
-    { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1 , product_id : lineItem.product_id },
-    { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 , product_id : lineItem.product_id },
-    { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 , product_id : lineItem.product_id }
-  ]); 
+  // await InventoryMovement.bulkCreate([
+  //   { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1 , product_id : lineItem.product_id },
+  //   { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 , product_id : lineItem.product_id },
+  //   { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 , product_id : lineItem.product_id }
+  // ]); 
     
   //>>> For analytics - Supplier ['company_name', 's1_name', 's1_phone_number', 'address', 'postal_code']
   const supplier1 = suppliers[0];
@@ -137,7 +137,8 @@ async function initAnalytics() {
     { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier19.id, created_at: '2021-07-01' , gst_rate: 7, offset: 2, charged_under_id : ccb.id },
     { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier19.id, created_at: '2021-07-01' , gst_rate: 7, offset: 2, charged_under_id : ccb.id },
     { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id, created_at: '2021-08-01' , gst_rate: 7, offset: 2, charged_under_id : ccb.id },
-    { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id, created_at: '2021-08-01' , gst_rate: 11, offset: 0, charged_under_id : ccb.id }
+    { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id, created_at: '2021-08-01' , gst_rate: 11, offset: 0, charged_under_id : ccb.id },
+    { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id, created_at: '2021-01-01' , gst_rate: 5, offset: 0, charged_under_id : cbfs.id }
   ]); 
 
   const pois = await PurchaseOrderItem.bulkCreate([
@@ -181,6 +182,19 @@ async function initAnalytics() {
     { unit_cost: 9.2,  quantity: 190 , purchase_order_id: 19, product_id: product9.id, created_at: '2021-07-01' },
     { unit_cost: 10.2,  quantity: 200 , purchase_order_id: 20, product_id: product10.id, created_at: '2021-08-01' },
     { unit_cost: 1.5,  quantity: 200 , purchase_order_id: 20, product_id: product1.id, created_at: '2021-08-01' },
+
+    // mass ordering for PO 21
+    { unit_cost: 1,  quantity: 75 , purchase_order_id: 21, product_id: product1.id, created_at: '2021-01-01' },
+    { unit_cost: 2,  quantity: 75 , purchase_order_id: 21, product_id: product2.id, created_at: '2021-01-01' },
+    { unit_cost: 3,  quantity: 75 , purchase_order_id: 21, product_id: product3.id, created_at: '2021-01-01' },
+    { unit_cost: 4,  quantity: 75 , purchase_order_id: 21, product_id: product4.id, created_at: '2021-01-01' },
+    { unit_cost: 5,  quantity: 75 , purchase_order_id: 21, product_id: product5.id, created_at: '2021-01-01' },
+    { unit_cost: 6,  quantity: 75 , purchase_order_id: 21, product_id: product6.id, created_at: '2021-01-01' },
+    { unit_cost: 7,  quantity: 75 , purchase_order_id: 21, product_id: product7.id, created_at: '2021-01-01' },
+    { unit_cost: 8,  quantity: 75 , purchase_order_id: 21, product_id: product8.id, created_at: '2021-01-01' },
+    { unit_cost: 9,  quantity: 75 , purchase_order_id: 21, product_id: product9.id, created_at: '2021-01-01' },
+    { unit_cost: 10,  quantity: 75 , purchase_order_id: 21, product_id: product10.id, created_at: '2021-01-01' }
+    
   ]); 
 
   const po1a = pois[0];
@@ -223,6 +237,18 @@ async function initAnalytics() {
   const po19b = pois[37];
   const po20a = pois[38];
   const po20b = pois[39];
+
+  const po21a = pois[40];
+  const po21b = pois[41];
+  const po21c = pois[42];
+  const po21d = pois[43];
+  const po21e = pois[44];
+  const po21f = pois[45];
+  const po21g = pois[46];
+  const po21h = pois[47];
+  const po21i = pois[48];
+  const po21j = pois[49];
+  
 
   //Payment for each of the PO
   await Payment.bulkCreate([
@@ -296,13 +322,15 @@ async function initAnalytics() {
     { amount: 3363, purchase_order_id: 19,  movement_type_id:1, created_at: '2021-07-01' }, // cash 
 
     { amount: 2340, purchase_order_id: 20,  movement_type_id:1 , created_at: '2021-08-01'}, // cash 
+
+    { amount: 450, purchase_order_id: 21,  movement_type_id:1 , created_at: '2021-01-01'}, // cash for mass ordering
   ]); 
       
   //inventory movement
   await InventoryMovement.bulkCreate([
-    { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1, product_id : lineItem.product_id },
-    { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 ,product_id : lineItem.product_id },
-    { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 ,product_id :lineItem.product_id},
+    // { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1, product_id : lineItem.product_id },
+    // { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 ,product_id : lineItem.product_id },
+    // { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 ,product_id :lineItem.product_id},
 
     { unit_cost: 1.1,  quantity: 10 , purchase_order_item_id: po1a.id, movement_type_id: 2, created_at: '2021-01-02' , product_id : po1a.product_id}, //quantity = product id * 10, unit_cost = product id
     { unit_cost: 2.1,  quantity: 10 , purchase_order_item_id: po1b.id, movement_type_id: 2, created_at: '2021-01-02',  product_id : po1b.product_id },
@@ -377,6 +405,22 @@ async function initAnalytics() {
     { unit_cost: 1.1,  quantity: -50 , purchase_order_item_id: po15b.id, movement_type_id: 3 , created_at: '2021-03-03' , product_id : po15b.product_id},
     { unit_cost: 2.1,  quantity: -60 , purchase_order_item_id: po16a.id, movement_type_id: 3 , created_at: '2021-04-03' , product_id : po16a.product_id},
     { unit_cost: 3.5,  quantity: -60 , purchase_order_item_id: po16b.id, movement_type_id: 3  , created_at: '2021-04-03', product_id : po16b.product_id},
+
+    // for mass ordering of PO 21
+    { unit_cost: 1,  quantity: 75 , purchase_order_item_id: po21a.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21a.product_id}, 
+    { unit_cost: 2,  quantity: 75 , purchase_order_item_id: po21b.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21b.product_id}, 
+    { unit_cost: 3,  quantity: 75 , purchase_order_item_id: po21c.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21c.product_id}, 
+    { unit_cost: 4,  quantity: 75 , purchase_order_item_id: po21d.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21d.product_id}, 
+    { unit_cost: 5,  quantity: 75 , purchase_order_item_id: po21e.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21e.product_id}, 
+    { unit_cost: 6,  quantity: 75 , purchase_order_item_id: po21f.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21f.product_id}, 
+    { unit_cost: 7,  quantity: 75 , purchase_order_item_id: po21g.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21g.product_id}, 
+    { unit_cost: 8,  quantity: 75 , purchase_order_item_id: po21h.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21h.product_id}, 
+    { unit_cost: 9,  quantity: 75 , purchase_order_item_id: po21i.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21i.product_id}, 
+    { unit_cost: 10,  quantity: 75 , purchase_order_item_id: po21j.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21j.product_id}, 
+
+
+
+
   ]); 
 
   // Analytics - Sales Order

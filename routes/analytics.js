@@ -1868,10 +1868,10 @@ router.get('/minimum_inventory_10', requireAccess(ViewType.ANALYTICS, true), asy
 router.get('/minimum_inventory_all', requireAccess(ViewType.ANALYTICS, true), async function(req, res, next) {
   try {
     const inv_table = await sequelize.query(`
-      SELECT products.name, SUM(COALESCE(quantity,0)) AS current_inventory_level, MIN(min_inventory_level), (SUM(COALESCE(quantity::decimal,0.00))/MIN(min_inventory_level::decimal) ) AS ratio
+      SELECT products.id, products.name, SUM(COALESCE(quantity,0)) AS current_inventory_level, MIN(min_inventory_level), (SUM(COALESCE(quantity::decimal,0.00))/MIN(min_inventory_level::decimal) ) AS ratio
       FROM products
       LEFT JOIN inventory_movements ON inventory_movements.product_id = products.id
-      GROUP BY products.name
+      GROUP BY products.id
       ORDER BY ratio`,
       {
         raw: true,

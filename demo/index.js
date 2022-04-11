@@ -1,3 +1,4 @@
+
 module.exports.insertDemoData = async () => {
     const { Customer, CustomerMenu, ChargedUnder } = require('../models/Customer');
     const { Product } = require('../models/Product');
@@ -5,11 +6,14 @@ module.exports.insertDemoData = async () => {
     const { Employee } = require('../models/Employee');
     const { AccessRight } = require('../models/AccessRight');
     const { LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
+    const { MenuCategory, ProductCatalogueItem } = require('../models/ProductCatalogueItem');
     const customersData = require('./customers');
     const productsData = require('./products');
     const suppliersData = require('./suppliers');
     const employeesData = require('./employees');
     const chargedUndersData = require('./chargedUnders');
+    const productCategories = require('./productCategories');
+    const productCatalogues = require('./productCatalogues');
 
     const products = await Product.bulkCreate(productsData);
     const customers = await Customer.bulkCreate(customersData);
@@ -32,6 +36,9 @@ module.exports.insertDemoData = async () => {
             }
         }
     }
+
+    await MenuCategory.bulkCreate(productCategories);
+    await ProductCatalogueItem.bulkCreate(productCatalogues.map(x => ({...x, product_id: products[Math.ceil((Math.random()*products.length)-1)].id})))
 
     await CustomerMenu.bulkCreate(customerMenus);
     await SupplierMenu.bulkCreate(supplierMenus);

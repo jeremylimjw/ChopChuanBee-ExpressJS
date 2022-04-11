@@ -6,7 +6,6 @@ const PaymentTermType = require('../common/PaymentTermType');
 const PurchaseOrderStatusType = require('../common/PurchaseOrderStatusType');
 const LeaveTypeEnum = require('../common/LeaveTypeEnum');
 const LeaveStatusEnum = require('../common/LeaveStatusEnum');
-const ProductCategoryEnum = require('../common/ProductCategory');
 const PaymentMethodType = require('../common/PaymentMethodType');
 const AccountingTypeEnum = require('../common/AccountingTypeEnum');
 const MovementTypeEnum = require('../common/MovementTypeEnum');
@@ -45,14 +44,12 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       const View = require('../models/View');
       const { LeaveType, LeaveAccount, STANDARD_LEAVE_ACCOUNTS } = require('../models/LeaveAccount');
       const { LeaveStatus } = require('../models/LeaveApplication');
-      const { ProductCategory } = require('../models/Product');
       const { DeliveryStatus } = require('../models/DeliveryOrder');
 
       await View.bulkCreate(Object.keys(ViewType).map(key => ViewType[key]));
       await Role.bulkCreate(Object.keys(RoleType).map(key => RoleType[key]));
       await LeaveType.bulkCreate(Object.keys(LeaveTypeEnum).map(key => LeaveTypeEnum[key]));
       await LeaveStatus.bulkCreate(Object.keys(LeaveStatusEnum).map(key => LeaveStatusEnum[key]));
-      await ProductCategory.bulkCreate(Object.keys(ProductCategoryEnum).map(key => ProductCategoryEnum[key]));
       await DeliveryStatus.bulkCreate(Object.keys(DeliveryStatusEnum).map(key => DeliveryStatusEnum[key]));
 
       const { PaymentTerm, POStatus } = require('../models/PurchaseOrder');

@@ -15,6 +15,7 @@ const { ChargedUnder, Customer } = require('../models/Customer');
 const { SalesOrder, SalesOrderItem, updateSalesOrder, buildNewPayment, buildRefundPayment, validateOrderItems, validateAndBuildNewInventories, buildDeliveryOrder, buildRefundInventories } = require('../models/SalesOrder');
 const { DeliveryOrder, generateAndSaveQRCode } = require('../models/DeliveryOrder');
 const { Sequelize } = require('sequelize');
+const { sendEmailTo } = require('../emailer');
 
 
 router.get('/', requireAccess(ViewType.CRM, false), async function(req, res, next) {
@@ -398,6 +399,39 @@ router.post('/inventory/refund', requireAccess(ViewType.CRM, true), async functi
     await Log.bulkCreate(logs);
 
     res.send(newInventoryMovements)
+
+  } catch(err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+
+});
+
+
+// Send email to customer
+router.post('/sendEmail', requireAccess(ViewType.CRM, true), async function(req, res, next) {
+  const { id, document } = req.body;
+
+  // Validation here
+  try {
+    assertNotNull(req.body, ['id', 'document']);
+  } catch(err) {
+    res.status(400).send(err);
+    return;
+  }
+
+  try {
+    const salesOrder = await SalesOrder.findByPk(id, { include: [Customer] });
+
+    sendEmailTo(salesOrder.customer.company_email, "salesOrder", { 
+      document: Buffer.from(document), 
+      customer: salesOrder.customer 
+    })
+
+    salesOrder.sales_order_status_id = PurchaseOrderStatusType.SENT_EMAIL.id;
+    await salesOrder.save();
+
+    res.send({ id: id })
 
   } catch(err) {
     console.log(err);

@@ -14,7 +14,7 @@ const { Supplier, SupplierMenu } = require('./Supplier');
 const { LeaveAccount, LeaveType } = require('./LeaveAccount');
 const { LeaveApplication, LeaveStatus } = require('./LeaveApplication');
 const { DeliveryOrder } = require('./DeliveryOrder');
-const { ProductCatalogueItem } = require('./ProductCatalogueItem');
+const { ProductCatalogueItem, MenuCategory } = require('./ProductCatalogueItem')
 
 module.exports = {
     // Update this when got new models. This is needed for dynamic query associations
@@ -35,6 +35,8 @@ module.exports = {
             case 'view': return View;
             case 'customer_menu': return CustomerMenu;
             case 'charged_under': return ChargedUnder;
+            case 'product_catalogue_item' : return ProductCatalogueItem;
+            case 'menu_category' : return MenuCategory;
             default: return null;
         }
     },
@@ -235,6 +237,10 @@ async function syncAssociations() {
   
     const SOFP = require('../models/SOFP');
     const IncomeStatement = require('../models/IncomeStatement');
+   
+    // 1-M association
+    MenuCategory.hasMany(ProductCatalogueItem, { foreignKey: {  name: 'menu_category_id' }});
+    ProductCatalogueItem.belongsTo(MenuCategory, { foreignKey: {  name: 'menu_category_id' }});
     
     // 1-1 association
     Product.hasOne(ProductCatalogueItem, { foreignKey: { name: 'product_id' }});

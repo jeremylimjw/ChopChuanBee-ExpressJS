@@ -21,6 +21,7 @@ PGDATABASE=chopchuanbee
 PGPORT=5432
 PORT=3000
 REACT_URL=http://localhost:3001
+REACT_CATALOGUE_URL=http://localhost:3002
 EMAIL_USERNAME=nuschopchuanbee@gmail.com
 EMAIL_PASSWORD=Nuschopchuanbee1
 GOOGLE_API_KEY=<API_KEY>

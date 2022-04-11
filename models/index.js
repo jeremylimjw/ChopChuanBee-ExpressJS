@@ -14,7 +14,7 @@ const { Supplier, SupplierMenu } = require('./Supplier');
 const { LeaveAccount, LeaveType } = require('./LeaveAccount');
 const { LeaveApplication, LeaveStatus } = require('./LeaveApplication');
 const { DeliveryOrder } = require('./DeliveryOrder');
-const  {ProductCatalogueItem, MenuCategory } = require('./ProductCatalogueItem')
+const { ProductCatalogueItem, MenuCategory } = require('./ProductCatalogueItem')
 
 module.exports = {
     // Update this when got new models. This is needed for dynamic query associations
@@ -248,7 +248,7 @@ async function syncAssociations() {
 
 
     await sequelize.sync(); // This will create tables if not exists
-    // await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
+    await sequelize.sync({ force: true }); // ONLY USE THIS FOR TESTING. This will ALWAYS drop tables and then create
     // await sequelize.sync({ alter: true }); // ONLY USE THIS FOR TESTING. This checks what is the current state of the table in the database (which columns it has, what are their data types, etc), and then performs the necessary changes in the table to make it match the model.
     
 }

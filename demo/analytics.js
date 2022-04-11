@@ -1,4 +1,5 @@
 const { ChargedUnder, Customer } = require("../models/Customer");
+const { DeliveryOrder, generateAndSaveQRCode } = require("../models/DeliveryOrder");
 const { InventoryMovement } = require("../models/InventoryMovement");
 const { Payment } = require("../models/Payment");
 const { Product } = require("../models/Product");
@@ -13,30 +14,30 @@ async function initAnalytics() {
   const ccb = chargedUnders[0];
   const cbfs = chargedUnders[1];
 
-  const heng = suppliers[0];
+  // const heng = suppliers[0];
 
-  await PurchaseOrder.bulkCreate([
-    { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: heng.id, charged_under_id : ccb.id },
-  ]); 
+  // await PurchaseOrder.bulkCreate([
+  //   { payment_term_id: 2, purchase_order_status_id: 2, supplier_id: heng.id, charged_under_id : ccb.id },
+  // ]); 
 
-  const ikanBilis = products[0];
+  // const ikanBilis = products[0];
 
-  await PurchaseOrderItem.bulkCreate([
-    { unit_cost: 1,  quantity: 20, purchase_order_id: 1, product_id: ikanBilis.id }
-  ]); 
+  // await PurchaseOrderItem.bulkCreate([
+  //   { unit_cost: 1,  quantity: 20, purchase_order_id: 1, product_id: ikanBilis.id }
+  // ]); 
 
-  await Payment.bulkCreate([
-    { amount: 100, purchase_order_id: 1, accounting_type_id: 1, movement_type_id:1 },
-    { amount: -50, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 },
-  ]); 
+  // await Payment.bulkCreate([
+  //   { amount: 100, purchase_order_id: 1, accounting_type_id: 1, movement_type_id:1 },
+  //   { amount: -50, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 },
+  // ]); 
 
-  const lineItem = await PurchaseOrderItem.findOne({ where: { product_id: ikanBilis.id } });
+  // const lineItem = await PurchaseOrderItem.findOne({ where: { product_id: ikanBilis.id } });
   
-  await InventoryMovement.bulkCreate([
-    { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1 , product_id : lineItem.product_id },
-    { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 , product_id : lineItem.product_id },
-    { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 , product_id : lineItem.product_id }
-  ]); 
+  // await InventoryMovement.bulkCreate([
+  //   { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1 , product_id : lineItem.product_id },
+  //   { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 , product_id : lineItem.product_id },
+  //   { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 , product_id : lineItem.product_id }
+  // ]); 
     
   //>>> For analytics - Supplier ['company_name', 's1_name', 's1_phone_number', 'address', 'postal_code']
   const supplier1 = suppliers[0];
@@ -137,7 +138,8 @@ async function initAnalytics() {
     { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier19.id, created_at: '2021-07-01' , gst_rate: 7, offset: 2, charged_under_id : ccb.id },
     { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier19.id, created_at: '2021-07-01' , gst_rate: 7, offset: 2, charged_under_id : ccb.id },
     { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id, created_at: '2021-08-01' , gst_rate: 7, offset: 2, charged_under_id : ccb.id },
-    { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id, created_at: '2021-08-01' , gst_rate: 11, offset: 0, charged_under_id : ccb.id }
+    { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id, created_at: '2021-08-01' , gst_rate: 11, offset: 0, charged_under_id : ccb.id },
+    { payment_term_id: 1, purchase_order_status_id: 2, supplier_id: supplier20.id, created_at: '2021-01-01' , gst_rate: 5, offset: 0, charged_under_id : cbfs.id }
   ]); 
 
   const pois = await PurchaseOrderItem.bulkCreate([
@@ -181,6 +183,19 @@ async function initAnalytics() {
     { unit_cost: 9.2,  quantity: 190 , purchase_order_id: 19, product_id: product9.id, created_at: '2021-07-01' },
     { unit_cost: 10.2,  quantity: 200 , purchase_order_id: 20, product_id: product10.id, created_at: '2021-08-01' },
     { unit_cost: 1.5,  quantity: 200 , purchase_order_id: 20, product_id: product1.id, created_at: '2021-08-01' },
+
+    // mass ordering for PO 21
+    { unit_cost: 1,  quantity: 75 , purchase_order_id: 21, product_id: product1.id, created_at: '2021-01-01' },
+    { unit_cost: 2,  quantity: 75 , purchase_order_id: 21, product_id: product2.id, created_at: '2021-01-01' },
+    { unit_cost: 3,  quantity: 75 , purchase_order_id: 21, product_id: product3.id, created_at: '2021-01-01' },
+    { unit_cost: 4,  quantity: 75 , purchase_order_id: 21, product_id: product4.id, created_at: '2021-01-01' },
+    { unit_cost: 5,  quantity: 75 , purchase_order_id: 21, product_id: product5.id, created_at: '2021-01-01' },
+    { unit_cost: 6,  quantity: 75 , purchase_order_id: 21, product_id: product6.id, created_at: '2021-01-01' },
+    { unit_cost: 7,  quantity: 75 , purchase_order_id: 21, product_id: product7.id, created_at: '2021-01-01' },
+    { unit_cost: 8,  quantity: 75 , purchase_order_id: 21, product_id: product8.id, created_at: '2021-01-01' },
+    { unit_cost: 9,  quantity: 75 , purchase_order_id: 21, product_id: product9.id, created_at: '2021-01-01' },
+    { unit_cost: 10,  quantity: 75 , purchase_order_id: 21, product_id: product10.id, created_at: '2021-01-01' }
+    
   ]); 
 
   const po1a = pois[0];
@@ -223,6 +238,18 @@ async function initAnalytics() {
   const po19b = pois[37];
   const po20a = pois[38];
   const po20b = pois[39];
+
+  const po21a = pois[40];
+  const po21b = pois[41];
+  const po21c = pois[42];
+  const po21d = pois[43];
+  const po21e = pois[44];
+  const po21f = pois[45];
+  const po21g = pois[46];
+  const po21h = pois[47];
+  const po21i = pois[48];
+  const po21j = pois[49];
+  
 
   //Payment for each of the PO
   await Payment.bulkCreate([
@@ -268,7 +295,7 @@ async function initAnalytics() {
 
     { amount: 660, purchase_order_id: 11, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-11-01'},
     { amount: -60, purchase_order_id: 11, payment_method_id:1, accounting_type_id: 1, movement_type_id:1, created_at: '2021-11-02' },
-    { amount: 100, purchase_order_id: 11, payment_method_id:1, movement_type_id:3 , created_at: '2021-11-03'}, //PO-11 supplier refund
+    { amount: 40, purchase_order_id: 11, payment_method_id:1, movement_type_id:3 , created_at: '2021-11-03'}, //PO-11 supplier refund
 
     { amount: 1188, purchase_order_id: 12, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-12-01'},
     { amount: -188, purchase_order_id: 12, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-12-02'},
@@ -296,13 +323,15 @@ async function initAnalytics() {
     { amount: 3363, purchase_order_id: 19,  movement_type_id:1, created_at: '2021-07-01' }, // cash 
 
     { amount: 2340, purchase_order_id: 20,  movement_type_id:1 , created_at: '2021-08-01'}, // cash 
+
+    { amount: 450, purchase_order_id: 21,  movement_type_id:1 , created_at: '2021-01-01'}, // cash for mass ordering
   ]); 
       
   //inventory movement
   await InventoryMovement.bulkCreate([
-    { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1, product_id : lineItem.product_id },
-    { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 ,product_id : lineItem.product_id },
-    { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 ,product_id :lineItem.product_id},
+    // { unit_cost: 1, quantity: 20, purchase_order_item_id: lineItem.id, movement_type_id: 1, product_id : lineItem.product_id },
+    // { unit_cost: 2, quantity: 70, purchase_order_item_id: lineItem.id, movement_type_id: 1 ,product_id : lineItem.product_id },
+    // { unit_cost: 1, quantity: -30, purchase_order_item_id: lineItem.id, movement_type_id: 2 ,product_id :lineItem.product_id},
 
     { unit_cost: 1.1,  quantity: 10 , purchase_order_item_id: po1a.id, movement_type_id: 2, created_at: '2021-01-02' , product_id : po1a.product_id}, //quantity = product id * 10, unit_cost = product id
     { unit_cost: 2.1,  quantity: 10 , purchase_order_item_id: po1b.id, movement_type_id: 2, created_at: '2021-01-02',  product_id : po1b.product_id },
@@ -377,51 +406,112 @@ async function initAnalytics() {
     { unit_cost: 1.1,  quantity: -50 , purchase_order_item_id: po15b.id, movement_type_id: 3 , created_at: '2021-03-03' , product_id : po15b.product_id},
     { unit_cost: 2.1,  quantity: -60 , purchase_order_item_id: po16a.id, movement_type_id: 3 , created_at: '2021-04-03' , product_id : po16a.product_id},
     { unit_cost: 3.5,  quantity: -60 , purchase_order_item_id: po16b.id, movement_type_id: 3  , created_at: '2021-04-03', product_id : po16b.product_id},
+
+    // for mass ordering of PO 21
+    { unit_cost: 1,  quantity: 75 , purchase_order_item_id: po21a.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21a.product_id}, 
+    { unit_cost: 2,  quantity: 75 , purchase_order_item_id: po21b.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21b.product_id}, 
+    { unit_cost: 3,  quantity: 75 , purchase_order_item_id: po21c.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21c.product_id}, 
+    { unit_cost: 4,  quantity: 75 , purchase_order_item_id: po21d.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21d.product_id}, 
+    { unit_cost: 5,  quantity: 75 , purchase_order_item_id: po21e.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21e.product_id}, 
+    { unit_cost: 6,  quantity: 75 , purchase_order_item_id: po21f.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21f.product_id}, 
+    { unit_cost: 7,  quantity: 75 , purchase_order_item_id: po21g.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21g.product_id}, 
+    { unit_cost: 8,  quantity: 75 , purchase_order_item_id: po21h.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21h.product_id}, 
+    { unit_cost: 9,  quantity: 75 , purchase_order_item_id: po21i.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21i.product_id}, 
+    { unit_cost: 10,  quantity: 75 , purchase_order_item_id: po21j.id, movement_type_id: 1, created_at: '2021-01-01' , product_id : po21j.product_id}, 
+
+
+
+
   ]); 
 
   // Analytics - Sales Order
-  await SalesOrder.bulkCreate([
-    { payment_term_id: 1, customer_id: customer1.id, created_at: '2021-01-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id: ccb.id }, //cash
-    { payment_term_id: 1, customer_id: customer1.id, created_at: '2021-01-10', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 1, customer_id: customer2.id, created_at: '2021-02-10', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id }, 
-    { payment_term_id: 1, customer_id: customer2.id, created_at: '2021-02-10', gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id },
-    { payment_term_id: 1, customer_id: customer3.id, created_at: '2021-03-10', gst_rate: 9, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 1, customer_id: customer3.id, created_at: '2021-03-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id },
-    { payment_term_id: 1, customer_id: customer4.id, created_at:'2021-04-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 1, customer_id: customer4.id, created_at: '2021-04-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 1, customer_id: customer5.id, created_at: '2021-05-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 1, customer_id: customer5.id, created_at:'2021-05-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 1, customer_id: customer6.id, created_at: '2021-06-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 1, customer_id: customer6.id, created_at: '2021-06-10' , gst_rate :7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer7.id, created_at: '2021-07-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, // credit
-    { payment_term_id: 2, customer_id: customer7.id, created_at:'2021-07-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer8.id, created_at: '2021-08-10' , gst_rate : 7 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer8.id, created_at: '2021-08-10' , gst_rate :0 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer9.id, created_at: '2021-09-10' , gst_rate: 11, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id }, 
-    { payment_term_id: 2, customer_id: customer9.id, created_at: '2021-09-10'  , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer10.id, created_at: '2021-10-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer10.id, created_at: '2021-10-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer11.id, created_at: '2021-11-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer11.id, created_at: '2021-11-10' , gst_rate :0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer12.id, created_at: '2021-12-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer12.id, created_at: '2021-12-10' , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, //new pattern
-    { payment_term_id: 2, customer_id: customer13.id, created_at: '2021-02-10' , gst_rate: 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer13.id, created_at: '2021-02-10' , gst_rate : 7, offset: 1 ,sales_order_status_id : 2, charged_under_id : ccb.id }, 
-    { payment_term_id: 2, customer_id: customer14.id, created_at: '2021-04-10', gst_rate : 0, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer14.id, created_at:'2021-04-10' , gst_rate :7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer15.id, created_at: '2021-06-10', gst_rate : 7 , offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer15.id, created_at: '2021-06-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer16.id, created_at: '2021-08-10', gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer16.id, created_at:'2021-08-10' , gst_rate : 0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer17.id, created_at: '2021-10-10', gst_rate: 7  , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer17.id, created_at:'2021-10-10', gst_rate : 7 , offset: 1 ,sales_order_status_id : 2, charged_under_id : ccb.id },
-    { payment_term_id: 2, customer_id: customer18.id, created_at:'2021-12-10' , gst_rate :9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer18.id, created_at: '2021-12-10' , gst_rate :9 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer19.id, created_at:'2021-12-10' , gst_rate : 9 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer19.id, created_at: '2021-12-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id},
-    { payment_term_id: 2, customer_id: customer20.id, created_at: '2021-12-10'  , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}, 
-    { payment_term_id: 2, customer_id: customer20.id, created_at: '2021-12-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id}
+  const SOs = await SalesOrder.bulkCreate([
+    { payment_term_id: 1, customer_id: customer1.id, created_at: '2021-01-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id: ccb.id, has_delivery: false }, //cash
+    { payment_term_id: 1, customer_id: customer1.id, created_at: '2021-01-10', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 1, customer_id: customer2.id, created_at: '2021-02-10', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false }, 
+    { payment_term_id: 1, customer_id: customer2.id, created_at: '2021-02-10', gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false },
+    { payment_term_id: 1, customer_id: customer3.id, created_at: '2021-03-10', gst_rate: 9, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 1, customer_id: customer3.id, created_at: '2021-03-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false },
+    { payment_term_id: 1, customer_id: customer4.id, created_at:'2021-04-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 1, customer_id: customer4.id, created_at: '2021-04-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 1, customer_id: customer5.id, created_at: '2021-05-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 1, customer_id: customer5.id, created_at:'2021-05-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 1, customer_id: customer6.id, created_at: '2021-06-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 1, customer_id: customer6.id, created_at: '2021-06-10' , gst_rate :7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer7.id, created_at: '2021-07-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, // credit
+    { payment_term_id: 2, customer_id: customer7.id, created_at:'2021-07-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer8.id, created_at: '2021-08-10' , gst_rate : 7 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer8.id, created_at: '2021-08-10' , gst_rate :0 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer9.id, created_at: '2021-09-10' , gst_rate: 11, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false }, 
+    { payment_term_id: 2, customer_id: customer9.id, created_at: '2021-09-10'  , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer10.id, created_at: '2021-10-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer10.id, created_at: '2021-10-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer11.id, created_at: '2021-11-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer11.id, created_at: '2021-11-10' , gst_rate :0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer12.id, created_at: '2021-12-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer12.id, created_at: '2021-12-10' , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, //new pattern
+    { payment_term_id: 2, customer_id: customer13.id, created_at: '2021-02-10' , gst_rate: 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer13.id, created_at: '2021-02-10' , gst_rate : 7, offset: 1 ,sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false }, 
+    { payment_term_id: 2, customer_id: customer14.id, created_at: '2021-04-10', gst_rate : 0, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer14.id, created_at:'2021-04-10' , gst_rate :7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer15.id, created_at: '2021-06-10', gst_rate : 7 , offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer15.id, created_at: '2021-06-10', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer16.id, created_at: '2021-08-10', gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer16.id, created_at:'2021-08-10' , gst_rate : 0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer17.id, created_at: '2021-10-10', gst_rate: 7  , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer17.id, created_at:'2021-10-10', gst_rate : 7 , offset: 1 ,sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false },
+    { payment_term_id: 2, customer_id: customer18.id, created_at:'2021-12-10' , gst_rate :9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer18.id, created_at: '2021-12-10' , gst_rate :9 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer19.id, created_at:'2021-12-10' , gst_rate : 9 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer19.id, created_at: '2021-12-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer20.id, created_at: '2021-12-10'  , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer20.id, created_at: '2021-12-10' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+
+
+    // For late payment (AR Aging Table) - January Sales transaction
+    { payment_term_id: 2, customer_id: customer1.id, created_at: '2022-03-25', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id: ccb.id, has_delivery: false }, //cash
+    { payment_term_id: 2, customer_id: customer2.id, created_at: '2022-03-25', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-03-25', gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false }, 
+    { payment_term_id: 2, customer_id: customer4.id, created_at: '2022-03-25', gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false },
+    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-03-25', gst_rate: 9, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-03-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false },
+    { payment_term_id: 2, customer_id: customer1.id, created_at:'2022-02-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer2.id, created_at: '2022-02-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-02-25' , gst_rate : 9, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer4.id, created_at:'2022-02-25', gst_rate : 7, offset: 1  , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-02-25' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-02-25' , gst_rate :7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer1.id, created_at: '2022-01-25' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, // credit
+    { payment_term_id: 2, customer_id: customer2.id, created_at:'2022-01-25' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-01-25' , gst_rate : 7 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer4.id, created_at: '2022-01-25' , gst_rate :0 , offset: 1, sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-01-25' , gst_rate: 11, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false }, 
+    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-01-25'  , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer1.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer2.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer3.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer4.id, created_at: '2022-01-10' , gst_rate :0 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, 
+    { payment_term_id: 2, customer_id: customer5.id, created_at: '2022-01-10' , gst_rate : 7 , offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false},
+    { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-01-10' , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, //new pattern
   ]); 
+
+  // Create demo delivery orders
+  const demoDOs = require('./deliveries');
+  for (let salesOrder of SOs) {
+    // 80% of a DO
+    if (Math.random() < 0.8) {
+      const deliveryOrder = {...demoDOs[Math.floor(Math.random()*6)]}
+      salesOrder.has_delivery = true;
+      salesOrder.delivery_address = deliveryOrder.address;
+      salesOrder.delivery_postal_code = deliveryOrder.postal_code;
+      await salesOrder.save();
+  
+      deliveryOrder.sales_order_id = salesOrder.id;
+      deliveryOrder.delivery_status_id = Math.random() < 0.5 ? 1 : 3;
+      const newDO = await DeliveryOrder.create(deliveryOrder);
+      generateAndSaveQRCode(newDO);
+    }
+  }
 
   const sois = await SalesOrderItem.bulkCreate([
     { unit_price: 2.2,  quantity: 5 , sales_order_id: 1, product_id: product1.id, created_at: '2021-01-10' }, //quantity = product id * 10, unit_cost = product id
@@ -463,7 +553,33 @@ async function initAnalytics() {
     { unit_price: 10.5,  quantity: 90 , sales_order_id: 19, product_id: product8.id, created_at:'2021-12-10' },
     { unit_price: 11.2,  quantity: 90 , sales_order_id: 19, product_id: product9.id, created_at:'2021-12-10' },
     { unit_price: 12.2,  quantity: 100 , sales_order_id: 20, product_id: product10.id, created_at:'2021-12-10'},
-    { unit_price: 13.5,  quantity: 100 , sales_order_id: 20, product_id: product1.id, created_at:'2021-12-10' }
+    { unit_price: 13.5,  quantity: 100 , sales_order_id: 20, product_id: product1.id, created_at:'2021-12-10' },
+
+    //For the AR Aging Table - January Sales Transactions
+    { unit_price: 2.2,  quantity: 5 , sales_order_id: 41, product_id: product1.id, created_at: '2022-03-25' }, //quantity = product id * 10, unit_cost = product id
+    { unit_price: 3.2,  quantity: 5 , sales_order_id: 42, product_id: product2.id, created_at: '2022-03-25' }, //purchase months = purchase_order_id 
+    { unit_price: 5.1,  quantity: 2 , sales_order_id: 43, product_id: product3.id, created_at: '2022-03-25' },
+    { unit_price: 6.5,  quantity: 5 , sales_order_id: 44, product_id: product4.id, created_at: '2022-03-25' }, 
+    { unit_price: 6.2,  quantity: 15 , sales_order_id: 45, product_id: product5.id, created_at:'2022-03-25' }, 
+    { unit_price: 7.6,  quantity: 23 , sales_order_id: 46, product_id: product6.id, created_at:'2022-03-25' },
+    { unit_price: 9.2,  quantity: 34 , sales_order_id: 47, product_id: product7.id, created_at:'2022-02-25' },
+    { unit_price: 9.5,  quantity: 32 , sales_order_id: 48, product_id: product8.id, created_at: '2022-02-25' },
+    { unit_price: 10.2,  quantity: 45 , sales_order_id: 49, product_id: product9.id, created_at: '2022-02-25'},
+    { unit_price: 1.9,  quantity: 24 , sales_order_id: 50, product_id: product1.id, created_at: '2022-02-25' },
+    { unit_price: 3.5,  quantity: 24 , sales_order_id: 51, product_id: product2.id, created_at:'2022-02-25'  },
+    { unit_price: 5.1,  quantity: 34 , sales_order_id: 52, product_id: product3.id, created_at:'2022-02-25'  },
+    { unit_price: 9.2,  quantity: 65 , sales_order_id: 53, product_id: product4.id, created_at: '2022-01-25' },
+    { unit_price: 12.2,  quantity: 42 , sales_order_id: 54, product_id: product5.id, created_at: '2022-01-25'},
+    { unit_price: 8.3,  quantity: 40 , sales_order_id: 55, product_id: product6.id, created_at: '2022-01-25' },
+    { unit_price: 9.2,  quantity: 40 , sales_order_id: 56, product_id: product7.id, created_at: '2022-01-25' },
+    { unit_price: 12.5,  quantity: 40 , sales_order_id: 57, product_id: product8.id, created_at: '2022-01-25' },
+    { unit_price: 13.5,  quantity: 40 , sales_order_id: 58, product_id: product9.id, created_at:'2022-01-25' },
+    { unit_price: 12.2,  quantity: 50 , sales_order_id: 59, product_id: product10.id, created_at:'2022-01-01' },
+    { unit_price: 2.2,  quantity: 50 , sales_order_id: 60, product_id: product1.id, created_at: '2022-01-01'},
+    { unit_price: 4.5,  quantity: 50 , sales_order_id: 61, product_id: product2.id, created_at:'2022-01-01' },
+    { unit_price: 5.5,  quantity: 50 , sales_order_id: 62, product_id: product3.id, created_at:'2022-01-01' },
+    { unit_price: 6.1,  quantity: 72 , sales_order_id: 63, product_id: product4.id, created_at: '2022-01-01' },
+    { unit_price: 7.8,  quantity: 71 , sales_order_id: 64, product_id: product5.id, created_at:'2022-01-01' },
   ]); 
 
   const so1a = sois[0];
@@ -506,6 +622,44 @@ async function initAnalytics() {
   const so19b = sois[37];
   const so20a = sois[38];
   const so20b = sois[39];
+  const so21 = sois[40]; // January Transactions (AR Table)
+  const so22= sois[41];
+  const so23 = sois[42];
+  const so24 = sois[43];
+  const so25 = sois[44];
+  const so26 = sois[45];
+  const so27 = sois[46];
+  const so28 = sois[47];
+  const so29 = sois[48];
+  const so30 = sois[49];
+  const so31 = sois[50];
+  const so32 = sois[51];
+  const so33 = sois[52];
+  const so34 = sois[53];
+  const so35 = sois[54];
+  const so36 = sois[55];
+  const so37 = sois[56];
+  const so38 = sois[57];
+  const so39 = sois[58];
+  const so40 = sois[59];
+  const so41 = sois[60];
+  const so42 = sois[61];
+  const so43 = sois[62];
+  const so44 = sois[63];
+
+  // Remove all 0 items SOs/POs
+  const newPOs = await PurchaseOrder.findAll({ include: [PurchaseOrderItem], attributes: ['id']})
+  for (let po of newPOs) {
+    if (po.purchase_order_items.length === 0) {
+      await PurchaseOrder.destroy({ where: { id: po.id }})
+    }
+  }
+  const newSOs = await SalesOrder.findAll({ include: [SalesOrderItem], attributes: ['id']})
+  for (let so of newSOs) {
+    if (so.sales_order_items.length === 0) {
+      await SalesOrder.destroy({ where: { id: so.id }})
+    }
+  }
 
   //inventory movement
   await InventoryMovement.bulkCreate([
@@ -583,19 +737,38 @@ async function initAnalytics() {
     { unit_cost:  5.2, unit_price: 0,  quantity: -2 ,sales_order_item_id: so17b.id, movement_type_id:4 , created_at: '2021-10-12', product_id : so17b.product_id}  ,
     { unit_cost:  1.1,  unit_price: 0,  quantity: -19 , sales_order_item_id: so19b.id, movement_type_id:4 , created_at: '2021-12-13', product_id : so19b.product_id}  ,
     { unit_cost:  10.2, unit_price: 0,  quantity: -5 ,sales_order_item_id: so20a.id, movement_type_id:4  , created_at: '2021-12-12' , product_id : so20a.product_id} ,
+
+
+
+    //January Transactions - AR Table
+    { unit_cost: 1.1 , unit_price: 2.2,  quantity: -5 , sales_order_item_id: so21.id, movement_type_id:2 , created_at: '2022-03-25' , product_id : so21.product_id} ,//deliver on the same day
+    { unit_cost: 2.1 , unit_price: 3.2,  quantity: -5 ,sales_order_item_id: so22.id, movement_type_id:2 , created_at: '2022-03-25' ,  product_id : so22.product_id} ,
+    { unit_cost: 3.5 , unit_price: 5.1,  quantity: -2 , sales_order_item_id: so23.id, movement_type_id:2, created_at: '2022-03-25' , product_id : so23.product_id },
+    { unit_cost: 4.5 , unit_price: 6.5,  quantity: -5 , sales_order_item_id: so24.id, movement_type_id:2 , created_at: '2022-03-25' , product_id : so24.product_id} ,
+    { unit_cost: 5.9, unit_price: 6.2,  quantity: -15 ,sales_order_item_id: so25.id, movement_type_id:2 , created_at: '2022-03-25' , product_id : so25.product_id}  ,
+    { unit_cost: 6.2, unit_price: 7.6,  quantity: -23 , sales_order_item_id: so26.id, movement_type_id:2 , created_at: '2022-03-25' , product_id : so26.product_id}  ,
+    { unit_cost: 7.2 , unit_price: 9.2,  quantity: -34 , sales_order_item_id: so27.id, movement_type_id:2 , created_at: '2022-02-25', product_id : so27.product_id }  ,
+    { unit_cost: 8.5, unit_price: 9.5,  quantity: -32 ,sales_order_item_id: so28.id, movement_type_id:2 , created_at: '2022-02-25' , product_id : so28.product_id}  ,
+    { unit_cost:  9.2, unit_price: 10.2,  quantity: -45 , sales_order_item_id: so29.id, movement_type_id:2 , created_at: '2022-02-25' , product_id : so29.product_id}  ,
+    { unit_cost:  0.9, unit_price: 1.9,  quantity: -24 , sales_order_item_id: so30.id, movement_type_id:2, created_at: '2022-02-25'  , product_id : so30.product_id}  ,
+    { unit_cost: 2.5 ,  unit_price: 3.5,  quantity: -24 ,sales_order_item_id: so31.id, movement_type_id:2 , created_at: '2022-02-25' , product_id : so31.product_id}  ,
+    { unit_cost: 3.1, unit_price: 5.1,  quantity: -34 , sales_order_item_id: so32.id, movement_type_id:2 , created_at: '2022-02-25' , product_id : so32.product_id} ,
+    { unit_cost: 4.2 , unit_price: 9.2,  quantity: -65 , sales_order_item_id: so33.id, movement_type_id:2 , created_at: '2022-01-25' , product_id : so33.product_id}  ,
+    { unit_cost:  5.2, unit_price: 12.2,  quantity: -42 , sales_order_item_id: so34.id, movement_type_id:2, created_at: '2022-01-25', product_id : so34.product_id}  ,
+    { unit_cost:  6.3, unit_price: 8.3,  quantity: -40 , sales_order_item_id: so35.id, movement_type_id:2 , created_at: '2022-01-25' , product_id : so35.product_id} ,
+    { unit_cost:  7.2, unit_price: 9.2,  quantity: -40 , sales_order_item_id: so36.id, movement_type_id:2 , created_at: '2022-01-25' , product_id : so36.product_id }  ,
+    { unit_cost:  8.5, unit_price: 12.5,  quantity: -40 ,sales_order_item_id: so37.id, movement_type_id:2 , created_at: '2022-01-25' , product_id : so37.product_id}  ,
+    { unit_cost:  9.5, unit_price: 13.5,  quantity: -40 , sales_order_item_id: so38.id, movement_type_id:2 , created_at: '2022-01-25', product_id : so38.product_id } ,
+    { unit_cost:  10.2, unit_price: 12.2,  quantity: -50 , sales_order_item_id: so39.id, movement_type_id:2, created_at: '2022-01-01', product_id : so39.product_id}  ,
+    { unit_cost:  1.2, unit_price: 2.2,  quantity: -50 , sales_order_item_id: so40.id, movement_type_id:2, created_at: '2022-01-01' , product_id : so40.product_id}  ,
+    { unit_cost:  10.2, unit_price: 12.2,  quantity: -50 , sales_order_item_id: so41.id, movement_type_id:2, created_at: '2022-01-01', product_id : so41.product_id}  ,
+    { unit_cost:  1.2, unit_price: 2.2,  quantity: -50 , sales_order_item_id: so42.id, movement_type_id:2, created_at: '2022-01-01' , product_id : so42.product_id}  , 
+    { unit_cost:  10.2, unit_price: 12.2,  quantity: -50 , sales_order_item_id: so43.id, movement_type_id:2, created_at: '2022-01-01', product_id : so43.product_id}  ,
+    { unit_cost:  1.2, unit_price: 2.2,  quantity: -50 , sales_order_item_id: so44.id, movement_type_id:2, created_at: '2022-01-01' , product_id : so44.product_id}  ,  
+
   ]); 
 
   await Payment.bulkCreate([
-    { amount: 22, purchase_order_id: 1, accounting_type_id: 1, movement_type_id: 1, created_at: '2021-01-01'},
-    { amount: -10, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-01-02'}, //double payment for PO1 to PO10
-    { amount: -2, purchase_order_id: 1, payment_method_id:1, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-01-03'},  //1 day apart
-
-    { amount: 660, purchase_order_id: 11, accounting_type_id: 1, movement_type_id:1 , created_at: '2021-11-01'},
-    { amount: -60, purchase_order_id: 11, payment_method_id:1, accounting_type_id: 1, movement_type_id:1, created_at: '2021-11-02' },
-    { amount: 100, purchase_order_id: 11, payment_method_id:1, movement_type_id:3 , created_at: '2021-11-03'}, //PO-11 supplier refund
-
-    { amount: 1649, purchase_order_id: 17, accounting_type_id: 1, movement_type_id:1, created_at: '2021-05-01' }, // cash 
-
     {amount: 27 , sales_order_id: 1, movement_type_id: 2, created_at: '2021-01-12', payment_method_id:1 }, //cash
 
     {amount: 42.7 , sales_order_id: 2, movement_type_id: 2, created_at: '2021-02-12', payment_method_id:1},
@@ -656,7 +829,117 @@ async function initAnalytics() {
     {amount: 2070 , sales_order_id: 20, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12', payment_method_id:1},
     {amount: -70 , sales_order_id: 20, accounting_type_id: 2, movement_type_id: 2, created_at: '2021-12-12'},
       
+    // January Sales - AR Table - All payments are made on the same day, but only partially
+    
+
+    //Less than 30 days
+    { amount: -11, sales_order_id: 41, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-03-25'}, //recognise credit
+    { amount: 1, sales_order_id: 41,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-03-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -65, sales_order_id: 42, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-03-25'}, //recognise credit
+    { amount: 1, sales_order_id: 42,  accounting_type_id: 2, movement_type_id:2, created_at: '2022-03-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -10.2, sales_order_id: 43, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-03-25'}, //recognise credit
+    { amount: 1, sales_order_id: 43, accounting_type_id: 2, movement_type_id:2 , created_at: '2022-03-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -32.5, sales_order_id: 44, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-03-25'}, //recognise credit
+    { amount: 1, sales_order_id: 44,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-03-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -93, sales_order_id: 45, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-03-25'}, //recognise credit
+    { amount: 1, sales_order_id: 45,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-03-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -174.8, sales_order_id: 46, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-03-25'}, //recognise credit
+    { amount: 1, sales_order_id: 46,  accounting_type_id: 2, movement_type_id:2, created_at: '2022-03-26', payment_method_id:1}, //partial credit payment
+
+
+    //31 days to 60 cays
+    { amount: -312.8, sales_order_id: 47, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-02-25'}, //recognise credit
+    { amount: 1, sales_order_id: 47, accounting_type_id: 2, movement_type_id:2 , created_at: '2022-02-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -304, sales_order_id: 48, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-02-25'}, //recognise credit
+    { amount: 1, sales_order_id: 48, accounting_type_id:2, movement_type_id:2 , created_at: '2022-02-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -459, sales_order_id: 49, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-02-25'}, //recognise credit
+    { amount: 1, sales_order_id: 49, accounting_type_id: 2, movement_type_id:2 , created_at: '2022-02-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -45.6, sales_order_id: 50, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-02-25'}, //recognise credit
+    { amount: 1, sales_order_id: 50,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-02-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -84, sales_order_id: 51, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-02-25'}, //recognise credit
+    { amount: 1, sales_order_id: 51,  accounting_type_id: 2, movement_type_id:2, created_at: '2022-02-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -173.4, sales_order_id: 52, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-02-25'}, //recognise credit
+    { amount: 1, sales_order_id: 52,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-02-26', payment_method_id:1}, //partial credit payment
+
+    //61 to 90 days
+    { amount: -273, sales_order_id: 53, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-25'}, //recognise credit
+    { amount: 1, sales_order_id: 53,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -512.4, sales_order_id: 54, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-25'}, //recognise credit
+    { amount: 1, sales_order_id: 54, accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -332, sales_order_id: 55, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-25'}, //recognise credit
+    { amount: 1, sales_order_id: 55,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -368, sales_order_id: 56, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-25'}, //recognise credit
+    { amount: 1, sales_order_id: 56,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -500, sales_order_id: 57, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-25'}, //recognise credit
+    { amount: 1, sales_order_id: 57,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-26', payment_method_id:1}, //partial credit payment
+
+    { amount: -540, sales_order_id: 58, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-25'}, //recognise credit
+    { amount: 1, sales_order_id: 58,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-26', payment_method_id:1}, //partial credit payment
+
+    // over 91 days
+    { amount: -610, sales_order_id: 59, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-01'}, //recognise credit
+    { amount: 1, sales_order_id: 59,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-02', payment_method_id:1}, //partial credit payment
+
+    { amount: -110, sales_order_id: 60, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-01'}, //recognise credit
+    { amount: 1, sales_order_id: 60, accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-02', payment_method_id:1}, //partial credit payment
+
+    { amount: -610, sales_order_id: 61, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-25'}, //recognise credit
+    { amount: 1, sales_order_id: 61,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-02', payment_method_id:1}, //partial credit payment
+
+    { amount: -110, sales_order_id: 62, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-25'}, //recognise credit
+    { amount: 1, sales_order_id: 62, accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-02', payment_method_id:1}, //partial credit payment
+
+    { amount: -610, sales_order_id: 63, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-25'}, //recognise credit
+    { amount: 1, sales_order_id: 63, accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-02', payment_method_id:1}, //partial credit payment
+
+    { amount: -110, sales_order_id: 64, accounting_type_id: 2, movement_type_id: 2, created_at: '2022-01-25'}, //recognise credit
+    { amount: 1, sales_order_id: 64,  accounting_type_id: 2, movement_type_id:2 , created_at: '2022-01-02', payment_method_id:1}, //partial credit payment
+
+
+
   ]); 
 }
 
 module.exports = { initAnalytics };
+
+
+
+// // --- to be deleted
+// // { 11, sales_order_item_id: so21.id, movement_type_id:2 , created_at: '2022-03-25' , product_id : so21.product_id} ,//deliver on the same day
+// // { 65 sales_order_item_id: so22.id, movement_type_id:2 , created_at: '2022-03-25' ,  product_id : so22.product_id} ,
+// // { 10.2 unit_cost: 3.5 , unit_price: 5.1,  quantity: -2 , sales_order_item_id: so23.id, movement_type_id:2, created_at: '2022-03-25' , product_id : so23.product_id },
+// // { 32.5 unit_cost: 4.5 , unit_price: 6.5,  quantity: -5 , sales_order_item_id: so24.id, movement_type_id:2 , created_at: '2022-03-25' , product_id : so24.product_id} ,
+// // { 93 unit_cost: 5.9, unit_price: 6.2,  quantity: -15 ,sales_order_item_id: so25.id, movement_type_id:2 , created_at: '2022-03-25' , product_id : so25.product_id}  ,
+// // { 174.8 unit_cost: 6.2, unit_price: 7.6,  quantity: -23 , sales_order_item_id: so26.id, movement_type_id:2 , created_at: '2022-03-25' , product_id : so26.product_id}  ,
+// // { 312.8 unit_cost: 7.2 , unit_price: 9.2,  quantity: -34 , sales_order_item_id: so27.id, movement_type_id:2 , created_at: '2022-02-25', product_id : so27.product_id }  ,
+// // { 304 unit_cost: 8.5, unit_price: 9.5,  quantity: -32 ,sales_order_item_id: so28.id, movement_type_id:2 , created_at: '2022-02-25' , product_id : so28.product_id}  ,
+// // { 459 unit_cost:  9.2, unit_price: 10.2,  quantity: -45 , sales_order_item_id: so29.id, movement_type_id:2 , created_at: '2022-02-25' , product_id : so29.product_id}  ,
+// // { 45.6 unit_cost:  0.9, unit_price: 1.9,  quantity: -24 , sales_order_item_id: so30.id, movement_type_id:2, created_at: '2022-02-25'  , product_id : so30.product_id}  ,
+// // { 84 unit_cost: 2.5 ,  unit_price: 3.5,  quantity: -24 ,sales_order_item_id: so31.id, movement_type_id:2 , created_at: '2022-02-25' , product_id : so31.product_id}  ,
+// // { 173.4 unit_cost: 3.1, unit_price: 5.1,  quantity: -34 , sales_order_item_id: so32.id, movement_type_id:2 , created_at: '2022-02-25' , product_id : so32.product_id} ,
+// // { 273 unit_cost: 4.2 , unit_price: 9.2,  quantity: -65 , sales_order_item_id: so33.id, movement_type_id:2 , created_at: '2022-01-25' , product_id : so33.product_id}  ,
+// // { 512.4 unit_cost:  5.2, unit_price: 12.2,  quantity: -42 , sales_order_item_id: so34.id, movement_type_id:2, created_at: '2022-01-25', product_id : so34.product_id}  ,
+// // { 332 unit_cost:  6.3, unit_price: 8.3,  quantity: -40 , sales_order_item_id: so35.id, movement_type_id:2 , created_at: '2022-01-25' , product_id : so35.product_id} ,
+// // { 368 unit_cost:  7.2, unit_price: 9.2,  quantity: -40 , sales_order_item_id: so36.id, movement_type_id:2 , created_at: '2022-01-25' , product_id : so36.product_id }  ,
+// // { 500 unit_cost:  8.5, unit_price: 12.5,  quantity: -40 ,sales_order_item_id: so37.id, movement_type_id:2 , created_at: '2022-01-25' , product_id : so37.product_id}  ,
+// // { 540 unit_cost:  9.5, unit_price: 13.5,  quantity: -40 , sales_order_item_id: so38.id, movement_type_id:2 , created_at: '2022-01-25', product_id : so38.product_id } ,
+// { 610 unit_cost:  10.2, unit_price: 12.2,  quantity: -50 , sales_order_item_id: so39.id, movement_type_id:2, created_at: '2022-01-01', product_id : so39.product_id}  ,
+// { 110 unit_cost:  1.2, unit_price: 2.2,  quantity: -50 , sales_order_item_id: so40.id, movement_type_id:2, created_at: '2022-01-01' , product_id : so40.product_id}  , // note the last 4 items are not delivered yet (So 41-44)
+// 610
+// 110
+// 610
+// 110

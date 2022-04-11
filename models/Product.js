@@ -23,17 +23,4 @@ const Product = sequelize.define('product', {
   createdAt: 'created_at', // Standardize 'createdAt' column name to 'created_at'
 });
 
-const ProductCategory = sequelize.define('product_category', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-}, { 
-  timestamps: false // Dont record 'updatedAt' and 'createdAt'
-});
-
-module.exports = { Product, ProductCategory };
+module.exports = { Product };

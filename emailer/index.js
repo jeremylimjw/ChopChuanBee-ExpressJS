@@ -33,6 +33,40 @@ function sendEmailTo(email, templateName, params) {
         }
       });
 
+  } else if (templateName === 'enquiry') {
+    return transporter.sendMail({
+      from: process.env.EMAIL_USERNAME,
+      to: email,
+      subject: `Enquiry from ${params?.name}`,
+      text: 
+`
+Name: ${params?.name}
+Email: ${params?.email}
+Phone: ${params?.phone}
+Enquiry: ${params?.text}
+`,
+    });
+
+  } else if (templateName === 'enquiryReply') {
+    return transporter.sendMail({
+      from: process.env.EMAIL_USERNAME,
+      to: email,
+      subject: `Your Enquiry Received by Chop Chuan Bee`,
+      text: 
+`
+Hi ${params?.name},
+
+We have successfully received your enquiry and we strive to reach back to you within 1 week.
+
+For your reference, the enquiry that you have submitted is shown below.
+
+Name: ${params?.name}
+Email: ${params?.email}
+Phone: ${params?.phone}
+Enquiry: ${params?.text}
+`,
+    });
+
   } else {
     return transporter.sendMail({
       from: process.env.EMAIL_USERNAME,

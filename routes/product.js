@@ -14,7 +14,7 @@ const { Customer } = require('../models/Customer');
 const MovementType = require('../common/MovementTypeEnum');
 
 
-router.get('/', requireAccess(ViewType.INVENTORY, false), async function(req, res, next) {
+router.get('/', async function(req, res, next) {
   const { id, name, status } = req.query;
 
   try {

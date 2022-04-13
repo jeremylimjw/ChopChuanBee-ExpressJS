@@ -70,7 +70,7 @@ const sequelize = new Sequelize(process.env.PGDATABASE, process.env.PGUSER, proc
       ], { include: LeaveAccount })
 
       // Give view access to all views for Alice
-      await AccessRight.bulkCreate(Object.keys(ViewType).map(key => ({ employee_id: employees[1].id, view_id: ViewType[key].id, has_write_access: false })))
+      await AccessRight.bulkCreate(Object.keys(ViewType).filter(key => key !== "ADMIN").map(key => ({ employee_id: employees[1].id, view_id: ViewType[key].id, has_write_access: false })))
 
       const { Supplier, GUEST_ID } = require('../models/Supplier');
       await Supplier.create({ id: GUEST_ID, company_name: 'Guest', s1_name: 'Guest', s1_phone_number: 'NA', address: 'NA', postal_code: 'NA' });

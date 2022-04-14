@@ -495,24 +495,6 @@ async function initAnalytics() {
     { payment_term_id: 2, customer_id: customer6.id, created_at: '2022-01-10' , gst_rate : 7, offset: 1 , sales_order_status_id : 2, charged_under_id : ccb.id, has_delivery: false}, //new pattern
   ]); 
 
-  // Create demo delivery orders
-  const demoDOs = require('./deliveries');
-  for (let salesOrder of SOs) {
-    // 80% of a DO
-    if (Math.random() < 0.8) {
-      const deliveryOrder = {...demoDOs[Math.floor(Math.random()*6)]}
-      salesOrder.has_delivery = true;
-      salesOrder.delivery_address = deliveryOrder.address;
-      salesOrder.delivery_postal_code = deliveryOrder.postal_code;
-      await salesOrder.save();
-  
-      deliveryOrder.sales_order_id = salesOrder.id;
-      deliveryOrder.delivery_status_id = Math.random() < 0.5 ? 1 : 3;
-      const newDO = await DeliveryOrder.create(deliveryOrder);
-      generateAndSaveQRCode(newDO);
-    }
-  }
-
   const sois = await SalesOrderItem.bulkCreate([
     { unit_price: 2.2,  quantity: 5 , sales_order_id: 1, product_id: product1.id, created_at: '2021-01-10' }, //quantity = product id * 10, unit_cost = product id
     { unit_price: 3.2,  quantity: 5 , sales_order_id: 1, product_id: product2.id, created_at: '2021-01-10' }, //purchase months = purchase_order_id 
@@ -658,6 +640,25 @@ async function initAnalytics() {
   for (let so of newSOs) {
     if (so.sales_order_items.length === 0) {
       await SalesOrder.destroy({ where: { id: so.id }})
+    }
+  }
+
+  // Create demo delivery orders
+  const demoDOs = require('./deliveries');
+  const finalSOs = await SalesOrder.findAll();
+  for (let salesOrder of finalSOs) {
+    // 80% of a DO
+    if (Math.random() < 0.8) {
+      const deliveryOrder = {...demoDOs[Math.floor(Math.random()*6)]}
+      salesOrder.has_delivery = true;
+      salesOrder.delivery_address = deliveryOrder.address;
+      salesOrder.delivery_postal_code = deliveryOrder.postal_code;
+      await salesOrder.save();
+  
+      deliveryOrder.sales_order_id = salesOrder.id;
+      deliveryOrder.delivery_status_id = Math.random() < 0.5 ? 1 : 3;
+      const newDO = await DeliveryOrder.create(deliveryOrder);
+      generateAndSaveQRCode(newDO);
     }
   }
 

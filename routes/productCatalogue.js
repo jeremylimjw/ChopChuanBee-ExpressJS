@@ -80,8 +80,10 @@ router.post('/', requireAccess(ViewType.CATALOGUE, true), async function(req, re
 
     const newProduct = newProductCatalogueItem.toJSON();
 
-    const product = await Product.findByPk(product_id);
-    newProduct.product_name = product.name;
+    if (product_id != null) {
+      const product = await Product.findByPk(product_id);
+      newProduct.product_name = product.name;
+    }
     const category = await MenuCategory.findByPk(menu_category_id);
     newProduct.menu_category_name = category.name;
 

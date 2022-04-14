@@ -124,7 +124,7 @@ router.post('/', requireAccess(ViewType.ADMIN, true), async function(req, res, n
  *  - /api/employee
  *  - requireAccess(ViewType.HR)
  * */ 
-router.put('/', requireAccess(ViewType.HR), async function(req, res, next) {
+router.put('/', requireAccess(ViewType.GENERAL), async function(req, res, next) {
     const { id, name, email, role_id, contact_number, nok_name, nok_number, address, postal_code } = req.body;
     
     try {
